@@ -39,3 +39,10 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# render checks written by scripts/capture-beats.mjs
+/.captures*
+
+# Raw source model (33 MB). The committed, web-ready file is
+# public/models/phone.glb, produced by scripts/optimize-model.mjs.
+/assets/phone-raw.glb
