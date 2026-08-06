@@ -19,8 +19,8 @@ export const brand = {
 } as const;
 
 export const app = {
-  name: 'Jrfin',
+  name: 'Islamic Expense Tracker',
   tagline: 'Every penny, accounted for.',
-  androidPackage: 'com.jrfin',
-  iosBundleId: 'com.jrfin',
+  androidPackage: 'com.islamicexpensetracker',
+  iosBundleId: 'com.islamicexpensetracker',
 } as const;

@@ -3,7 +3,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { useEffect, useRef, useState } from 'react';
-import { ThemeToggle } from '@/components/ThemeToggle';
+import { app } from '@/lib/brand';
 
 const LINKS = [
   { href: '#ai-coach', label: 'Features' },
@@ -52,8 +52,8 @@ export function Nav() {
     >
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-6">
         <Link href="/" className="flex items-center gap-2">
-          <Image src="/jrfin-icon.png" alt="Jrfin" width={32} height={32} className="rounded-xl" />
-          <span className="text-lg font-semibold text-[var(--text-primary)]">Jrfin</span>
+          <Image src="/islamic-expense-tracker-icon.png" alt={app.name} width={32} height={32} className="rounded-xl" />
+          <span className="text-lg font-semibold text-[var(--text-primary)]">{app.name}</span>
         </Link>
 
         <nav className="hidden items-center gap-8 md:flex">
@@ -69,7 +69,6 @@ export function Nav() {
         </nav>
 
         <div className="flex items-center gap-3">
-          <ThemeToggle />
           <a
             href="#download"
             className="lift rounded-full bg-[var(--accent)] px-5 py-2 text-sm font-semibold text-[#06110a] shadow-[0_6px_18px_-8px_var(--accent)] hover:shadow-[0_10px_22px_-8px_var(--accent)]"

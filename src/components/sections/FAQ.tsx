@@ -5,8 +5,8 @@ import { Reveal } from '@/components/Reveal';
 
 const QUESTIONS = [
   {
-    q: 'Does Jrfin work offline?',
-    a: 'Yes. Jrfin is offline-first — your data lives on your device and syncs when you have a connection, so logging a transaction never has to wait on signal.',
+    q: 'Does Islamic Expense Tracker work offline?',
+    a: 'Yes. Islamic Expense Tracker is offline-first — your data lives on your device and syncs when you have a connection, so logging a transaction never has to wait on signal.',
   },
   {
     q: 'How is the financial health score calculated?',
@@ -14,19 +14,19 @@ const QUESTIONS = [
   },
   {
     q: 'How does the Zakat calculation work?',
-    a: 'Jrfin tracks your gold, bank balances, investments and real estate against the Nisab threshold and Hawl period, so your obligation is calculated from what you actually own rather than a manual estimate.',
+    a: 'Islamic Expense Tracker tracks your gold, bank balances, investments and real estate against the Nisab threshold and Hawl period, so your obligation is calculated from what you actually own rather than a manual estimate.',
   },
   {
     q: 'Is my financial data private?',
     a: 'Yes. Sensitive accounts can be moved into the PIN-locked Secret Vault, separate from the rest of the app, and Zakat data sits behind its own PIN too.',
   },
   {
-    q: 'What languages does Jrfin support?',
-    a: 'Jrfin supports English and Bangla throughout the app today, with more languages on the way.',
+    q: 'What languages does Islamic Expense Tracker support?',
+    a: 'Islamic Expense Tracker supports English and Bangla throughout the app today, with more languages on the way.',
   },
   {
-    q: 'Is Jrfin available on iOS?',
-    a: 'Jrfin is currently Android-only. An iOS version is not available yet.',
+    q: 'Is Islamic Expense Tracker available on iOS?',
+    a: 'Islamic Expense Tracker is currently Android-only. An iOS version is not available yet.',
   },
 ];
 
@@ -44,11 +44,11 @@ export function FAQ() {
             Frequently asked questions
           </h2>
           <p className="mt-4 max-w-sm text-[var(--text-secondary)]">
-            See how Jrfin handles the things people ask about most before they start using it.
+            See how Islamic Expense Tracker handles the things people ask about most before they start using it.
           </p>
         </Reveal>
 
-        <Reveal delay={120} className="surface-card overflow-hidden rounded-3xl">
+        <div className="surface-card overflow-hidden rounded-3xl">
           {QUESTIONS.map((item, index) => {
             const isOpen = openIndex === index;
             return (
@@ -62,7 +62,7 @@ export function FAQ() {
                   aria-expanded={isOpen}
                   className="flex w-full items-start justify-between gap-6 px-8 py-6 text-left transition-colors hover:bg-[color-mix(in_srgb,var(--text-primary)_3%,transparent)]"
                 >
-                  <div>
+                  <Reveal delay={index * 70}>
                     <p className="font-medium text-[var(--text-primary)]">{item.q}</p>
                     {/* Answers expand rather than pop in. grid-template-rows
                         0fr→1fr is the one way to transition to auto height
@@ -80,7 +80,7 @@ export function FAQ() {
                         </p>
                       </div>
                     </div>
-                  </div>
+                  </Reveal>
                   <span
                     aria-hidden
                     className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-[var(--surface)] shadow-sm"
@@ -105,7 +105,7 @@ export function FAQ() {
               </div>
             );
           })}
-        </Reveal>
+        </div>
       </div>
     </section>
   );

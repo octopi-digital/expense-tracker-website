@@ -133,7 +133,7 @@ export const HERO_POSE_LIGHT: PhonePose = {
 };
 
 export const HERO_COPY = {
-  eyebrow: 'Jrfin',
+  eyebrow: 'Islamic Expense Tracker',
   title: 'Every penny, accounted for.',
   body: 'Personal finance that understands how you actually earn and spend — offline-first, and in your language.',
 };
@@ -208,7 +208,7 @@ export const SCREENS: AppScreen[] = [
     id: 'transactions',
     eyebrow: 'Every purchase, understood',
     title: 'Stop wondering where the money went',
-    body: 'Log it once — Jrfin sorts it into need or want, tags the category, and warns you the moment a spending habit starts creeping up. No spreadsheet, no end-of-month surprise.',
+    body: 'Log it once — Islamic Expense Tracker sorts it into need or want, tags the category, and warns you the moment a spending habit starts creeping up. No spreadsheet, no end-of-month surprise.',
     pose: { rotateY: 0, rotateX: 0, rotateZ: 1.5, scale: 1.24, offsetX: LEFT, offsetY: 0.04 },
     side: 'left',
     enter: 'hand-off',
@@ -236,7 +236,7 @@ export const SCREENS: AppScreen[] = [
     id: 'zakat',
     eyebrow: 'Zakat & Sadaqah',
     title: 'Never guess your Zakat again',
-    body: 'Gold, bank balance, investments, real estate — Jrfin tracks it all against Nisab and Hawl automatically, so obligation season isn\'t a scramble, and your sadaqah is logged right alongside it.',
+    body: 'Gold, bank balance, investments, real estate — Islamic Expense Tracker tracks it all against Nisab and Hawl automatically, so obligation season isn\'t a scramble, and your sadaqah is logged right alongside it.',
     pose: { rotateY: 0, rotateX: 0, rotateZ: -1.5, scale: 1.27, offsetX: RIGHT, offsetY: -0.04 },
     side: 'right',
     enter: 'pendulum',

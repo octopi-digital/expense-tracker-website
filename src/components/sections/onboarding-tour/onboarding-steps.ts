@@ -31,7 +31,7 @@ export const ONBOARDING_STEPS: OnboardingStep[] = [
   },
   {
     title: 'Set your income range',
-    body: 'Just a range, not an exact number — enough for Jrfin to suggest a budget that actually fits.',
+    body: 'Just a range, not an exact number — enough for Islamic Expense Tracker to suggest a budget that actually fits.',
     src: '/screens/secondary/onboarding-survey-2.webp',
     aspect: CAPTURE_ASPECT,
     side: 'left',

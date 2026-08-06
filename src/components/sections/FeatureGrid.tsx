@@ -52,7 +52,7 @@ export function FeatureGrid() {
           </h2>
         </div>
         <p className="max-w-sm text-[var(--text-secondary)]">
-          Beyond net worth and spending, Jrfin covers the details of everyday
+          Beyond net worth and spending, Islamic Expense Tracker covers the details of everyday
           financial life that most apps leave out.
         </p>
       </div>

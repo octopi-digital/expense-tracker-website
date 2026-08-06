@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useEffect, useState } from 'react';
 
-const STORAGE_KEY = 'jrfin-theme';
+const STORAGE_KEY = 'islamic-expense-tracker-theme';
 
 export type Theme = 'dark' | 'light';
 

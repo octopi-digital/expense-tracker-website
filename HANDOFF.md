@@ -1,4 +1,4 @@
-# Jrfin marketing site — handoff
+# Islamic Expense Tracker marketing site — handoff
 
 Context for picking this up in a fresh conversation. Read
 [README.md](README.md) too — it covers day-to-day usage (adding screenshots,
@@ -12,7 +12,7 @@ Working directory: `c:\Jrfin\website`. The React Native app it markets is at
 
 ## 1. What this is
 
-A marketing site for **Jrfin**, a Bangladesh-focused personal finance app
+A marketing site for **Islamic Expense Tracker**, a Bangladesh-focused personal finance app
 (net worth, financial health score, goals, Zakat, AI coach, SMS
 auto-detection). Brand: emerald `#106C31`, bright green `#19CC50`, gold
 `#D7A225`, Urbanist. Tokens mirrored into [src/lib/brand.ts](src/lib/brand.ts)

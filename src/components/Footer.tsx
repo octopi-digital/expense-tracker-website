@@ -7,7 +7,7 @@ export function Footer() {
       <div className="mx-auto flex max-w-6xl flex-col gap-10 px-6 py-16 sm:flex-row sm:items-start sm:justify-between">
         <div className="max-w-sm">
           <div className="mb-4 flex items-center gap-2">
-            <Image src="/jrfin-icon.png" alt={app.name} width={28} height={28} className="rounded-lg" />
+            <Image src="/islamic-expense-tracker-icon.png" alt={app.name} width={28} height={28} className="rounded-lg" />
             <span className="text-lg font-semibold text-[var(--text-primary)]">{app.name}</span>
           </div>
           <p className="text-sm text-[var(--text-secondary)]">{app.tagline}</p>
@@ -24,8 +24,12 @@ export function Footer() {
         </div>
       </div>
 
-      <div className="mx-auto max-w-6xl border-t border-[var(--border)] px-6 py-6 text-xs text-[var(--text-tertiary)]">
-        © {new Date().getFullYear()} {app.name}. All rights reserved.
+      <div className="mx-auto flex max-w-6xl flex-col gap-3 border-t border-[var(--border)] px-6 py-6 text-xs text-[var(--text-tertiary)] sm:flex-row sm:items-center sm:justify-between">
+        <span>© {new Date().getFullYear()} {app.name}. All rights reserved.</span>
+        <div className="flex items-center gap-4">
+          <a href="/privacy" className="hover:text-[var(--text-primary)]">Privacy Policy</a>
+          <a href="/terms" className="hover:text-[var(--text-primary)]">Terms &amp; Conditions</a>
+        </div>
       </div>
     </footer>
   );

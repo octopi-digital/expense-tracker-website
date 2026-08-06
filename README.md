@@ -1,4 +1,4 @@
-# Jrfin marketing site
+# Islamic Expense Tracker marketing site
 
 Next.js 16 + Tailwind. The centrepiece is a scroll-driven 3D phone: a real
 three.js model that floats at a 3/4 angle in the hero, straightens up as you
