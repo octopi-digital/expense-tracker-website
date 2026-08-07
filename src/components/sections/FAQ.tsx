@@ -6,7 +6,7 @@ import { Reveal } from '@/components/Reveal';
 const QUESTIONS = [
   {
     q: 'Does Islamic Expense Tracker work offline?',
-    a: 'Yes. Islamic Expense Tracker is offline-first — your data lives on your device and syncs when you have a connection, so logging a transaction never has to wait on signal.',
+    a: 'Core logging does. Adding a transaction, updating a goal, or recording a Zakat payment is queued on your device and syncs the moment you\'re back online, so a weak signal never blocks an entry. Things like the AI coach and live dashboards still need a connection.',
   },
   {
     q: 'How is the financial health score calculated?',
@@ -18,11 +18,11 @@ const QUESTIONS = [
   },
   {
     q: 'Is my financial data private?',
-    a: 'Yes. Sensitive accounts can be moved into the PIN-locked Secret Vault, separate from the rest of the app, and Zakat data sits behind its own PIN too.',
+    a: 'Yes. Sensitive accounts can be moved into the PIN-locked Secret Vault, and Zakat data sits behind that same PIN — both kept separate from the rest of the app.',
   },
   {
     q: 'What languages does Islamic Expense Tracker support?',
-    a: 'Islamic Expense Tracker supports English and Bangla throughout the app today, with more languages on the way.',
+    a: 'Islamic Expense Tracker supports English, Bangla, Arabic and Urdu throughout the app today, with the AI coach\'s voice features rolling out to the newer languages.',
   },
   {
     q: 'Is Islamic Expense Tracker available on iOS?',

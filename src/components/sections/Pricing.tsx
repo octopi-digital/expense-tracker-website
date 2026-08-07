@@ -1,47 +1,139 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Reveal } from '@/components/Reveal';
 import { StarField } from '@/components/StarField';
 
 /**
- * Placeholder tiers — names, prices and feature lists are not final. Swap in
- * real values once pricing is decided; the layout below doesn't need to
- * change. `monthly` is the base number; yearly is computed as a 20% discount
- * for display only.
+ * Fallback values only — used until `/plans` answers, or if it never does
+ * (no `NEXT_PUBLIC_API_URL` configured, or the request fails). Kept in sync
+ * by hand with `expense-tracker-server/src/config/plans.ts` as a floor, not
+ * a source of truth: two tiers (Free, Premium), priced in BDT. There is no
+ * "Plus" or "Family" tier and no USD pricing in the product.
  */
-const TIERS = [
+const FALLBACK_TIERS = [
   {
+    id: 'free',
     name: 'Free',
     monthly: 0,
+    yearly: 0,
+    savingsPct: undefined as number | undefined,
     body: 'Everything you need to start tracking.',
-    features: ['Net worth tracking', 'Transaction logging', 'Financial health score', 'One goal'],
+    features: ['Net worth tracking', 'Financial health score', 'Up to 3 goals', '5 AI messages / month'],
     highlighted: false,
   },
   {
-    name: 'Plus',
-    monthly: 5,
+    id: 'premium',
+    name: 'Premium',
+    monthly: 299,
+    yearly: 2999,
+    savingsPct: 16 as number | undefined,
     body: 'For anyone serious about staying on top of it.',
     features: [
       'Everything in Free',
+      'Unlimited AI messages',
       'Unlimited goals',
-      'Zakat & Sadaqah tracking',
-      'Secret Vault',
-      'Analysis reports',
+      'Advanced analytics & reports',
+      'Data export',
+      'Priority support',
     ],
     highlighted: true,
   },
-  {
-    name: 'Family',
-    monthly: 9,
-    body: 'Shared visibility across a household.',
-    features: ['Everything in Plus', 'Shared accounts', 'Priority support'],
-    highlighted: false,
-  },
 ];
+
+type Tier = (typeof FALLBACK_TIERS)[number];
+
+/** Rough BDT→USD display rate, hand-updated occasionally — not a live rate
+ * (no public FX endpoint exists; `/currency/rates` requires auth). Display
+ * only: the actual charge is always created and settled in BDT (see
+ * `expense-tracker-server/src/config/plans.ts` and `sslcommerz.gateway.ts`),
+ * per IMPLEMENTATION-PLAN.md decision D6 — "catalogue currency fixed to BDT
+ * in v1; display conversion is the client's job." Showing $-only here means
+ * the amount a card is actually charged (৳299/mo, converted by the card
+ * issuer) will not match this figure exactly — a deliberate tradeoff, not an
+ * oversight; keep this rate reasonably current to limit the gap. */
+const USD_DISPLAY_RATE = 1 / 122;
+
+interface PlanCatalogueEntry {
+  id: string;
+  name: string;
+  features: { aiMessagesPerMonth: number | null; maxGoals: number | null; export: boolean; advancedAnalytics: boolean };
+  prices: { cycle: 'monthly' | 'yearly'; price: { amount: string; currency: string }; savingsPct?: number }[];
+}
+
+/** Marketing copy the API doesn't track (body text, ordered feature list) —
+ * merged onto whatever numbers `/plans` actually returns, same split used by
+ * the app's `ComparePlansScreen`. */
+function tiersFromCatalogue(catalogue: PlanCatalogueEntry[]): Tier[] | null {
+  const free = catalogue.find((p) => p.id === 'free');
+  const premium = catalogue.find((p) => p.id === 'premium');
+  if (!free || !premium) return null;
+
+  const premiumMonthly = Number(premium.prices.find((p) => p.cycle === 'monthly')?.price.amount ?? NaN);
+  const premiumYearly = premium.prices.find((p) => p.cycle === 'yearly');
+  const premiumYearlyAmount = Number(premiumYearly?.price.amount ?? NaN);
+  if (!isFinite(premiumMonthly) || !isFinite(premiumYearlyAmount)) return null;
+
+  const freeAiLimit = free.features.aiMessagesPerMonth ?? 5;
+  const freeGoalsLimit = free.features.maxGoals ?? 3;
+
+  return [
+    {
+      id: 'free',
+      name: free.name,
+      monthly: 0,
+      yearly: 0,
+      savingsPct: undefined,
+      body: 'Everything you need to start tracking.',
+      features: [
+        'Net worth tracking',
+        'Financial health score',
+        `Up to ${freeGoalsLimit} goals`,
+        `${freeAiLimit} AI messages / month`,
+      ],
+      highlighted: false,
+    },
+    {
+      id: 'premium',
+      name: premium.name,
+      monthly: premiumMonthly,
+      yearly: premiumYearlyAmount,
+      savingsPct: premiumYearly?.savingsPct,
+      body: 'For anyone serious about staying on top of it.',
+      features: [
+        'Everything in Free',
+        'Unlimited AI messages',
+        'Unlimited goals',
+        ...(premium.features.advancedAnalytics ? ['Advanced analytics & reports'] : []),
+        ...(premium.features.export ? ['Data export'] : []),
+        'Priority support',
+      ],
+      highlighted: true,
+    },
+  ];
+}
 
 export function Pricing() {
   const [yearly, setYearly] = useState(false);
+  const [tiers, setTiers] = useState<Tier[]>(FALLBACK_TIERS);
+
+  useEffect(() => {
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+    if (!apiUrl) return;
+
+    const controller = new AbortController();
+    fetch(`${apiUrl}/plans`, { signal: controller.signal })
+      .then((res) => (res.ok ? res.json() : Promise.reject(new Error(`status ${res.status}`))))
+      .then((body: { data: PlanCatalogueEntry[] }) => {
+        const next = tiersFromCatalogue(body.data);
+        if (next) setTiers(next);
+      })
+      .catch(() => {
+        // Non-critical — keep the fallback tiers already showing.
+      });
+
+    return () => controller.abort();
+  }, []);
 
   return (
     <section id="pricing" className="dot-grid relative w-full overflow-hidden bg-black py-24 text-white">
@@ -81,18 +173,18 @@ export function Pricing() {
             >
               Yearly
               <span className="rounded-full bg-[var(--accent-gold)] px-2 py-0.5 text-xs font-bold text-black">
-                SAVE 20%
+                SAVE {tiers.find((t) => t.id === 'premium')?.savingsPct ?? 16}%
               </span>
             </button>
           </div>
         </Reveal>
 
-        <div className="grid grid-cols-1 gap-6 sm:grid-cols-3">
-          {TIERS.map((tier, index) => {
-            const price = yearly ? Math.round((tier.monthly * 0.8) / 1) : tier.monthly;
+        <div className="mx-auto grid max-w-3xl grid-cols-1 gap-6 sm:grid-cols-2">
+          {tiers.map((tier, index) => {
+            const price = yearly ? tier.yearly : tier.monthly;
             return (
               <Reveal
-                key={tier.name}
+                key={tier.id}
                 delay={index * 110}
                 className={`flex flex-col rounded-3xl border p-8 ${
                   tier.highlighted
@@ -106,14 +198,16 @@ export function Pricing() {
                   {tier.name}
                 </p>
                 <p className="mb-1 text-4xl font-semibold">
-                  ${price}
-                  <span
-                    className={`text-base font-normal ${
-                      tier.highlighted ? 'text-black/50' : 'text-white/50'
-                    }`}
-                  >
-                    /mo
-                  </span>
+                  ${price > 0 ? (price * USD_DISPLAY_RATE).toFixed(2) : '0'}
+                  {price > 0 && (
+                    <span
+                      className={`text-base font-normal ${
+                        tier.highlighted ? 'text-black/50' : 'text-white/50'
+                      }`}
+                    >
+                      {yearly ? '/yr' : '/mo'}
+                    </span>
+                  )}
                 </p>
                 <p className={`mb-6 text-sm ${tier.highlighted ? 'text-black/60' : 'text-white/60'}`}>
                   {tier.body}
