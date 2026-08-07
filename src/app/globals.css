@@ -61,16 +61,37 @@
 @theme inline {
   --color-background: var(--surface);
   --color-foreground: var(--text-primary);
-  --font-sans: var(--font-geist-sans);
+  --font-sans: var(--font-urbanist-sans);
   --font-mono: var(--font-geist-mono);
+}
+
+/* Nothing on this page is meant to scroll sideways, and several things are
+   deliberately wider than the viewport: `Reveal variant="zoom"` parks each
+   section heading at scale(1.4) until it enters view (a 1440px-wide h2 sits
+   at left:-53px meanwhile), and the ambient glows behind the devices are
+   sized past 100% on purpose. Together they gave the page a real horizontal
+   scrollbar that disappeared as soon as the headings settled and came back
+   on reload.
+
+   `clip`, not `hidden`: `overflow-x: hidden` would make this a scroll
+   container, which retargets every `position: sticky` inside it and breaks
+   both StickyStack sections and the pinned HowItWorks tour. `clip` just
+   clips — no scrollport, so sticky keeps resolving against the viewport.
+   It also permits `overflow-y: visible` to stay visible, which `hidden`
+   does not. */
+html,
+body {
+  overflow-x: clip;
 }
 
 body {
   background: var(--surface);
   color: var(--text-primary);
-  /* Geist is loaded in layout.tsx and exposed as --font-geist-sans. This used
-     to hardcode Arial, which silently overrode it for the entire site. */
-  font-family: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  /* Urbanist is loaded in layout.tsx and exposed as --font-urbanist-sans —
+     the same family the mobile app ships, for a consistent brand voice
+     across web and app. This used to hardcode Arial, which silently
+     overrode whatever font was configured here. */
+  font-family: var(--font-urbanist-sans), ui-sans-serif, system-ui, sans-serif;
   transition: background-color 0.3s ease, color 0.3s ease;
 }
 
@@ -174,9 +195,24 @@ h3 {
   will-change: auto;
 }
 
+/* variant="zoom" (section headlines): starts oversized and settles down to
+   its real size, instead of rising from below. Higher specificity than the
+   plain [data-reveal='out']/['in'] rules above so it wins on the same
+   element. */
+[data-reveal='out'][data-reveal-variant='zoom'] {
+  opacity: 0;
+  transform: scale(1.4);
+}
+
+[data-reveal='in'][data-reveal-variant='zoom'] {
+  opacity: 1;
+  transform: scale(1);
+}
+
 @media (prefers-reduced-motion: reduce) {
   [data-reveal],
-  [data-reveal='out'] {
+  [data-reveal='out'],
+  [data-reveal='out'][data-reveal-variant='zoom'] {
     opacity: 1;
     transform: none;
     transition: none;
@@ -207,6 +243,99 @@ h3 {
   );
 }
 
+/* Glow behind the hero copy. --glow-x/--glow-y drive the gradient's
+   center; registering them via @property is what makes the keyframe
+   drift below interpolate smoothly between stops instead of jumping —
+   unregistered custom properties animate as discrete steps. Browsers
+   without @property support just lose the smoothing, not the effect. */
+@property --glow-x {
+  syntax: '<percentage>';
+  inherits: false;
+  initial-value: 30%;
+}
+@property --glow-y {
+  syntax: '<percentage>';
+  inherits: false;
+  initial-value: 20%;
+}
+
+/* Loose circular path so the idle drift reads as "orbiting" rather than
+   bouncing between two points. HeroMouseGlow.tsx toggles `.is-idle` off
+   the instant the pointer moves (killing this animation outright, not
+   just pausing it) so its own inline --glow-x/--glow-y can take over. */
+@keyframes hero-glow-drift {
+  0% {
+    --glow-x: 30%;
+    --glow-y: 20%;
+  }
+  25% {
+    --glow-x: 70%;
+    --glow-y: 15%;
+  }
+  50% {
+    --glow-x: 65%;
+    --glow-y: 50%;
+  }
+  75% {
+    --glow-x: 30%;
+    --glow-y: 45%;
+  }
+  100% {
+    --glow-x: 30%;
+    --glow-y: 20%;
+  }
+}
+
+/* A free-standing circle parked at the pointer — not a gradient painted
+   into a section-sized box.
+
+   It used to be the latter: `background: radial-gradient(600px circle at
+   var(--glow-x) var(--glow-y))` on an `inset-0` element. A background only
+   paints inside its own element, so as soon as the pointer came within
+   ~420px of the hero's top or bottom the circle was sliced off dead
+   straight along that edge — most obvious at the top, where the cut landed
+   right under the header.
+
+   Sizing the element to the glow instead of the section means there is no
+   nearby box edge left to slice it. `left`/`top` keep taking --glow-x and
+   --glow-y as percentages of the section (the offset parent), exactly as
+   before, so the idle drift keyframes and the pointer handler both keep
+   working unchanged. Requires the hero to clip on the x axis only — see
+   Hero.tsx. */
+.hero-mouse-glow {
+  position: absolute;
+  left: var(--glow-x);
+  top: var(--glow-y);
+  /* Twice the old 600px gradient radius, so the falloff below lands in the
+     same place it always did. */
+  width: 1200px;
+  height: 1200px;
+  transform: translate(-50%, -50%);
+  background: radial-gradient(
+    circle,
+    color-mix(in srgb, var(--accent) 16%, transparent) 0%,
+    transparent 70%
+  );
+}
+
+.hero-mouse-glow.is-idle {
+  animation: hero-glow-drift 18s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-mouse-glow.is-idle {
+    animation: none;
+  }
+}
+
+/* Dock-style magnify for MagnifyText.tsx. Scale is set inline per
+   character on pointermove; this only owns the settle-back transition
+   and the anchor point letters grow from. */
+.magnify-char {
+  transition: transform 0.12s var(--ease-out-soft);
+  transform-origin: bottom center;
+}
+
 /* Interactive polish: everything clickable lifts slightly rather than just
    dimming. 180ms on a decelerating curve is the standard "responsive but
    not twitchy" range. */
@@ -231,6 +360,23 @@ h3 {
   .lift:hover,
   .lift:active {
     transform: none;
+    transition: none;
+  }
+}
+
+/* Pointer-follow 3D tilt, used on the pricing cards. --tilt-rx/--tilt-ry
+   are written directly by TiltCard's pointermove handler; the CSS side
+   only owns the perspective, the transform composition, and the
+   settle-back transition when the pointer leaves. */
+.tilt-card {
+  transform: perspective(1000px) rotateX(var(--tilt-rx, 0deg)) rotateY(var(--tilt-ry, 0deg));
+  transition: transform 0.3s var(--ease-out-soft);
+  will-change: transform;
+}
+
+@media (hover: none), (prefers-reduced-motion: reduce) {
+  .tilt-card {
+    transform: none !important;
     transition: none;
   }
 }

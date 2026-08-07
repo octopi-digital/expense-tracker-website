@@ -17,7 +17,9 @@ const CAPTURE_ASPECT = 390 / 844;
 export const ONBOARDING_STEPS: OnboardingStep[] = [
   {
     title: 'Create your account',
-    body: 'Just a name, an email or phone number, and a password — or continue with Google or Apple.',
+    // No Apple sign-in: the app ships `@react-native-google-signin` only, and
+    // is Android-only besides — an earlier version of this line offered both.
+    body: 'Just a name, an email or phone number, and a password — or continue with Google.',
     src: '/screens/secondary/onboarding-signup.webp',
     aspect: CAPTURE_ASPECT,
     side: 'left',

@@ -148,9 +148,11 @@ export function HowItWorks() {
         <p className="mb-3 text-sm font-semibold uppercase tracking-[0.15em] text-[var(--accent)]">
           How it works
         </p>
-        <h2 className="max-w-lg text-3xl font-semibold text-[var(--text-primary)] sm:text-4xl">
-          Get started in a couple of minutes
-        </h2>
+        <Reveal variant="zoom">
+          <h2 className="max-w-lg text-3xl font-semibold text-[var(--text-primary)] sm:text-4xl">
+            Get started in a couple of minutes
+          </h2>
+        </Reveal>
       </Reveal>
 
       <section

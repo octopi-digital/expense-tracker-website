@@ -6,7 +6,9 @@ import { useEffect, useRef, useState } from 'react';
 import { app } from '@/lib/brand';
 
 const LINKS = [
-  { href: '#ai-coach', label: 'Features' },
+  { href: '#features', label: 'Features' },
+  { href: '#sms', label: 'Auto-capture' },
+  { href: '#guidance', label: 'Guides' },
   { href: '#how-it-works', label: 'How it works' },
   { href: '#pricing', label: 'Pricing' },
   { href: '#faq', label: 'FAQ' },
@@ -71,7 +73,7 @@ export function Nav() {
         <div className="flex items-center gap-3">
           <a
             href="#download"
-            className="lift rounded-full bg-[var(--accent)] px-5 py-2 text-sm font-semibold text-[#06110a] shadow-[0_6px_18px_-8px_var(--accent)] hover:shadow-[0_10px_22px_-8px_var(--accent)]"
+            className="lift rounded-full bg-[var(--accent)] px-5 py-2 text-sm font-semibold text-white shadow-[0_6px_18px_-8px_var(--accent)] hover:shadow-[0_10px_22px_-8px_var(--accent)]"
           >
             Get the app
           </a>

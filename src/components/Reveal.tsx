@@ -11,18 +11,25 @@ import { useEffect, useRef, useState } from 'react';
  * grid/flex container it wraps rather than inserting a div that would break
  * the parent's layout. The visual states live in globals.css under
  * `[data-reveal]`.
+ *
+ * `variant="zoom"` swaps the rise-and-fade for a scale-down-to-size settle
+ * (starts oversized, shrinks to its real size as it fades in) — used on
+ * section headlines specifically, see `[data-reveal-variant='zoom']` in
+ * globals.css.
  */
 export function Reveal({
   children,
   className = '',
   delay = 0,
   as: Tag = 'div',
+  variant = 'default',
 }: {
   children: React.ReactNode;
   className?: string;
   /** Stagger offset in ms, for siblings that should arrive in sequence. */
   delay?: number;
   as?: 'div' | 'section' | 'header';
+  variant?: 'default' | 'zoom';
 }) {
   const ref = useRef<HTMLDivElement>(null);
   const [shown, setShown] = useState(false);
@@ -64,6 +71,7 @@ export function Reveal({
     <Tag
       ref={ref as React.Ref<HTMLDivElement & HTMLElement>}
       data-reveal={shown ? 'in' : 'out'}
+      data-reveal-variant={variant}
       style={delay ? { transitionDelay: `${delay}ms` } : undefined}
       className={className}
     >

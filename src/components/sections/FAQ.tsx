@@ -17,8 +17,20 @@ const QUESTIONS = [
     a: 'Islamic Expense Tracker tracks your gold, bank balances, investments and real estate against the Nisab threshold and Hawl period, so your obligation is calculated from what you actually own rather than a manual estimate.',
   },
   {
+    q: 'Why does the app want to read my SMS?',
+    a: 'Only to turn your bank and mobile-wallet alerts into transactions for you — most banks offer no open API to a finance app, but they all send a confirmation text. It is off until you switch it on, only messages from allowlisted bank and wallet senders are ever read, and nothing is written to your books until you confirm the draft. Turn it off and everything still works by manual entry. Android only; iOS gives no app access to SMS at all.',
+  },
+  {
     q: 'Is my financial data private?',
-    a: 'Yes. Sensitive accounts can be moved into the PIN-locked Secret Vault, and Zakat data sits behind that same PIN — both kept separate from the rest of the app.',
+    a: 'Yes. Sensitive accounts can be moved into the PIN-locked Secret Vault, and Zakat data sits behind that same PIN — both kept separate from the rest of the app. You can also lock the whole app behind a fingerprint or PIN.',
+  },
+  {
+    q: 'Can I get my data out, or delete it?',
+    a: 'Both. Premium plans can export your data, and any account can be reset back to empty or deleted outright from inside the app — no email to support, no waiting period.',
+  },
+  {
+    q: 'Do I have to pay to use it?',
+    a: 'No. The free plan covers net worth tracking, the financial health score, Zakat, up to 3 goals and 5 AI messages a month, with no time limit. Premium lifts the AI and goal caps and adds advanced reports, export and priority support.',
   },
   {
     q: 'What languages does Islamic Expense Tracker support?',
@@ -40,9 +52,11 @@ export function FAQ() {
           <p className="mb-3 text-sm font-semibold uppercase tracking-[0.15em] text-[var(--accent)]">
             FAQ
           </p>
-          <h2 className="text-3xl font-semibold text-[var(--text-primary)] sm:text-4xl">
-            Frequently asked questions
-          </h2>
+          <Reveal variant="zoom">
+            <h2 className="text-3xl font-semibold text-[var(--text-primary)] sm:text-4xl">
+              Frequently asked questions
+            </h2>
+          </Reveal>
           <p className="mt-4 max-w-sm text-[var(--text-secondary)]">
             See how Islamic Expense Tracker handles the things people ask about most before they start using it.
           </p>

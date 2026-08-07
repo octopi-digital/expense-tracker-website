@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { Reveal } from '@/components/Reveal';
 import { StarField } from '@/components/StarField';
+import { TiltCard } from '@/components/TiltCard';
 
 /**
  * Fallback values only — used until `/plans` answers, or if it never does
@@ -144,9 +145,11 @@ export function Pricing() {
             <p className="mb-3 text-sm font-semibold uppercase tracking-[0.15em] text-[var(--accent)]">
               Pricing
             </p>
-            <h2 className="max-w-lg text-3xl font-semibold sm:text-4xl">
-              Simple plans, whatever stage you're at
-            </h2>
+            <Reveal variant="zoom">
+              <h2 className="max-w-lg text-3xl font-semibold sm:text-4xl">
+                Simple plans, whatever stage you're at
+              </h2>
+            </Reveal>
           </div>
           <p className="max-w-sm text-white/60">
             Choose the plan that fits how you manage money today.
@@ -183,62 +186,62 @@ export function Pricing() {
           {tiers.map((tier, index) => {
             const price = yearly ? tier.yearly : tier.monthly;
             return (
-              <Reveal
-                key={tier.id}
-                delay={index * 110}
-                className={`flex flex-col rounded-3xl border p-8 ${
-                  tier.highlighted
-                    ? 'border-transparent bg-white text-black shadow-[0_24px_60px_-20px_rgba(0,0,0,0.9)]'
-                    : 'border-white/15 bg-white/5 text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]'
-                }`}
-              >
-                <p
-                  className={`mb-2 text-sm font-semibold ${tier.highlighted ? 'text-black' : 'text-white'}`}
-                >
-                  {tier.name}
-                </p>
-                <p className="mb-1 text-4xl font-semibold">
-                  ${price > 0 ? (price * USD_DISPLAY_RATE).toFixed(2) : '0'}
-                  {price > 0 && (
-                    <span
-                      className={`text-base font-normal ${
-                        tier.highlighted ? 'text-black/50' : 'text-white/50'
-                      }`}
-                    >
-                      {yearly ? '/yr' : '/mo'}
-                    </span>
-                  )}
-                </p>
-                <p className={`mb-6 text-sm ${tier.highlighted ? 'text-black/60' : 'text-white/60'}`}>
-                  {tier.body}
-                  {yearly && tier.monthly > 0 ? ' Billed yearly.' : ''}
-                </p>
-
-                <a
-                  href="#download"
-                  className={`lift mb-6 rounded-full px-5 py-2.5 text-center text-sm font-semibold ${
+              <Reveal key={tier.id} delay={index * 110} className="h-full">
+                <TiltCard
+                  className={`flex h-full flex-col rounded-3xl border p-8 ${
                     tier.highlighted
-                      ? 'bg-black text-white hover:bg-black/85'
-                      : 'border border-white/20 text-white hover:border-white/40 hover:bg-white/10'
+                      ? 'border-transparent bg-white text-black shadow-[0_24px_60px_-20px_rgba(0,0,0,0.9)]'
+                      : 'border-white/15 bg-white/5 text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]'
                   }`}
                 >
-                  Get started
-                </a>
-
-                <ul
-                  className={`flex flex-col gap-3 border-t pt-6 text-sm ${
-                    tier.highlighted ? 'border-black/10 text-black/70' : 'border-white/10 text-white/70'
-                  }`}
-                >
-                  {tier.features.map((feature) => (
-                    <li key={feature} className="flex items-center gap-2">
-                      <span aria-hidden className="text-[var(--accent)]">
-                        +
+                  <p
+                    className={`mb-2 text-sm font-semibold ${tier.highlighted ? 'text-black' : 'text-white'}`}
+                  >
+                    {tier.name}
+                  </p>
+                  <p className="mb-1 text-4xl font-semibold">
+                    ${price > 0 ? (price * USD_DISPLAY_RATE).toFixed(2) : '0'}
+                    {price > 0 && (
+                      <span
+                        className={`text-base font-normal ${
+                          tier.highlighted ? 'text-black/50' : 'text-white/50'
+                        }`}
+                      >
+                        {yearly ? '/yr' : '/mo'}
                       </span>
-                      {feature}
-                    </li>
-                  ))}
-                </ul>
+                    )}
+                  </p>
+                  <p className={`mb-6 text-sm ${tier.highlighted ? 'text-black/60' : 'text-white/60'}`}>
+                    {tier.body}
+                    {yearly && tier.monthly > 0 ? ' Billed yearly.' : ''}
+                  </p>
+
+                  <a
+                    href="#download"
+                    className={`lift mb-6 rounded-full px-5 py-2.5 text-center text-sm font-semibold ${
+                      tier.highlighted
+                        ? 'bg-black text-white hover:bg-black/85'
+                        : 'border border-white/20 text-white hover:border-white/40 hover:bg-white/10'
+                    }`}
+                  >
+                    Get started
+                  </a>
+
+                  <ul
+                    className={`flex flex-col gap-3 border-t pt-6 text-sm ${
+                      tier.highlighted ? 'border-black/10 text-black/70' : 'border-white/10 text-white/70'
+                    }`}
+                  >
+                    {tier.features.map((feature) => (
+                      <li key={feature} className="flex items-center gap-2">
+                        <span aria-hidden className="text-[var(--accent)]">
+                          +
+                        </span>
+                        {feature}
+                      </li>
+                    ))}
+                  </ul>
+                </TiltCard>
               </Reveal>
             );
           })}

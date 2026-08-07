@@ -24,3 +24,17 @@ export const app = {
   androidPackage: 'com.islamicexpensetracker',
   iosBundleId: 'com.islamicexpensetracker',
 } as const;
+
+/**
+ * Canonical origin, used for `metadataBase`, the sitemap and robots.txt.
+ *
+ * Absolute URLs are unavoidable in all three — Open Graph tags, `<link
+ * rel="canonical">` and sitemap `<loc>` entries are invalid as relative
+ * paths — so the real domain has to be configured somewhere. Set
+ * `NEXT_PUBLIC_SITE_URL` in the deploy environment; the fallback below is a
+ * guess at the production domain and only exists so local builds don't
+ * crash. Trailing slashes are stripped so callers can always concatenate.
+ */
+export const siteUrl = (
+  process.env.NEXT_PUBLIC_SITE_URL ?? 'https://islamicexpensetracker.com'
+).replace(/\/+$/, '');

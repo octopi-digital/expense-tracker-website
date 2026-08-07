@@ -34,9 +34,11 @@ export function FinancialHealthSpotlight() {
         <p className="mb-3 text-sm font-semibold uppercase tracking-[0.15em] text-[var(--accent)]">
           {HEALTH.eyebrow}
         </p>
-        <h2 className="max-w-2xl text-3xl font-semibold leading-tight text-[var(--text-primary)] sm:text-4xl">
-          {HEALTH.title}
-        </h2>
+        <Reveal variant="zoom">
+          <h2 className="max-w-2xl text-3xl font-semibold leading-tight text-[var(--text-primary)] sm:text-4xl">
+            {HEALTH.title}
+          </h2>
+        </Reveal>
         <p className="mt-4 max-w-xl text-[var(--text-secondary)]">{HEALTH.body}</p>
       </Reveal>
 
