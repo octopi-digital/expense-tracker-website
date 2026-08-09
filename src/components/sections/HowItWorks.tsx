@@ -29,13 +29,40 @@ const HOLD_END = 0.78;
 const RISE_DISTANCE = 110;
 
 /**
+ * Length of the scroll "track" in step-units — how far `track` (see `tick`
+ * below) travels from 0 to this value over the pinned section's full
+ * height. Every step but the last still gets a full unit (matching
+ * `VIEWPORTS_PER_STEP` of physical scroll each, so their entry/hold/exit
+ * timing is completely unaffected); the last step gets only `HOLD_END` of
+ * one, since it never uses the trailing `(1 - HOLD_END)` share a normal
+ * step spends on its exit animation.
+ *
+ * Before this, the pinned section was `STEP_COUNT * VIEWPORTS_PER_STEP`
+ * viewports tall — a full unit for the last step too — so once its `t`
+ * clamped at `HOLD_END` (see below), the remaining `(1 - HOLD_END) *
+ * VIEWPORTS_PER_STEP` (~0.29 viewports) of that allocation was scroll where
+ * literally nothing on screen changes. Scrolled through with any velocity
+ * (a trackpad flick, a fast wheel), that dead stretch let momentum build up
+ * uninterrupted, and the instant the pin released into the section below,
+ * all of it dumped in at once — reported as the page "flying" a good
+ * fraction of the next section on release. Ending the track here instead
+ * removes that dead scroll outright: the last step's `t` still walks up to
+ * `HOLD_END` at exactly the same physical scroll pace as before, it just
+ * runs out of pinned section to consume right as it gets there, rather than
+ * continuing on into an idle tail.
+ */
+const TRACK_LENGTH = STEP_COUNT - 1 + HOLD_END;
+
+/**
  * A pinned scrollytelling tour through the 5 onboarding steps.
  *
- * The section is `STEP_COUNT * VIEWPORTS_PER_STEP` viewports tall with a
- * `sticky` inner stage (same trick as the commented-out `PhoneShowcase`, see
- * that component for the fuller explanation) — scroll is spent driving the
- * tour instead of moving the page, and releases back to normal scrolling
- * once the last step has held for its share of the section's height.
+ * The section is `TRACK_LENGTH * VIEWPORTS_PER_STEP` viewports tall (see
+ * `TRACK_LENGTH` above — a step short of `STEP_COUNT`, since the last step's
+ * scroll budget is trimmed) with a `sticky` inner stage (same trick as the
+ * commented-out `PhoneShowcase`, see that component for the fuller
+ * explanation) — scroll is spent driving the tour instead of moving the
+ * page, and releases back to normal scrolling once the last step has held
+ * for its share of the section's height.
  *
  * Each step's copy rises up from the bottom, holds, then keeps rising and
  * fades out as the next step's copy rises in from the opposite side — except
@@ -73,7 +100,7 @@ export function HowItWorks() {
       const travelled = -section.getBoundingClientRect().top;
       const progress = distance <= 0 ? 0 : clamp(travelled / distance, 0, 1);
 
-      const track = progress * STEP_COUNT;
+      const track = progress * TRACK_LENGTH;
       const rawIndex = Math.min(Math.floor(track), STEP_COUNT - 1);
       const localT = clamp(track - rawIndex, 0, 1);
       const isLast = rawIndex === STEP_COUNT - 1;
@@ -158,7 +185,7 @@ export function HowItWorks() {
       <section
         ref={sectionRef}
         aria-label="Onboarding walkthrough"
-        style={{ height: `${STEP_COUNT * VIEWPORTS_PER_STEP * 100}vh` }}
+        style={{ height: `${TRACK_LENGTH * VIEWPORTS_PER_STEP * 100}vh` }}
         className="relative"
       >
         <div className="sticky top-0 h-screen w-full overflow-hidden bg-[var(--surface)]">
@@ -170,8 +197,32 @@ export function HowItWorks() {
             className="ambient-glow pointer-events-none absolute left-1/2 top-1/2 h-[640px] w-[640px] max-w-[140%] -translate-x-1/2 -translate-y-1/2 opacity-60"
           />
 
-          <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
-            <div className="relative h-[76vh] max-h-[700px] w-full max-w-sm">
+          {/* `px-10`: without it, `max-w-sm` (384px) is wider than a small
+              phone's own viewport (e.g. 390px), so this had no room to
+              shrink into and the 3D phone rendered flush against both
+              screen edges.
+
+              The rest of this wrapper's classes are mobile-only additions
+              (`max-sm:`-scoped) that confine the phone to a band below the
+              step copy and above the progress dots, so the two don't
+              overlap. `sm:` and up still resolve to exactly the original
+              `inset-0`/`items-center`/`h-[76vh]` layout the desktop version
+              has always used.
+
+              This band is vertically *centered* (`items-center`), not
+              bottom-anchored. An earlier version ran the band from `top-
+              [38%]` all the way to the screen bottom with `items-end`, which
+              pins the phone to the band's bottom edge — on a real device
+              taller than the one this was tuned against, the band itself
+              grows, but a bottom-pinned phone doesn't grow with it, so every
+              extra pixel of height piled up as dead space between the copy
+              and the phone instead of shrinking. Centering the phone in a
+              band bounded on both ends (`top-44` below the text, `bottom-16`
+              above the dots) means any extra vertical room on a taller
+              screen splits evenly above and below instead of collecting in
+              one gap. */}
+          <div className="pointer-events-none absolute inset-0 flex items-center justify-center px-10 max-sm:inset-x-0 max-sm:inset-y-auto max-sm:top-44 max-sm:bottom-16 max-sm:items-center">
+            <div className="relative h-[76vh] max-h-[700px] w-full max-w-sm max-sm:h-full max-sm:max-h-[420px]">
               <PhoneProgressContext.Provider value={phoneProgressRef}>
                 <StaticPhone
                   screens={ONBOARDING_STEPS}
@@ -190,8 +241,24 @@ export function HowItWorks() {
                 textRefs.current[index] = el;
               }}
               aria-hidden={index !== activeStep}
-              className={`pointer-events-none absolute top-1/2 max-w-sm -translate-y-1/2 px-6 will-change-[opacity,transform] sm:px-12 ${
-                step.side === 'left' ? 'left-0 text-left' : 'right-0 text-right'
+              /*
+               * Mobile default here is a stacked layout: the copy sits in a
+               * centered band near the top of the pinned stage (`top-10`,
+               * full width, `text-center`) instead of overlapping the
+               * phone. It used to be `top-1/2 max-w-sm left-0/right-0` at
+               * every width — on a phone-sized viewport that box is nearly
+               * the full screen width and lands directly on top of the
+               * device instead of beside it, which is the "text renders
+               * above the phone" overlap.
+               *
+               * Every `sm:` class below reproduces the original unprefixed
+               * ruleset verbatim, so desktop's layout is untouched: same
+               * `top-1/2`/`-translate-y-1/2` vertical centering, same
+               * `max-w-sm`, same `px-12`, same per-side `left-0`/`right-0`
+               * and `text-left`/`text-right`.
+               */
+              className={`pointer-events-none absolute inset-x-0 top-10 mx-auto max-w-xs px-6 text-center will-change-[opacity,transform] sm:inset-x-auto sm:top-1/2 sm:mx-0 sm:max-w-sm sm:-translate-y-1/2 sm:px-12 sm:text-left ${
+                step.side === 'left' ? 'sm:left-0' : 'sm:right-0 sm:text-right'
               }`}
               style={{ opacity: 0, transition: reducedMotion ? 'opacity 0.3s ease-out' : undefined }}
             >

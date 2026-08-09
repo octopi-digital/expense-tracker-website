@@ -80,7 +80,26 @@ export function HeroPhoneStage() {
         <PhoneFrame
           src="/screens/derived/home-full.webp"
           alt="Home screen — net worth at a glance"
-          className="z-10 w-[58%]"
+          /*
+           * `max-sm:!w-[76%]`: on mobile, this is the only visible phone
+           * (the other two are `hidden` below `sm`), and `PhoneFrame`'s own
+           * base classes bake in `w-full`, which wins the cascade over the
+           * plain `w-[58%]` below regardless of source order — this frame's
+           * rendered width is empirically 100% of its container, not 58%.
+           * At rest that just reads as a slightly bigger phone, but as
+           * `--scroll` grows the frame's `scale()` up to 1.10, a
+           * 100%-wide box scales past its `overflow-hidden` mask and its
+           * left/right edges get clipped flat.
+           *
+           * `!` forces `!important` so it reliably beats `w-full` despite
+           * the cascade ambiguity, and `max-sm:` confines the whole rule to
+           * below the `sm` breakpoint — desktop keeps today's `w-[58%]`
+           * vs `w-full` cascade outcome exactly as it already renders,
+           * whatever that resolves to. Not "fixing" that fight generally,
+           * since doing so would also change how the three phones share
+           * width on desktop.
+           */
+          className="z-10 max-sm:!w-[76%] sm:w-[58%]"
           style={{
             willChange: 'transform, opacity',
             transformOrigin: 'top center',
