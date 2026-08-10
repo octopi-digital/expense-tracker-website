@@ -81,25 +81,35 @@ export function HeroPhoneStage() {
           src="/screens/derived/home-full.webp"
           alt="Home screen — net worth at a glance"
           /*
-           * `max-sm:!w-[76%]`: on mobile, this is the only visible phone
-           * (the other two are `hidden` below `sm`), and `PhoneFrame`'s own
-           * base classes bake in `w-full`, which wins the cascade over the
-           * plain `w-[58%]` below regardless of source order — this frame's
-           * rendered width is empirically 100% of its container, not 58%.
-           * At rest that just reads as a slightly bigger phone, but as
-           * `--scroll` grows the frame's `scale()` up to 1.10, a
-           * 100%-wide box scales past its `overflow-hidden` mask and its
-           * left/right edges get clipped flat.
+           * `w-[58%]` is deliberately left unprefixed, and that matters.
            *
-           * `!` forces `!important` so it reliably beats `w-full` despite
-           * the cascade ambiguity, and `max-sm:` confines the whole rule to
-           * below the `sm` breakpoint — desktop keeps today's `w-[58%]`
-           * vs `w-full` cascade outcome exactly as it already renders,
-           * whatever that resolves to. Not "fixing" that fight generally,
-           * since doing so would also change how the three phones share
-           * width on desktop.
+           * `PhoneFrame`'s base classes bake in `w-full`, and in the
+           * compiled sheet `.w-full` is emitted *after* `.w-[58%]` and
+           * `.w-[36%]`. Same specificity, so `w-full` wins and all three
+           * frames actually lay out at `width: 100%`, which the flex row
+           * then shrinks to equal thirds. That is not what this code reads
+           * like, but it is the layout the hero has always shipped and the
+           * one it's tuned for.
+           *
+           * Prefixing only this one frame with `sm:` breaks that balance:
+           * `sm:*` rules live in a media block *after* `.w-full`, so the
+           * centre phone alone escapes to 58% while its two neighbours stay
+           * at 100% — flex then hands the sides more width than the middle
+           * and the outer edges clip flat against the mask. Don't reach for
+           * `sm:w-[58%]` here without giving the side frames `sm:w-[36%]`
+           * in the same change; the three widths only make sense together.
+           *
+           * `max-sm:!w-[78%]` is scoped below `sm`, where this is the only
+           * visible phone (the others are `hidden`). There a 100%-wide box
+           * scales past the `overflow-hidden` mask once `--scroll` drives
+           * `scale()` to 1.10 and gets clipped. 86% was the widest that
+           * still cleared the mask; 78% is a deliberate step narrower so
+           * the device reads as a phone sitting in the section rather than
+           * filling it, and leaves breathing room either side on a 320px
+           * screen. `!` is needed to beat `w-full`, and the `max-sm:` scope
+           * keeps desktop untouched.
            */
-          className="z-10 max-sm:!w-[76%] sm:w-[58%]"
+          className="z-10 w-[58%] max-sm:!w-[58%]"
           style={{
             willChange: 'transform, opacity',
             transformOrigin: 'top center',

@@ -20,7 +20,25 @@ export const brand = {
 
 export const app = {
   name: 'Islamic Expense Tracker',
-  tagline: 'Every penny, accounted for.',
+  /*
+   * Two halves on purpose: the everyday money app on the left, the thing no
+   * other expense tracker does on the right. Leading on Zakat alone reads as
+   * a single-purpose religious utility, and leading on tracking alone is
+   * indistinguishable from every other budgeting app — the pairing is the
+   * positioning.
+   *
+   * Deliberately names no currency. The app is multi-currency (BDT, USD,
+   * GBP, AED, EUR, SAR — see the app's constants/currencies.ts, where the
+   * default base currency is USD) and the audience is international, so any
+   * currency word here would read as "not for me" to most of it. Earlier
+   * drafts used "penny" and then "taka"; both were wrong for the same
+   * reason, in opposite directions.
+   *
+   * Also the hero <h1> — see HERO_COPY in lib/screens.ts, which reads this
+   * rather than restating it, since the two drifting apart is exactly how
+   * the page ends up making two different promises.
+   */
+  tagline: 'Every expense tracked. Every obligation met.',
   androidPackage: 'com.islamicexpensetracker',
   iosBundleId: 'com.islamicexpensetracker',
 } as const;

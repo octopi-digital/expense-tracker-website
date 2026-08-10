@@ -6,7 +6,27 @@
  * Replaces `derive-frames.mjs`, which sliced one placeholder capture into fake
  * beats before real per-feature screenshots existed.
  *
- * Run: node scripts/process-screenshots.mjs
+ * Run: `npm run screens`. Also wired to `prebuild`, so `npm run build` always
+ * regenerates first and a production bundle can't ship screens that are older
+ * than their sources.
+ *
+ * That guard exists because the drift is silent and expensive: replacing a
+ * file in `assets/screenshots/` changes nothing on the site until this runs,
+ * with no error and no visual cue that the page is stale. Two outputs sat
+ * behind their sources for days that way, and one of them was still showing
+ * the assistant named "Jrfin" — the pre-rename brand — in a marketing
+ * screenshot on the live AI Coach section.
+ *
+ * Safe to run on every build: WebP encoding here is deterministic, so
+ * unchanged sources re-encode to byte-identical files and `public/screens/`
+ * doesn't churn in git. `assets/screenshots/` is committed, so CI has the
+ * sources it needs. A missing source throws and fails the build, which is
+ * the intended behaviour — better than shipping a broken image.
+ *
+ * `sharp` is a declared devDependency rather than a transitive one. It was
+ * previously resolved only via `next`'s own optional dependency, which a
+ * Next upgrade could drop or move without warning — fine when this was a
+ * script someone ran by hand, not fine now that `build` depends on it.
  */
 import sharp from 'sharp';
 import path from 'node:path';

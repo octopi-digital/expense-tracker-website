@@ -11,6 +11,7 @@
  * To swap in a real screenshot, drop the file in `public/screens/` and point
  * `src` at it. Nothing else needs to change.
  */
+import { app } from '@/lib/brand';
 import type { TransitionKind } from '@/components/showcase/transitions';
 
 /**
@@ -132,10 +133,22 @@ export const HERO_POSE_LIGHT: PhonePose = {
   offsetY: 0,
 };
 
+/*
+ * `title` reads `app.tagline` rather than restating it. The same line is the
+ * hero <h1>, the <title> suffix, the OG image and the footer; when it was
+ * duplicated here as a literal, the page had two independent copies of its
+ * own promise and nothing to stop them diverging.
+ *
+ * `body` names the three things the app does that a generic expense tracker
+ * doesn't — automatic bank/MFS SMS capture, Zakat, and the AI coach — in the
+ * order they're most likely to land. It used to lead on "offline-first",
+ * which is an implementation detail rather than a reason to install
+ * anything, and it left all three differentiators unmentioned.
+ */
 export const HERO_COPY = {
-  eyebrow: 'Islamic Expense Tracker',
-  title: 'Every penny, accounted for.',
-  body: 'Personal finance that understands how you actually earn and spend — offline-first, and in your language.',
+  eyebrow: app.name,
+  title: app.tagline,
+  body: 'Income, expenses, assets and Zakat in one place — captured automatically from your bank SMS, explained by an AI coach that speaks your language.',
 };
 
 const HOME_CAPTURE = {
