@@ -1,237 +1,153 @@
-@import "tailwindcss";
+@import 'tailwindcss';
 
-/*
- * Neutral-grey, light-only palette.
- *
- * The greys carry no colour cast. An earlier version tinted every neutral
- * toward the brand green, which meant the emerald never read as an accent —
- * it was just the most saturated point on a page that was already green.
- * Here the page is genuinely neutral and the emerald is the only saturated
- * thing on it, which is what gives it force.
- *
- * The ground is #f3f3f3, not white. White reserves itself for the panels that
- * are meant to sit *above* the page, so a card needs no shadow to separate —
- * the tonal step does it.
- */
-:root {
-  --surface: #f3f3f3;
-  /* Plinths: the flat grey slabs product imagery sits on. */
-  --surface-plinth: #e7e7e5;
-  --surface-card: #ffffff;
-  --surface-dark: #121312;
+/* ------------------------------------------------------------------
+   Deenomics design tokens.
+   Brand colors are lifted verbatim from the app's single source of
+   truth (expense-tracker-app/src/constants/theme.js) so the site and
+   the product can never drift apart.
+   ------------------------------------------------------------------ */
+@theme {
+  --color-emerald-brand: #106c31;
+  --color-emerald-deep: #0a4a21;
+  --color-emerald-ink: #041b0d;
+  --color-emerald-night: #02120a;
+  --color-green-bright: #19cc50;
+  --color-green-link: #129244;
+  --color-green-tint: #e2f2e9;
 
-  /* Ink as opacities of one near-black, the way a print palette works —
-     so secondary text is the same colour at less strength, not a different
-     grey that can drift out of family. */
-  --ink: #111211;
-  --ink-secondary: rgba(17, 18, 17, 0.58);
-  --ink-tertiary: rgba(17, 18, 17, 0.4);
+  --color-gold: #d7a225;
+  --color-gold-light: #fadb8a;
+  --color-gold-deep: #a4731d;
 
-  --border: rgba(17, 18, 17, 0.11);
-  --border-strong: rgba(17, 18, 17, 0.2);
+  --color-ink: #0f172a;
+  --color-slate-body: #647488;
+  --color-divider: #e2e8f0;
+  --color-card: #f3f3f4;
 
-  /* The fixed brand emerald. `--accent` is a *role* and gets reassigned per
-     band (white on the emerald CTA, bright green on the dark one), so a band
-     that paints itself with `var(--accent)` while also redefining `--accent`
-     resolves against its own override and paints the wrong colour. `--emerald`
-     is the literal, never reassigned, and is what those backgrounds use. */
-  --emerald: #106c31;
-  --accent: var(--emerald);
-  --accent-hover: #0d5a29;
-  --accent-bright: #19cc50;
-  --accent-soft: #e6f0e9;
-  --accent-on: #ffffff;
-  --accent-gold: #8a6206;
+  --color-expense: #f09d05;
+  --color-savings: #2e7df7;
+  --color-lavender: #655fee;
+  --color-danger: #e5484d;
 
-  /* Almost nothing casts a shadow here. Depth comes from the tonal steps
-     between ground, plinth and card; a drop shadow on top of that reads as a
-     second, competing system. What remains is a whisper for the few panels
-     that genuinely float. */
-  --shadow-card: 0 1px 2px rgba(17, 18, 17, 0.04);
-  --shadow-float: 0 2px 4px rgba(17, 18, 17, 0.04), 0 12px 32px -16px rgba(17, 18, 17, 0.18);
-  /* The one place a real shadow is earned. A screenshot with only a hairline
-     reads as a decal printed on the plinth rather than an object resting on
-     it — the slab and the screen end up occupying the same plane. Two layers:
-     a tight contact shadow for the edge, and a wide soft one for the lift. */
-  --shadow-device: 0 2px 6px rgba(17, 18, 17, 0.06), 0 24px 48px -20px rgba(17, 18, 17, 0.3);
+  --font-sans: var(--font-jakarta), ui-sans-serif, system-ui, sans-serif;
+  --font-arabic: var(--font-amiri), serif;
 
-  --ease-out-soft: cubic-bezier(0.22, 1, 0.36, 1);
+  --shadow-glow: 0 0 80px -20px rgb(25 204 80 / 0.45);
+  --shadow-card: 0 1px 2px rgb(15 23 42 / 0.04), 0 12px 32px -12px rgb(15 23 42 / 0.12);
+  --shadow-lift: 0 2px 4px rgb(15 23 42 / 0.04), 0 24px 60px -20px rgb(15 23 42 / 0.22);
+  --shadow-phone: 0 40px 90px -30px rgb(2 18 10 / 0.65), 0 0 0 1px rgb(255 255 255 / 0.06);
+
+  --animate-marquee: marquee 40s linear infinite;
+  --animate-float: float 7s ease-in-out infinite;
+  --animate-pulse-ring: pulse-ring 3s ease-out infinite;
+  --animate-shimmer: shimmer 3s linear infinite;
 }
 
-@theme inline {
-  --color-background: var(--surface);
-  --color-foreground: var(--ink);
-  --font-sans: var(--font-urbanist-sans);
-  --font-mono: var(--font-geist-mono);
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
 }
 
-body {
-  background: var(--surface);
-  color: var(--ink-secondary);
-  /* Urbanist is loaded in layout.tsx — the same family the mobile app ships,
-     so site and app read as one product. */
-  font-family: var(--font-urbanist-sans), ui-sans-serif, system-ui, sans-serif;
-  font-size: 16px;
-  line-height: 1.55;
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-14px); }
 }
 
-/*
- * Display type is set at regular weight, not bold.
- *
- * This is the single biggest thing separating a considered marketing page
- * from a template one. At 48px+ a semibold or bold weight reads as shouting
- * and as generic — the size alone is already carrying the emphasis, and
- * adding weight on top of it just thickens the page. Regular weight at a
- * large size with tight negative tracking is what reads as editorial.
- *
- * Tracking scales with size: the larger the type, the looser the default
- * spacing looks, so h1 takes more correction than h2 and h3 takes least.
- */
-h1,
-h2,
-h3 {
-  color: var(--ink);
-  font-weight: 400;
+@keyframes pulse-ring {
+  0% { transform: scale(0.9); opacity: 0.7; }
+  70% { transform: scale(1.35); opacity: 0; }
+  100% { transform: scale(1.35); opacity: 0; }
 }
 
-h1 {
-  font-size: clamp(2.5rem, 4.8vw, 3.5rem);
-  line-height: 1.06;
-  letter-spacing: -0.032em;
+@keyframes shimmer {
+  from { background-position: 200% 0; }
+  to { background-position: -200% 0; }
 }
 
-h2 {
-  font-size: clamp(1.875rem, 3.4vw, 2.75rem);
-  line-height: 1.1;
-  letter-spacing: -0.028em;
-}
-
-h3 {
-  font-size: 1.0625rem;
-  line-height: 1.35;
-  letter-spacing: -0.012em;
-  font-weight: 500;
-}
-
-/* Anchor scrolling has to clear the sticky header, or every in-page jump
-   lands with the section's heading tucked under the bar. */
-:where(section[id], div[id]) {
-  scroll-margin-top: 5rem;
-}
+/* ------------------------------------------------------------------ */
 
 html {
   scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
 }
 
-@media (prefers-reduced-motion: reduce) {
-  html {
-    scroll-behavior: auto;
-  }
+body {
+  background: #ffffff;
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  overflow-x: hidden;
 }
 
-/* Visible focus for keyboard users on every interactive element, in the
-   accent rather than the browser default blue. */
-:where(a, button, summary, input, [tabindex]):focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: 2px;
-  border-radius: 4px;
+::selection {
+  background: var(--color-green-bright);
+  color: var(--color-emerald-ink);
 }
 
-/* ── Plinth motif ──────────────────────────────────────────────────────────
-   A khatam — the eight-pointed star made by overlaying two squares at 45° —
-   tiled across the slab a device sits on.
-
-   It is there because the plinth is otherwise a plain grey rectangle with a
-   phone floating in the middle of it, and the empty thirds either side of the
-   device had nothing to say. A motif is the one kind of filler that is not
-   filler: it is the only place on this site where the "Deen" half of the name
-   shows up visually, and it costs nothing but a tiled SVG.
-
-   Kept at 5% of the ink colour and stroked at a single hairline, because the
-   moment it is legible as decoration it competes with the screenshot — the
-   reader should register texture, not pattern. Same reason it is drawn in the
-   neutral ink and not in the emerald or the gold. */
-.plinth-motif {
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='56' height='56' viewBox='0 0 56 56'%3E%3Cg fill='none' stroke='%23111211' stroke-width='1'%3E%3Crect x='14' y='14' width='28' height='28'/%3E%3Crect x='14' y='14' width='28' height='28' transform='rotate(45 28 28)'/%3E%3C/g%3E%3C/svg%3E");
-  background-size: 56px 56px;
-  opacity: 0.05;
-  /* Fades out toward the middle so the pattern never runs under the device,
-     where it would show through the screen's own rounded corners. */
-  mask-image: radial-gradient(ellipse 44% 60% at 50% 45%, transparent 30%, black 85%);
-  -webkit-mask-image: radial-gradient(ellipse 44% 60% at 50% 45%, transparent 30%, black 85%);
-}
-
-/* ── Scroll reveal ─────────────────────────────────────────────────────────
-   Driven by components/Reveal.tsx, which flips data-reveal to "in" the first
-   time an element enters the viewport.
-
-   Scoped to `.js`, which the inline script in layout.tsx adds to <html>
-   before first paint. Without that scope the page is blank to anyone without
-   JavaScript: Reveal server-renders every element as `out` (opacity 0) and
-   only flips it from a `useEffect`, which never runs. Scoping the *hidden*
-   state rather than the visible one is also what avoids a flash — markup
-   arrives visible, and the class that hides it is already on <html> by the
-   time anything paints. */
-[data-reveal] {
-  transition:
-    opacity 0.6s var(--ease-out-soft),
-    transform 0.6s var(--ease-out-soft);
-}
-
-.js [data-reveal='out'] {
+/* Scroll-reveal: elements start hidden and are released by an
+   IntersectionObserver in <Reveal>. Anyone with reduced-motion set,
+   or with JS off, sees them immediately (see the media query and the
+   .reveal-ready gate below). */
+.reveal {
   opacity: 0;
-  transform: translateY(14px);
+  transform: translateY(28px);
+  transition:
+    opacity 0.75s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 0.75s cubic-bezier(0.16, 1, 0.3, 1);
+  transition-delay: var(--reveal-delay, 0ms);
 }
 
-[data-reveal='in'] {
+.reveal-in {
   opacity: 1;
   transform: none;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  [data-reveal],
-  .js [data-reveal='out'] {
-    opacity: 1;
-    transform: none;
-    transition: none;
+  html { scroll-behavior: auto; }
+  .reveal { opacity: 1; transform: none; transition: none; }
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
   }
 }
 
-/* ── Interaction ───────────────────────────────────────────────────────────
-   Colour and border only. The previous version lifted every clickable thing
-   by a pixel on hover; against flat plinths and hairlines that reads as the
-   page twitching, so the lift is gone and only the tonal change remains. */
-.lift {
-  transition:
-    background-color 0.18s var(--ease-out-soft),
-    border-color 0.18s var(--ease-out-soft),
-    color 0.18s var(--ease-out-soft),
-    opacity 0.18s var(--ease-out-soft);
+/* Utility: gradient text used for the hero's emphasised words. */
+.text-gradient-gold {
+  background: linear-gradient(100deg, #fadb8a 0%, #d7a225 45%, #fadb8a 100%);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: var(--animate-shimmer);
 }
 
-/* ── FAQ accordion ─────────────────────────────────────────────────────────
-   Built on <details>/<summary> so it opens without JavaScript and its answers
-   stay in the DOM for indexing. These rules only remove the default marker
-   and rotate our own chevron. */
-.faq-item summary::-webkit-details-marker {
-  display: none;
+.text-gradient-green {
+  background: linear-gradient(100deg, #106c31 0%, #19cc50 60%, #106c31 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
 }
 
-.faq-item summary {
-  list-style: none;
-  cursor: pointer;
+/* Hairline grid + radial vignette used behind dark sections. */
+.bg-grid {
+  background-image:
+    linear-gradient(to right, rgb(255 255 255 / 0.05) 1px, transparent 1px),
+    linear-gradient(to bottom, rgb(255 255 255 / 0.05) 1px, transparent 1px);
+  background-size: 64px 64px;
 }
 
-.faq-item[open] .faq-chevron {
-  transform: rotate(180deg);
+.mask-fade-edges {
+  mask-image: linear-gradient(to right, transparent, black 12%, black 88%, transparent);
 }
 
-.faq-chevron {
-  transition: transform 0.2s var(--ease-out-soft);
+.mask-fade-bottom {
+  mask-image: linear-gradient(to bottom, black 55%, transparent 100%);
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .faq-chevron {
-    transition: none;
-  }
+/* Lets the footer's ornament fade in below the seam, so the pattern does not
+   visibly restart where two dark sections meet. */
+.mask-fade-top {
+  mask-image: linear-gradient(to bottom, transparent 0%, black 22%);
 }

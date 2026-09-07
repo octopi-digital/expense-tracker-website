@@ -1,64 +1,104 @@
-import Image from 'next/image';
-import { NAV_LINKS, SITE } from '@/content/site';
-import { app } from '@/lib/brand';
+import Link from 'next/link';
+import { Logo } from '@/components/Logo';
+import { StoreBadges } from '@/components/StoreBadges';
+import { GeometricPattern } from '@/components/Pattern';
+import { site } from '@/lib/site';
 
-/**
- * Chrome only. The download call to action is its own section immediately
- * above this one — the footer used to carry `id="download"` and absorb every
- * CTA on the page, which is how "Get the app" came to mean "scroll to the
- * copyright line".
- */
+const columns: { title: string; links: { href: string; label: string }[] }[] = [
+  {
+    title: 'Product',
+    links: [
+      { href: '/features', label: 'Features' },
+      { href: '/zakat', label: 'Zakat & Sadaqah' },
+      { href: '/pricing', label: 'Pricing' },
+      { href: '/download', label: 'Download' },
+    ],
+  },
+  {
+    title: 'Company',
+    links: [
+      { href: '/support', label: 'Support' },
+      { href: '/support#contact', label: 'Contact us' },
+      { href: '/support#faq', label: 'FAQ' },
+    ],
+  },
+  {
+    title: 'Legal',
+    links: [
+      { href: '/privacy', label: 'Privacy Policy' },
+      { href: '/terms', label: 'Terms of Service' },
+      { href: '/data-deletion', label: 'Delete your data' },
+    ],
+  },
+];
+
 export function Footer() {
   return (
-    <footer className="border-t border-[var(--border)] bg-[var(--surface)]">
-      <div className="mx-auto flex max-w-6xl flex-col gap-10 px-6 py-14 sm:flex-row sm:justify-between">
-        <div className="max-w-xs">
-          <div className="mb-4 flex items-center gap-2.5">
-            <Image
-              src="/deenomics-icon.png"
-              alt=""
-              width={30}
-              height={30}
-              className="rounded-lg"
-            />
-            <span className="font-medium tracking-[-0.01em] text-[var(--ink)]">{SITE.name}</span>
+    <footer className="relative overflow-hidden bg-emerald-night text-white">
+      {/* The footer usually follows a section painted emerald-ink. Starting on
+          that exact colour and easing down to emerald-night removes the hard
+          step where the two met, and is invisible on the pages whose last
+          section is light. */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-x-0 top-0 h-48 bg-gradient-to-b from-emerald-ink to-transparent"
+      />
+      <GeometricPattern
+        className="mask-fade-top pointer-events-none absolute inset-0 h-full w-full"
+        opacity={0.07}
+        stroke="#FADB8A"
+      />
+
+      <div className="relative mx-auto max-w-7xl px-5 pb-10 sm:px-8">
+        {/* A deliberate divider. The sections now share a colour at the join,
+            so without this the two dark blocks ran together into one
+            featureless expanse — this marks where the footer begins without
+            reinstating a full-bleed edge. */}
+        <div className="h-px w-full bg-gradient-to-r from-transparent via-white/[0.18] to-transparent" />
+
+        <div className="grid gap-12 pt-14 lg:grid-cols-[1.4fr_2fr]">
+          <div>
+            <Logo tone="light" />
+            <p className="mt-6 max-w-sm text-[0.98rem] leading-relaxed text-white/55">
+              Manage your wealth the way your deen asks you to — with your Zakat calculated,
+              your spending understood, and guidance whenever you need it.
+            </p>
+            <StoreBadges className="mt-7" />
           </div>
-          <p className="text-sm text-[var(--ink-secondary)]">{SITE.tagline}</p>
-          {/* The name decoded a second time, for anyone who arrived partway
-              down the page and never saw the hero. */}
-          <p className="mt-3 text-[13px] text-[var(--ink-tertiary)]">{app.meaning}</p>
+
+          <div className="grid grid-cols-2 gap-8 sm:grid-cols-3">
+            {columns.map((col) => (
+              <div key={col.title}>
+                <h3 className="text-[0.72rem] font-bold uppercase tracking-[0.2em] text-gold-light/80">
+                  {col.title}
+                </h3>
+                <ul className="mt-5 space-y-3.5">
+                  {col.links.map((link) => (
+                    <li key={link.href + link.label}>
+                      <Link
+                        href={link.href}
+                        className="text-[0.95rem] text-white/60 transition-colors hover:text-white"
+                      >
+                        {link.label}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
         </div>
 
-        <nav aria-label="Footer">
-          <p className="mb-4 text-[13px] text-[var(--ink-tertiary)]">
-            On this page
+        <div className="mt-16 flex flex-col gap-4 border-t border-white/10 pt-8 sm:flex-row sm:items-center sm:justify-between">
+          <p className="text-sm text-white/45">
+            © {new Date().getFullYear()} {site.name}. All rights reserved.
           </p>
-          <ul className="grid grid-cols-2 gap-x-10 gap-y-2.5">
-            {NAV_LINKS.map((link) => (
-              <li key={link.href}>
-                <a
-                  href={link.href}
-                  className="text-[14px] text-[var(--ink-secondary)] hover:text-[var(--ink)]"
-                >
-                  {link.label}
-                </a>
-              </li>
-            ))}
-          </ul>
-        </nav>
-      </div>
-
-      <div className="mx-auto flex max-w-6xl flex-col gap-3 border-t border-[var(--border)] px-6 py-6 text-xs text-[var(--ink-tertiary)] sm:flex-row sm:items-center sm:justify-between">
-        <span>
-          &copy; {new Date().getFullYear()} {SITE.name}. All rights reserved.
-        </span>
-        <div className="flex items-center gap-5">
-          <a href="/privacy" className="hover:text-[var(--ink)]">
-            Privacy Policy
-          </a>
-          <a href="/terms" className="hover:text-[var(--ink)]">
-            Terms &amp; Conditions
-          </a>
+          <p className="text-sm text-white/45">
+            Questions?{' '}
+            <a href={`mailto:${site.email}`} className="font-semibold text-gold-light hover:text-white">
+              {site.email}
+            </a>
+          </p>
         </div>
       </div>
     </footer>

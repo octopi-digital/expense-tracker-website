@@ -1,87 +1,89 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, type ReactNode } from 'react';
+
+/** If nothing has revealed an element by this point, show it regardless. */
+const FAILSAFE_MS = 1200;
 
 /**
- * Fades and lifts its children into place the first time they enter the
- * viewport, then disconnects — reveals never replay on scroll-back, which
- * would read as a page that cannot hold still.
+ * Fades and lifts children into view once, the first time they cross the
+ * viewport.
  *
- * Renders as a single element and forwards `className`, so it can *be* the
- * grid or flex container it wraps rather than inserting a div that would
- * break the parent's layout. The visual states live in globals.css under
- * `[data-reveal]`.
- *
- * This is the only scroll-driven effect on the site. It replaced a pinned
- * WebGL tour, sticky-stacked section overlaps, a pointer-following glow and
- * a per-character magnify — all of which are gone.
+ * Content must never be left invisible, so hiding is opt-in and reversible at
+ * three points: the hidden class is only applied after mount (no JS, no
+ * hiding), elements already on screen are released on the next frame rather
+ * than waiting for an observer callback, and a timer releases anything the
+ * observer has not reported on by FAILSAFE_MS.
  */
 export function Reveal({
   children,
-  className = '',
   delay = 0,
+  className = '',
   as: Tag = 'div',
 }: {
-  children: React.ReactNode;
-  className?: string;
-  /** Stagger offset in ms, for siblings that should arrive in sequence. */
+  children: ReactNode;
   delay?: number;
-  as?: 'div' | 'section' | 'header' | 'li' | 'article' | 'ul' | 'ol';
+  className?: string;
+  as?: 'div' | 'section' | 'li' | 'span';
 }) {
-  const ref = useRef<HTMLElement>(null);
+  const ref = useRef<HTMLElement | null>(null);
+  const [armed, setArmed] = useState(false);
   const [shown, setShown] = useState(false);
 
   useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
+    const node = ref.current;
+    if (!node) return;
 
-    // Without IntersectionObserver nothing would ever flip the state and the
-    // content would sit at opacity 0 forever, so show it immediately. Set on
-    // the node rather than through state — this runs synchronously in the
-    // effect body, where a setState would cascade a second render.
-    //
-    // Reduced motion needs no branch here: the media query in globals.css
-    // already neutralises both reveal states.
-    if (typeof IntersectionObserver === 'undefined') {
-      el.dataset.reveal = 'in';
+    if (
+      typeof IntersectionObserver === 'undefined' ||
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    ) {
+      setShown(true);
       return;
     }
 
+    setArmed(true);
+
+    const failsafe = window.setTimeout(() => setShown(true), FAILSAFE_MS + delay);
+
+    // Already on screen at mount (the hero, or any deep link that lands
+    // mid-page): play the entrance immediately instead of waiting to be
+    // scrolled into view, which would never happen.
+    if (node.getBoundingClientRect().top < window.innerHeight) {
+      const raf = requestAnimationFrame(() => requestAnimationFrame(() => setShown(true)));
+      return () => {
+        cancelAnimationFrame(raf);
+        window.clearTimeout(failsafe);
+      };
+    }
+
     const observer = new IntersectionObserver(
-      ([entry]) => {
-        // `top < 0` means the element is already above the viewport. That is
-        // not an intersection, but it must still reveal: on a reload where
-        // the browser restores a mid-page scroll position, everything above
-        // that point mounts already passed, and waiting for an intersection
-        // would leave it blank until the reader scrolled back up to it.
-        if (!entry.isIntersecting && entry.boundingClientRect.top >= 0) return;
-        setShown(true);
-        observer.disconnect();
+      (entries) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting) {
+            setShown(true);
+            observer.disconnect();
+          }
+        }
       },
-      // Hold the reveal until the element is a little way past the bottom
-      // edge, so it animates in view rather than the instant it clips in.
-      { rootMargin: '0px 0px -12% 0px' }
+      { threshold: 0.08, rootMargin: '0px 0px -50px 0px' },
     );
 
-    observer.observe(el);
-    return () => observer.disconnect();
-  }, []);
-
-  // Widened to ElementType so the single ref types against every tag `as`
-  // accepts. Naming a union of concrete elements instead makes the ref an
-  // intersection of them — HTMLDivElement & HTMLLIElement, which nothing
-  // satisfies — and the component stops compiling the moment a second tag is
-  // allowed.
-  const Component = Tag as React.ElementType;
+    observer.observe(node);
+    return () => {
+      observer.disconnect();
+      window.clearTimeout(failsafe);
+    };
+  }, [delay]);
 
   return (
-    <Component
+    <Tag
+      // @ts-expect-error -- one ref covers every element this renders as.
       ref={ref}
-      data-reveal={shown ? 'in' : 'out'}
-      style={delay ? { transitionDelay: `${delay}ms` } : undefined}
-      className={className}
+      className={`${armed ? 'reveal' : ''} ${shown ? 'reveal-in' : ''} ${className}`}
+      style={{ ['--reveal-delay' as string]: `${delay}ms` }}
     >
       {children}
-    </Component>
+    </Tag>
   );
 }

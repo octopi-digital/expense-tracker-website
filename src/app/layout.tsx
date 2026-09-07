@@ -1,91 +1,73 @@
-import type { Metadata } from "next";
-import { Urbanist, Geist_Mono } from "next/font/google";
-import "./globals.css";
-import { app, siteUrl } from "@/lib/brand";
+import type { Metadata, Viewport } from 'next';
+import { Plus_Jakarta_Sans, Amiri } from 'next/font/google';
+import './globals.css';
+import { Nav } from '@/components/Nav';
+import { Footer } from '@/components/Footer';
+import { site } from '@/lib/site';
 
-// Same family the mobile app ships (src/constants/theme.js's `fontFamily`),
-// so the marketing site and the app read as one product rather than two.
-const urbanist = Urbanist({
-  variable: "--font-urbanist-sans",
-  subsets: ["latin"],
+const jakarta = Plus_Jakarta_Sans({
+  subsets: ['latin'],
+  display: 'swap',
+  variable: '--font-jakarta',
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
+const amiri = Amiri({
+  subsets: ['arabic'],
+  weight: ['400', '700'],
+  display: 'swap',
+  variable: '--font-amiri',
 });
-
-const DESCRIPTION =
-  "Personal finance that understands how you actually earn and spend. Net worth, financial health scoring, goals and Zakat — with bank SMS logged automatically. Offline-first, in your language.";
 
 export const metadata: Metadata = {
-  // Required for the OG/Twitter image and canonical URL to resolve to
-  // absolute URLs — without it Next emits relative paths, which no scraper
-  // accepts. See `siteUrl` in lib/brand.ts for how the origin is configured.
-  metadataBase: new URL(siteUrl),
+  metadataBase: new URL(site.url),
   title: {
-    default: `${app.name} — ${app.tagline}`,
-    template: `%s — ${app.name}`,
+    default: `${site.name} — Islamic Wealth & Expense Tracker`,
+    template: `%s · ${site.name}`,
   },
-  description: DESCRIPTION,
-  applicationName: app.name,
-  // Brand name first, then the descriptive terms people actually search for.
-  // A newly coined name has no search volume of its own yet, so the generic
-  // phrases are what has to carry discovery until it does.
+  description: site.description,
   keywords: [
-    "Deenomics",
-    "Islamic expense tracker",
-    "halal budgeting app",
-    "Zakat calculator",
-    "Nisab",
-    "Muslim personal finance",
-    "net worth tracker",
-    "bKash expense tracker",
-    "Bangladesh budgeting app",
+    'Islamic expense tracker',
+    'Zakat calculator app',
+    'halal budgeting app',
+    'Muslim finance app',
+    'Sadaqah tracker',
+    'Nisab calculator',
+    'Islamic financial planning',
   ],
-  alternates: { canonical: "/" },
   openGraph: {
-    type: "website",
-    siteName: app.name,
-    title: `${app.name} — ${app.tagline}`,
-    description: DESCRIPTION,
-    url: siteUrl,
-    locale: "en",
+    type: 'website',
+    url: site.url,
+    siteName: site.name,
+    title: `${site.name} — Islamic Wealth & Expense Tracker`,
+    description: site.description,
   },
   twitter: {
-    card: "summary_large_image",
-    title: `${app.name} — ${app.tagline}`,
-    description: DESCRIPTION,
+    card: 'summary_large_image',
+    title: `${site.name} — Islamic Wealth & Expense Tracker`,
+    description: site.description,
   },
-  // The site is one long scroll plus two legal pages; there is nothing here
-  // that shouldn't be indexed.
   robots: { index: true, follow: true },
 };
 
-export default function RootLayout({ children }: LayoutProps<"/">) {
+export const viewport: Viewport = {
+  themeColor: '#106C31',
+  width: 'device-width',
+  initialScale: 1,
+};
+
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html
-      lang="en"
-      // The inline script below adds a `js` class to this element before React
-      // hydrates, so the DOM's className legitimately differs from the one
-      // rendered on the server. Without this, that mismatch is reported as a
-      // hydration error on every page load.
-      suppressHydrationWarning
-      className={`${urbanist.variable} ${geistMono.variable} h-full antialiased`}
-    >
-      <body className="min-h-full">
-        {/*
-          Runs before anything paints, and is the switch that lets the scroll
-          reveals hide their content at all — see `.js [data-reveal='out']` in
-          globals.css. If this never runs, every revealed element simply stays
-          visible, which is the correct no-JavaScript rendering of this page.
-        */}
-        <script
-          dangerouslySetInnerHTML={{
-            __html: "document.documentElement.classList.add('js')",
-          }}
-        />
-        {children}
+    <html lang="en" className={`${jakarta.variable} ${amiri.variable}`}>
+      <body>
+        <a
+          href="#main"
+          className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:rounded-full focus:bg-emerald-brand focus:px-5 focus:py-3 focus:font-semibold focus:text-white"
+        >
+          Skip to content
+        </a>
+        <Nav />
+        <main id="main">{children}</main>
+        <Footer />
       </body>
     </html>
   );

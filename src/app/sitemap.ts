@@ -1,30 +1,14 @@
 import type { MetadataRoute } from 'next';
-import { siteUrl } from '@/lib/brand';
+import { site } from '@/lib/site';
 
-/**
- * Three routes is the whole site — the marketing page is a single scroll,
- * and privacy/terms are the only other documents. Listed by hand rather than
- * crawled: at this size a generated list would only add a way to be wrong.
- */
+const routes = ['', '/features', '/zakat', '/pricing', '/download', '/support', '/privacy', '/terms', '/data-deletion'];
+
 export default function sitemap(): MetadataRoute.Sitemap {
-  return [
-    {
-      url: siteUrl,
-      lastModified: new Date(),
-      changeFrequency: 'weekly',
-      priority: 1,
-    },
-    {
-      url: `${siteUrl}/privacy`,
-      lastModified: new Date(),
-      changeFrequency: 'yearly',
-      priority: 0.3,
-    },
-    {
-      url: `${siteUrl}/terms`,
-      lastModified: new Date(),
-      changeFrequency: 'yearly',
-      priority: 0.3,
-    },
-  ];
+  const now = new Date();
+  return routes.map((route) => ({
+    url: `${site.url}${route}`,
+    lastModified: now,
+    changeFrequency: route === '' ? 'weekly' : 'monthly',
+    priority: route === '' ? 1 : 0.7,
+  }));
 }

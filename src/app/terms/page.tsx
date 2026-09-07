@@ -1,183 +1,173 @@
 import type { Metadata } from 'next';
-import { Nav } from '@/components/Nav';
-import { Footer } from '@/components/Footer';
-import { app } from '@/lib/brand';
+import Link from 'next/link';
+import { LegalNote, Prose } from '@/components/Legal';
+import { PageHero } from '@/components/PageHero';
+import { site } from '@/lib/site';
 
 export const metadata: Metadata = {
-  title: `Terms & Conditions — ${app.name}`,
-  description: `The terms that govern your use of ${app.name}.`,
+  title: 'Terms of Service',
+  description:
+    'The terms that govern your use of the Deenomics app and website — accounts, subscriptions, acceptable use, and the limits of the guidance we provide.',
 };
 
-const LAST_UPDATED = 'August 6, 2026';
+const UPDATED = '7 September 2026';
 
-function Section({ title, children }: { title: string; children: React.ReactNode }) {
-  return (
-    <section className="mb-10">
-      <h2 className="mb-3 text-xl font-semibold text-[var(--text-primary)]">{title}</h2>
-      <div className="space-y-3 text-sm leading-relaxed text-[var(--text-secondary)]">{children}</div>
-    </section>
-  );
-}
-
-export default function TermsAndConditions() {
+export default function TermsPage() {
   return (
     <>
-      <Nav />
-      <main className="bg-[var(--surface)] text-[var(--text-primary)]">
-        <div className="mx-auto max-w-3xl px-6 py-24">
-          <h1 className="mb-2 text-3xl font-bold text-[var(--text-primary)]">Terms &amp; Conditions</h1>
-          <p className="mb-12 text-sm text-[var(--text-tertiary)]">Last updated: {LAST_UPDATED}</p>
+      <PageHero
+        eyebrow="Legal"
+        title="Terms of Service"
+        lede={`The agreement between you and ${site.name}. Last updated ${UPDATED}.`}
+      />
 
-          <Section title="1. Agreement to Terms">
+      <section className="bg-white py-20 sm:py-24">
+        <div className="mx-auto max-w-3xl px-5 sm:px-8">
+          <Prose>
             <p>
-              These Terms &amp; Conditions (&ldquo;Terms&rdquo;) govern your access to and use of {app.name} (the
-              &ldquo;Service&rdquo;), a personal finance, budgeting, and Zakat-planning application available
-              globally. By creating an account or using the Service, you agree to be bound by these Terms and our{' '}
-              <a href="/privacy" className="text-[var(--accent)] underline">Privacy Policy</a>. If you do not agree, do not use the Service.
+              These terms govern your use of the {site.name} mobile application and this website
+              (together, the “Service”). By creating an account or using the Service you agree to
+              them. If you do not agree, please do not use the Service.
             </p>
-          </Section>
 
-          <Section title="2. Eligibility">
+            <h2 id="eligibility">1. Who may use the Service</h2>
             <p>
-              You must be at least 13 years old to use the Service. If you are between 13 and 18 (or the age of
-              majority in your jurisdiction), you may only use the Service under the supervision and with the
-              consent of a parent or legal guardian, who agrees to these Terms on your behalf and takes
-              responsibility for your use of the Service, including any subscription purchases.
+              You must be at least 13 years old, and old enough to form a binding contract where you
+              live. If you use the Service on behalf of an organisation, you confirm you are
+              authorised to accept these terms for it.
             </p>
-          </Section>
 
-          <Section title="3. Your Account">
-            <ul className="list-disc space-y-2 pl-5">
-              <li>You are responsible for maintaining the confidentiality of your login credentials, PIN, and any device used to access your account.</li>
-              <li>You are responsible for all activity that occurs under your account.</li>
-              <li>You must provide accurate information when creating your account and keep it up to date.</li>
-              <li>Notify us immediately if you suspect unauthorized access to your account.</li>
+            <h2 id="account">2. Your account</h2>
+            <ul>
+              <li>Give accurate information when you register and keep it current.</li>
+              <li>You are responsible for keeping your password and vault PIN confidential.</li>
+              <li>Tell us promptly at <a href={`mailto:${site.email}`}>{site.email}</a> if you believe your account has been accessed without your permission.</li>
+              <li>One person, one account. Do not share your login.</li>
             </ul>
-          </Section>
 
-          <Section title="4. The Service">
+            <h2 id="not-advice">3. Guidance, not advice</h2>
             <p>
-              {app.name} lets you track income and expenses, manage assets and liabilities, set savings goals,
-              calculate and track Zakat, view your net worth and financial health, and — where you choose to enable
-              it — automatically detect transactions from bank/mobile-financial-service SMS messages (Android only)
-              or manually via voice and an AI-powered coach.
+              This is the most important clause in these terms, so please read it carefully.
             </p>
-            <p>
-              <strong>Not financial or religious advice.</strong> The AI Coach, insights, financial health scoring,
-              and Islamic finance guidance (including Zakat calculations) provided in the Service are for
-              informational and educational purposes only. They do not constitute professional financial, tax,
-              legal, or religious (fatwa) advice, and should not be relied upon as a substitute for consulting a
-              qualified financial advisor or a qualified Islamic scholar for matters specific to your situation. You
-              are responsible for verifying calculations, particularly Zakat obligations, before acting on them.
-            </p>
-            <p>
-              <strong>SMS auto-capture accuracy.</strong> Automatic transaction detection from SMS is provided for
-              convenience and may occasionally misread, miss, or duplicate a transaction. You are responsible for
-              reviewing and correcting entries in the app.
-            </p>
-          </Section>
-
-          <Section title="5. Subscriptions &amp; Payments">
-            <ul className="list-disc space-y-2 pl-5">
-              <li>The Service offers a free plan and one or more paid subscription plans (billed monthly or yearly) with additional features.</li>
-              <li>Paid plans are processed through our third-party payment gateway and may be paid via card, PayPal, bKash, or Nagad, depending on availability in your region.</li>
-              <li>Subscriptions renew automatically at the end of each billing cycle unless cancelled before the renewal date.</li>
-              <li>You can cancel your subscription at any time from within the app; cancellation takes effect at the end of the current billing period, and you retain access to paid features until then.</li>
-              <li>Fees are shown in-app before purchase. Except where required by law or explicitly stated otherwise, payments are non-refundable.</li>
-              <li>We may change subscription pricing or features with reasonable advance notice; changes will not apply retroactively to a period you have already paid for.</li>
+            <ul>
+              <li>
+                <strong>{site.name} is not a financial adviser.</strong> Analytics, health scores,
+                projections and AI coaching are informational. They are not investment, tax, legal
+                or accounting advice, and they do not take account of your full circumstances.
+              </li>
+              <li>
+                <strong>{site.name} does not issue religious rulings.</strong> The Zakat
+                calculations, the Islamic finance guide, and any Qur’an or Hadith references in the
+                app are provided for general education. Schools of jurisprudence differ. For a
+                ruling on your own situation, consult a qualified scholar.
+              </li>
+              <li>
+                <strong>Figures depend on your inputs.</strong> Zakat and net-worth results are only
+                as accurate as the assets, liabilities and metal rates recorded. You are responsible
+                for verifying them before you act.
+              </li>
+              <li>
+                <strong>AI output can be wrong.</strong> The AI coach may produce incorrect or
+                incomplete answers. Check anything important before relying on it.
+              </li>
             </ul>
-          </Section>
 
-          <Section title="6. Acceptable Use">
+            <h2 id="capture">4. Automatic transaction capture</h2>
+            <p>
+              Where you enable it, the Service reads SMS messages and notifications on your device to
+              draft transactions. {site.name} never connects to your bank, never asks for banking
+              credentials, and never initiates payments. Drafts are suggestions: you are responsible
+              for reviewing each one before approving it, and for correcting anything the parser
+              gets wrong.
+            </p>
+
+            <h2 id="subscriptions">5. Subscriptions and payment</h2>
+            <ul>
+              <li>The Service has a free tier and a paid Premium tier. Current features and prices are on the <Link href="/pricing">pricing page</Link>.</li>
+              <li>Premium is billed through the app store you subscribed with, and renews automatically until cancelled.</li>
+              <li>Cancel any time from Profile → Subscription, or in your app store account. Premium features remain available until the end of the period you have already paid for.</li>
+              <li>Refunds are handled under the policy of the app store that processed the payment.</li>
+              <li>We may change prices with at least 30 days’ notice. Changes never apply to a period you have already paid for.</li>
+            </ul>
+
+            <h2 id="your-content">6. Your content</h2>
+            <p>
+              Everything you enter — transactions, assets, goals, notes, receipts — remains yours. You
+              grant us only the licence needed to store, process and display it back to you as part
+              of running the Service. We do not sell it and we do not use it for advertising.
+            </p>
+
+            <h2 id="acceptable">7. Acceptable use</h2>
             <p>You agree not to:</p>
-            <ul className="list-disc space-y-2 pl-5">
-              <li>Use the Service for any unlawful purpose, or in violation of any applicable law or regulation.</li>
-              <li>Attempt to gain unauthorized access to the Service, other users&rsquo; accounts, or our systems.</li>
-              <li>Reverse-engineer, decompile, or attempt to extract the source code of the app, except as permitted by law.</li>
-              <li>Interfere with or disrupt the integrity or performance of the Service.</li>
-              <li>Use automated means (bots, scrapers) to access the Service without our written permission.</li>
-              <li>Upload or transmit malicious code.</li>
-              <li>Misrepresent your identity or provide false information when creating an account.</li>
+            <ul>
+              <li>Use the Service for anything unlawful, including money laundering or fraud.</li>
+              <li>Reverse engineer, decompile or attempt to extract the source code of the app.</li>
+              <li>Probe, scan or interfere with the security of the Service or its infrastructure.</li>
+              <li>Use automated means to scrape or overload the Service.</li>
+              <li>Upload malware, or content that infringes someone else’s rights.</li>
+              <li>Resell or redistribute access to the Service.</li>
             </ul>
-          </Section>
 
-          <Section title="7. Your Content &amp; Data">
+            <h2 id="ip">8. Our intellectual property</h2>
             <p>
-              You retain ownership of the financial data and content you enter into the Service. You grant us a
-              limited license to store, process, and use that data solely to operate, maintain, and improve the
-              Service, as described in our Privacy Policy — including sending relevant data to AI processors to
-              power the AI Coach, voice assistant, and automatic entry features. You can export your data or reset
-              it at any time from within the app.
+              The {site.name} name, logo, app, website, design and content are ours or our
+              licensors’. These terms grant you a personal, non-exclusive, non-transferable,
+              revocable licence to use the Service — nothing more.
             </p>
-          </Section>
 
-          <Section title="8. Intellectual Property">
+            <h2 id="availability">9. Availability</h2>
             <p>
-              The Service, including its design, branding, software, and content (excluding your own data), is owned
-              by us or our licensors and is protected by intellectual property laws. We grant you a limited,
-              non-exclusive, non-transferable, revocable license to use the app for your personal, non-commercial
-              use, subject to these Terms.
+              We work to keep the Service running but do not guarantee uninterrupted access. Features
+              may be added, changed or withdrawn. We will give reasonable notice before removing
+              something you rely on.
             </p>
-          </Section>
 
-          <Section title="9. Suspension &amp; Termination">
+            <h2 id="termination">10. Suspension and termination</h2>
             <p>
-              We may suspend or terminate your account if you violate these Terms, engage in fraudulent or abusive
-              behavior, or if required by law. You may stop using the Service and request account deletion at any
-              time by contacting us. Sections of these Terms that by their nature should survive termination
-              (including intellectual property, disclaimers, and limitation of liability) will survive.
+              You may stop using the Service and delete your account at any time — see{' '}
+              <Link href="/data-deletion">Data Deletion</Link>. We may suspend or terminate an
+              account that breaches these terms, or where required by law, and will tell you why
+              unless we are prohibited from doing so.
             </p>
-          </Section>
 
-          <Section title="10. Disclaimers">
+            <h2 id="liability">11. Disclaimers and liability</h2>
             <p>
-              The Service is provided &ldquo;as is&rdquo; and &ldquo;as available&rdquo; without warranties of any
-              kind, whether express or implied, including warranties of merchantability, fitness for a particular
-              purpose, accuracy, or non-infringement. We do not warrant that the Service will be uninterrupted,
-              error-free, or that automatic SMS detection, AI-generated insights, or Zakat calculations will be
-              perfectly accurate.
+              The Service is provided “as is”, without warranties of any kind to the fullest extent
+              the law allows. We are not liable for any financial loss, missed obligation, tax
+              consequence or other indirect or consequential damage arising from your use of the
+              Service. Where liability cannot be excluded, it is limited to the amount you paid us in
+              the twelve months before the claim. Nothing here limits liability for fraud, death or
+              personal injury caused by negligence, or anything else that cannot lawfully be limited.
             </p>
-          </Section>
 
-          <Section title="11. Limitation of Liability">
+            <h2 id="changes">12. Changes to these terms</h2>
             <p>
-              To the maximum extent permitted by law, we will not be liable for any indirect, incidental, special,
-              consequential, or punitive damages, or any loss of profits, data, or financial loss, arising from your
-              use of or inability to use the Service, including reliance on AI-generated insights, financial health
-              scores, or Zakat calculations. Our total liability for any claim arising from the Service will not
-              exceed the amount you paid us, if any, in the 12 months preceding the claim.
+              We may update these terms. Material changes will be announced in the app at least 30
+              days before they take effect. Continuing to use the Service after that means you accept
+              the updated terms.
             </p>
-          </Section>
 
-          <Section title="12. Changes to the Service or Terms">
+            <h2 id="law">13. Governing law</h2>
             <p>
-              We may modify or discontinue features of the Service at any time. We may update these Terms from time
-              to time; if we make material changes, we will notify you in-app or by email before they take effect.
-              Continued use of the Service after changes take effect constitutes acceptance of the updated Terms.
+              These terms are governed by the laws of the jurisdiction in which {site.name} is
+              established, and disputes will be resolved in its courts, without prejudice to any
+              mandatory consumer rights you have where you live.
             </p>
-          </Section>
 
-          <Section title="13. Governing Law &amp; Dispute Resolution">
+            <h2 id="contact">14. Contact</h2>
             <p>
-              While {app.name} is available to users globally, these Terms are governed by the laws of Bangladesh,
-              without regard to conflict-of-law principles. Any dispute arising from these Terms or the Service will
-              be subject to the exclusive jurisdiction of the courts of Bangladesh, unless otherwise required by
-              mandatory local consumer-protection law in your country of residence.
+              Questions about these terms: <a href={`mailto:${site.email}`}>{site.email}</a>.
             </p>
-          </Section>
 
-          <Section title="14. Contact Us">
-            <p>
-              If you have questions about these Terms, contact us at{' '}
-              <span className="font-medium text-[var(--text-primary)]">[support@yourdomain.com]</span>.
-            </p>
-            <p className="text-[var(--text-tertiary)]">
-              [Company/Developer legal name to be added here.]
-            </p>
-          </Section>
+            <LegalNote>
+              These terms are drafted around how the product actually works, but they are not a
+              substitute for legal advice. Before publishing, insert your registered company name and
+              jurisdiction in sections 8 and 13, and have a lawyer review the liability clauses for
+              the markets you operate in.
+            </LegalNote>
+          </Prose>
         </div>
-      </main>
-      <Footer />
+      </section>
     </>
   );
 }

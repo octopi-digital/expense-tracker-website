@@ -1,190 +1,224 @@
 import type { Metadata } from 'next';
-import { Nav } from '@/components/Nav';
-import { Footer } from '@/components/Footer';
-import { app } from '@/lib/brand';
+import Link from 'next/link';
+import { LegalNote, Prose } from '@/components/Legal';
+import { PageHero } from '@/components/PageHero';
+import { site } from '@/lib/site';
 
 export const metadata: Metadata = {
-  title: `Privacy Policy — ${app.name}`,
-  description: `How ${app.name} collects, uses, and protects your data.`,
+  title: 'Privacy Policy',
+  description:
+    'How Deenomics collects, uses, stores and protects your data — including SMS and notification access, AI conversations, and your rights over everything we hold.',
 };
 
-const LAST_UPDATED = 'August 6, 2026';
+const UPDATED = '7 September 2026';
 
-function Section({ title, children }: { title: string; children: React.ReactNode }) {
-  return (
-    <section className="mb-10">
-      <h2 className="mb-3 text-xl font-semibold text-[var(--text-primary)]">{title}</h2>
-      <div className="space-y-3 text-sm leading-relaxed text-[var(--text-secondary)]">{children}</div>
-    </section>
-  );
-}
-
-export default function PrivacyPolicy() {
+export default function PrivacyPage() {
   return (
     <>
-      <Nav />
-      <main className="bg-[var(--surface)] text-[var(--text-primary)]">
-        <div className="mx-auto max-w-3xl px-6 py-24">
-          <h1 className="mb-2 text-3xl font-bold text-[var(--text-primary)]">Privacy Policy</h1>
-          <p className="mb-12 text-sm text-[var(--text-tertiary)]">Last updated: {LAST_UPDATED}</p>
+      <PageHero
+        eyebrow="Legal"
+        title="Privacy Policy"
+        lede={`How we collect, use and protect your information. Last updated ${UPDATED}.`}
+      />
 
-          <Section title="1. Introduction">
+      <section className="bg-white py-20 sm:py-24">
+        <div className="mx-auto max-w-3xl px-5 sm:px-8">
+          <Prose>
             <p>
-              This Privacy Policy explains how {app.name} (&ldquo;we&rdquo;, &ldquo;us&rdquo;, &ldquo;our&rdquo;)
-              collects, uses, discloses, and protects information when you use our mobile application and related
-              services (together, the &ldquo;Service&rdquo;). By using the Service, you agree to the collection and
-              use of information as described in this policy.
+              This policy explains what {site.name} (“we”, “us”) collects when you use the {site.name}{' '}
+              mobile application and this website, why we collect it, and what control you have over
+              it. Using {site.name} means you accept the practices described here.
             </p>
-            <p>
-              We are a personal finance and Zakat-planning app. Handling your financial information responsibly is
-              core to what we do, and this policy is written to be specific about what we collect and why — not
-              boilerplate.
-            </p>
-          </Section>
 
-          <Section title="2. Information We Collect">
-            <p><strong>Account information:</strong> name, email address and/or phone number, password (stored as a salted hash, never in plain text), preferred language, and base currency.</p>
-            <p><strong>Onboarding &amp; profile information:</strong> occupation, income range, financial goals, self-reported Islamic financial knowledge level, country, date of birth, and profile photo — all optional and provided by you.</p>
-            <p><strong>Financial data you enter or import:</strong> income and expense transactions, categories, assets, liabilities, savings goals and contributions, net worth snapshots, and Zakat/Sadaqah payment records.</p>
-            <p>
-              <strong>Bank and mobile financial service (MFS) SMS data (Android only, opt-in):</strong> if you turn
-              on SMS auto-capture, the app reads incoming SMS messages from recognized bank and MFS senders (e.g.
-              bKash, Nagad, Rocket, and partner banks) to automatically detect transactions and account balances. We
-              extract structured fields — amount, date, category, sender name, and a masked account reference (e.g.
-              last 4 digits) — and discard the raw message content after processing. A one-way fingerprint of each
-              message is kept only to prevent duplicate entries. This feature is Android-only (iOS does not permit
-              apps to read SMS) and is off unless you explicitly enable it.
-            </p>
-            <p>
-              <strong>Voice data:</strong> if you use the voice AI assistant, we process microphone audio to
-              transcribe your speech and generate spoken responses.
-            </p>
-            <p>
-              <strong>AI Coach conversation data:</strong> when you chat with the in-app AI Coach, your messages and
-              relevant financial figures (such as spending by category, net worth, or pending transactions) are sent
-              to our AI processing infrastructure to generate a response.
-            </p>
-            <p>
-              <strong>Authentication data:</strong> if you sign in with Google or Apple, we receive your name, email,
-              and a unique identifier from that provider. We use industry-standard secure device storage (iOS
-              Keychain / Android Keystore) for biometric app-lock (Face ID / fingerprint / Touch ID) and PIN
-              verification — your raw biometric data never leaves your device and is never sent to us.
-            </p>
-            <p>
-              <strong>Payment and subscription data:</strong> if you subscribe to a paid plan, we and our payment
-              gateway process your plan, billing cycle, payment method (card, PayPal, bKash, or Nagad), and
-              transaction status. Full card numbers and MFS credentials are handled directly by our payment gateway
-              and are never stored on our servers.
-            </p>
-            <p>
-              <strong>Device and technical data:</strong> push-notification device token, app version, platform, and
-              standard server request logs (such as IP address) generated when the app communicates with our servers.
-            </p>
-            <p><strong>Support data:</strong> information you provide when contacting support, including support tickets and messages.</p>
-          </Section>
+            <h2 id="collect">1. What we collect</h2>
 
-          <Section title="3. How We Use Your Information">
-            <ul className="list-disc space-y-2 pl-5">
-              <li>To provide core features: transaction tracking, budgeting, net worth, goals, and Zakat calculation.</li>
-              <li>To automatically detect transactions from bank/MFS SMS when you opt in (Android).</li>
-              <li>To power the AI Coach, voice assistant, and Islamic finance Q&amp;A features.</li>
-              <li>To authenticate you and keep your account secure.</li>
-              <li>To process subscription payments and manage your plan.</li>
-              <li>To send push notifications you&rsquo;ve enabled (e.g. reminders, transaction confirmations).</li>
-              <li>To respond to support requests.</li>
-              <li>To maintain, secure, and improve the Service, including diagnosing technical issues.</li>
+            <h3>Information you give us</h3>
+            <ul>
+              <li>
+                <strong>Account details</strong> — your name, email address or phone number, and a
+                password or Google sign-in identifier.
+              </li>
+              <li>
+                <strong>Profile and preferences</strong> — language, currency, profile photo, and
+                the answers you give in the onboarding survey.
+              </li>
+              <li>
+                <strong>Financial records you create</strong> — transactions, income, assets,
+                liabilities, goals, Zakat and Sadaqah entries, and any receipts or documents you
+                attach.
+              </li>
+              <li>
+                <strong>Support content</strong> — messages, tickets and attachments you send us.
+              </li>
             </ul>
-            <p>We do not sell your personal or financial information to third parties, and we do not use your financial data for advertising.</p>
-          </Section>
 
-          <Section title="4. AI Processing &amp; Third-Party Processors">
-            <p>
-              To power the AI Coach, entry extraction, voice transcription, text-to-speech, and live voice calls, we
-              send relevant data — which may include your financial figures, chat messages, SMS text (only when
-              on-device parsing cannot classify a message), and voice audio — to <strong>OpenAI</strong> for
-              processing. Islamic knowledge Q&amp;A citations are handled by our own self-hosted service and do not
-              involve your financial data.
-            </p>
-            <p>We also share limited information with the following service providers, solely to operate the Service:</p>
-            <ul className="list-disc space-y-2 pl-5">
-              <li><strong>Firebase Cloud Messaging (Google)</strong> — delivering push notifications.</li>
-              <li><strong>Google and Apple</strong> — verifying your identity if you use &ldquo;Sign in with Google/Apple&rdquo;.</li>
-              <li><strong>SSLCommerz</strong> and associated payment/MFS rails (card, PayPal, bKash, Nagad) — processing subscription payments.</li>
-              <li><strong>Our email provider</strong> — sending verification, password-reset, and transactional emails.</li>
-              <li><strong>Our cloud database provider</strong> — securely hosting your account and financial data.</li>
-              <li>Public exchange-rate and gold-price data providers — used only to fetch market rates, not to send us your personal data.</li>
+            <h3>Information collected automatically</h3>
+            <ul>
+              <li>
+                <strong>Device and diagnostic data</strong> — device model, operating system
+                version, app version, crash reports and basic usage events, used to keep the app
+                working.
+              </li>
+              <li>
+                <strong>Push token</strong> — an anonymous identifier from Firebase Cloud Messaging
+                so we can deliver notifications you have asked for.
+              </li>
             </ul>
-            <p>These providers are contractually or technically restricted to using your data only to provide services to us, and not for their own independent purposes.</p>
-          </Section>
 
-          <Section title="5. Data Storage &amp; Security">
+            <h3>SMS and notification access</h3>
             <p>
-              Your data is stored on secured cloud infrastructure. Passwords and app-lock PINs are stored only as
-              salted hashes. Data in transit between the app and our servers is encrypted (HTTPS/TLS). We restrict
-              internal access to personal data to what is necessary to operate the Service.
+              If you turn on automatic transaction capture, {site.name} reads incoming SMS messages
+              and notifications in order to recognise bank and payment alerts.
             </p>
-            <p>No method of transmission or storage is 100% secure, and we cannot guarantee absolute security.</p>
-          </Section>
-
-          <Section title="6. Your Rights &amp; Choices">
-            <ul className="list-disc space-y-2 pl-5">
-              <li><strong>Export your data:</strong> you can download a full copy of your account data (as JSON or PDF) at any time from within the app.</li>
-              <li><strong>Reset your data:</strong> you can wipe your transactions, assets, liabilities, and goals from within the app. This keeps your account profile, support history, and billing records, which we retain as described below.</li>
-              <li><strong>Delete your account:</strong> you may request full account deletion by contacting us at the email below. We will delete or anonymize your personal data except where we are required to retain records (e.g. payment records for accounting, tax, or legal compliance).</li>
-              <li><strong>SMS auto-capture:</strong> you may disable this at any time in the app&rsquo;s settings and revoke the SMS permission at the OS level.</li>
-              <li><strong>Notifications:</strong> you can disable push notifications in your device settings.</li>
-              <li><strong>Correct your information:</strong> you can update your profile and account details in the app at any time.</li>
+            <ul>
+              <li>
+                Messages are <strong>matched and parsed on your device</strong>. We do not upload,
+                store or transmit the content of your SMS messages or notifications.
+              </li>
+              <li>
+                Only the fields extracted from a message you approve — amount, date, merchant name,
+                category and account label — become a transaction in your account.
+              </li>
+              <li>
+                Messages that do not look like a financial alert are ignored and never leave the
+                device.
+              </li>
+              <li>
+                This permission is optional. The app works fully without it, and you can revoke it
+                at any time in your device settings or in Profile → SMS Permissions.
+              </li>
             </ul>
-          </Section>
 
-          <Section title="7. Data Retention">
+            <h3>Voice and photos</h3>
             <p>
-              We retain your account and financial data for as long as your account is active. If you delete your
-              account, we delete or anonymize your personal data within a reasonable period, except for records we
-              are legally required to retain (such as payment/billing records) or data necessary to resolve disputes
-              or enforce our agreements.
+              Microphone access is used only while you are actively speaking to the AI coach or
+              dictating an entry. Audio is transmitted for the length of that request and is not
+              retained afterwards. Camera and photo access is requested only at the moment you
+              attach an image.
             </p>
-          </Section>
 
-          <Section title="8. Children&rsquo;s Privacy">
+            <h2 id="use">2. How we use your information</h2>
+            <ul>
+              <li>To provide the service: recording transactions, calculating Zakat, tracking goals and producing analytics.</li>
+              <li>To generate AI coaching responses relevant to your actual finances.</li>
+              <li>To send the notifications and reminders you have enabled.</li>
+              <li>To operate subscriptions, process payments and prevent fraud.</li>
+              <li>To respond to your support requests.</li>
+              <li>To diagnose crashes and improve reliability.</li>
+              <li>To meet legal and regulatory obligations.</li>
+            </ul>
             <p>
-              The Service is not directed at children under 13. Users between 13 and 18 should use the Service only
-              with the involvement and guidance of a parent or legal guardian, particularly given the financial
-              nature of the app. We do not knowingly collect personal information from children under 13; if we
-              become aware that we have, we will take steps to delete it.
+              <strong>We do not sell your personal information, and we do not share it with
+              advertisers.</strong>
             </p>
-          </Section>
 
-          <Section title="9. International Users">
+            <h2 id="ai">3. AI coaching</h2>
             <p>
-              {app.name} is available globally. Regardless of where you access the Service from, your information
-              may be processed and stored on servers located in other countries, including by the third-party
-              processors described above. By using the Service, you consent to this transfer and processing of your
-              information.
+              When you ask the AI coach a question, the question and a relevant summary of your
+              financial data are sent to our AI processing provider to generate the answer. That
+              provider processes the request on our behalf under contract, and is not permitted to
+              use your data to train its models. Conversations are stored in your account so you can
+              return to them, and you can delete any conversation at any time.
             </p>
-          </Section>
 
-          <Section title="10. Changes to This Policy">
+            <h2 id="sharing">4. Who we share data with</h2>
+            <p>We share information only with the service providers needed to run {site.name}:</p>
+            <table>
+              <thead>
+                <tr>
+                  <th>Provider</th>
+                  <th>Purpose</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><td>Google Firebase</td><td>Push notifications and crash reporting</td></tr>
+                <tr><td>Google Play Billing</td><td>Subscription payments</td></tr>
+                <tr><td>Google Sign-In</td><td>Optional account authentication</td></tr>
+                <tr><td>AI processing provider</td><td>Generating AI coach responses</td></tr>
+                <tr><td>Cloud hosting provider</td><td>Storing your account and financial records</td></tr>
+              </tbody>
+            </table>
             <p>
-              We may update this Privacy Policy from time to time. If we make material changes, we will notify you
-              in-app or by email before the changes take effect. Continued use of the Service after changes take
-              effect constitutes acceptance of the updated policy.
+              We may also disclose information where we are legally required to, or to protect the
+              rights and safety of our users.
             </p>
-          </Section>
 
-          <Section title="11. Contact Us">
+            <h2 id="security">5. How we protect it</h2>
+            <ul>
+              <li>All traffic between the app and our servers is encrypted with TLS.</li>
+              <li>Data at rest is encrypted, and passwords are stored only as salted hashes.</li>
+              <li>Authentication tokens are held in the device keystore, not in plain storage.</li>
+              <li>
+                The Zakat Vault and Secret Vault are protected by a PIN you set, separate from your
+                device unlock.
+              </li>
+              <li>Access to production data is restricted to the staff who need it, and is logged.</li>
+            </ul>
             <p>
-              If you have questions about this Privacy Policy, want to exercise your rights, or wish to delete your
-              account, contact us at{' '}
-              <span className="font-medium text-[var(--text-primary)]">[support@yourdomain.com]</span>.
+              No system is perfectly secure. If a breach affects your data, we will notify you and
+              the relevant authority without undue delay.
             </p>
-            <p className="text-[var(--text-tertiary)]">
-              [Company/Developer legal name to be added here.]
+
+            <h2 id="retention">6. How long we keep it</h2>
+            <p>
+              We keep your account data for as long as your account is active. When you delete your
+              account, your personal data and financial records are erased from our production
+              systems within 30 days and from backups within 90 days, except where we are required
+              to retain transaction records for tax or accounting purposes.
             </p>
-          </Section>
+
+            <h2 id="rights">7. Your rights</h2>
+            <ul>
+              <li><strong>Access and portability</strong> — export your data as PDF or CSV from within the app.</li>
+              <li><strong>Correction</strong> — edit any record you have created, at any time.</li>
+              <li><strong>Deletion</strong> — delete individual records, reset all your data, or delete your account entirely. See <Link href="/data-deletion">Data Deletion</Link>.</li>
+              <li><strong>Withdraw consent</strong> — revoke SMS, notification, microphone or camera access at any time without losing your existing data.</li>
+              <li><strong>Object or restrict</strong> — write to us and we will act on your request.</li>
+            </ul>
+            <p>
+              To exercise any of these, email{' '}
+              <a href={`mailto:${site.email}`}>{site.email}</a>. We respond within 30 days.
+            </p>
+
+            <h2 id="children">8. Children</h2>
+            <p>
+              {site.name} is not directed at children under 13, and we do not knowingly collect data
+              from them. If you believe a child has given us information, contact us and we will
+              delete it.
+            </p>
+
+            <h2 id="transfers">9. International transfers</h2>
+            <p>
+              Your data may be processed in countries other than your own. Where it is, we rely on
+              appropriate safeguards such as standard contractual clauses to protect it.
+            </p>
+
+            <h2 id="cookies">10. This website</h2>
+            <p>
+              This website does not use advertising or tracking cookies. The Zakat calculator on it
+              runs entirely in your browser — the figures you enter are never sent to us.
+            </p>
+
+            <h2 id="changes">11. Changes to this policy</h2>
+            <p>
+              We will post any changes on this page and update the date above. Material changes will
+              also be announced in the app before they take effect.
+            </p>
+
+            <h2 id="contact">12. Contact</h2>
+            <p>
+              Questions about this policy, or about your data, go to{' '}
+              <a href={`mailto:${site.email}`}>{site.email}</a>.
+            </p>
+
+            <LegalNote>
+              This policy describes how the product is built to behave. Before publishing, have it
+              reviewed against the laws that apply to your business and add your registered company
+              name, address, and data-protection contact.
+            </LegalNote>
+          </Prose>
         </div>
-      </main>
-      <Footer />
+      </section>
     </>
   );
 }

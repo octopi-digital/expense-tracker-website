@@ -1,114 +1,98 @@
-# Deenomics — marketing site
+# Deenomics — marketing website
 
-Next.js 16 (App Router, Turbopack) + Tailwind v4. One long landing page, plus
-`/privacy` and `/terms`. Everything is statically prerendered.
+The public site for **Deenomics** (Deen + Economics), the Islamic wealth and
+expense tracker app. Built fresh; it shares nothing with the empty
+`expense-tracker-website/` folder next to it.
+
+## Stack
+
+- **Next.js 16** (App Router, Turbopack) — every page is statically prerendered
+- **Tailwind CSS 4** — tokens declared in `src/app/globals.css` under `@theme`
+- **TypeScript**, no other runtime dependencies
+
+## Run it
 
 ```bash
-npm run dev      # http://localhost:3000
-npm run screens  # regenerate public/screens from assets/screenshots
-npm run build    # runs `screens` first via prebuild
-npm run lint
+npm install
+npm run dev        # http://localhost:3010
+npm run build      # production build
+npm start          # serve the build on :3010
+npm run typecheck
 ```
 
-The site is **light-only** and has no WebGL, no theme toggle, and no
-dependencies beyond Next and React. If you are looking for the scroll-driven
-3D phone described in older notes, it was removed — see
-[HANDOFF.md](HANDOFF.md).
+## Pages
 
-**Product imagery is deliberately scarce: six pieces on the whole page.** Before
-adding a seventh, read §5 of [HANDOFF.md](HANDOFF.md) — the count is a design
-decision, not an oversight.
+| Route | What it is |
+|---|---|
+| `/` | Landing page — hero, features, Zakat and AI spotlights, pricing, FAQ |
+| `/features` | Deep dive on all six product pillars |
+| `/zakat` | Zakat story **plus a working Nisab/Zakat calculator** |
+| `/pricing` | Free vs Premium, with a full comparison table |
+| `/download` | Store links, device requirements, and every permission explained |
+| `/support` | Support channels, full FAQ, contact form |
+| `/privacy`, `/terms`, `/data-deletion` | The legal pages Google Play requires |
 
-## Layout of the source
+`robots.txt` and `sitemap.xml` are generated from `src/app/robots.ts` and
+`src/app/sitemap.ts`.
 
-| Path | What lives there |
-| --- | --- |
-| `src/content/` | **All copy**, as typed data. No JSX. |
-| `src/components/ui/` | The six primitives every section is built from |
-| `src/components/sections/` | One file per band on the page |
-| `src/app/page.tsx` | The running order, and only that |
-| `src/lib/` | Brand tokens, and the `/plans` catalogue merge |
-| `scripts/process-screenshots.mjs` | Raw captures → optimised WebP |
+## Where the content lives
 
-### Changing the brand name
+Almost all marketing copy is data, not JSX, in **`src/lib/site.ts`** — site
+name, URL, support email, store links, the six features, pricing plans, the
+comparison table, FAQs, and the hero stats. Editing that file updates every
+page that uses it, and keeps the copy in one place for a future translation
+pass.
 
-`app.name` in [`src/lib/brand.ts`](src/lib/brand.ts) is the only place it
-exists; everything else reads it. `app.meaning` holds "Deen + Economics", shown
-in the hero and the footer. The store identifiers next to them are *not* the
-brand — see §3 of [HANDOFF.md](HANDOFF.md) before touching those.
+## Brand
 
-### Changing copy
+Colours are lifted verbatim from the app's own source of truth,
+`expense-tracker-app/src/constants/theme.js` (emerald `#106C31`, green
+`#19CC50`, gold `#D7A225` / `#FADB8A`, ink `#0F172A`), and redeclared as
+Tailwind tokens in `globals.css`. If the app's palette changes, change it
+there too so the two stay in step.
 
-Edit the matching file in `src/content/`. Nothing user-visible is written
-inline in a component, so a wording change never means reading JSX. This is
-also what would make a Bangla version a content addition rather than a
-rewrite.
+The app screens shown in the phone mockups are **built in HTML/CSS**
+(`src/components/PhoneMockup.tsx`), not screenshots — so they stay sharp at
+any size and never go stale. Swap in real screenshots later if you prefer.
 
-### Adding a section
+## Before you go live
 
-1. Add its copy to `src/content/<name>.ts`.
-2. Build the section in `src/components/sections/<Name>.tsx` using `Section`,
-   `SectionHeading` and the other primitives.
-3. Mount it in `src/app/page.tsx`.
+1. **`src/lib/site.ts`** — set the real `url`, `email`, `playStoreUrl` and
+   `appStoreUrl` (the store links are `#` placeholders today).
+2. **Legal pages** — `/privacy`, `/terms` and `/data-deletion` are written
+   around how the product actually behaves, but each ends with a note listing
+   what still needs filling in (registered company name, jurisdiction) and
+   should be reviewed by a lawyer for your markets.
+3. **Pricing — read this before launch.** Only two of the six tiers exist in
+   the backend. `expense-tracker-server/src/config/plans.ts` defines `free`
+   (5 AI conversations/month, 3 goals) and `premium` (৳299/month, ৳2,999/year)
+   and enforces those limits in code. **Basic, Family, Business and Lifetime
+   are marketing-only right now** — nobody can buy one until they are added to
+   `PLANS` there, given store products, and their limits enforced. Either ship
+   the backend tiers first or hide those cards. Prices live in `plans` /
+   `extraPlans` in `src/lib/site.ts`; keep them in step with `plans.ts` by
+   hand, since a static site cannot import from the Express app.
+4. **Contact form** — `src/components/ContactForm.tsx` composes a `mailto:`
+   rather than posting anywhere, since there is no backend. Point its submit
+   handler at an API route when one exists.
+5. **Metal rates** — the Zakat calculator ships with editable per-gram
+   defaults for gold and silver. They are illustrative; the app itself uses
+   live rates.
 
-**Give it `divider` and leave it on the default ground.** Sections are
-separated by a hairline rule and whitespace, not by a colour change. Only two
-leave the common ground — Zakat (`white`) and the AI coach (`dark`) — and that
-is what makes those two register. Adding a third costs the other two their
-effect.
+## Deploying (matching the existing ExpenseTracker setup)
 
-**Then give it a form its neighbours do not have.** Because the palette is
-constant, shape is the only thing distinguishing one band from the next, and a
-run of sections built the same way stops reading as separate sections at all —
-which is exactly what happened here and had to be undone. Setup is a track,
-Guidance is an index, FeatureGrid is the ruled grid. See §2 of
-[HANDOFF.md](HANDOFF.md) before reaching for a fourth ruled grid.
+Same shape as `expense-tracker-admin` — build on the server, run under PM2
+behind Nginx:
 
-## Screenshots
+```bash
+npm ci
+npm run build
+pm2 start npm --name deenomics-website -- start   # binds :3010
+```
 
-Raw captures live in `assets/screenshots/` (committed). `npm run screens`
-crops and re-encodes them into `public/screens/`, and `prebuild` runs it on
-every build so a bundle can never ship images older than their sources.
+Then proxy your domain to `127.0.0.1:3010` in Nginx. Add the app to
+`/var/www/ExpenseTracker/ecosystem.config.cjs` if you want it managed
+alongside the others — remember `cwd` must be this directory.
 
-To add one:
-
-1. Drop the file in `assets/screenshots/`.
-2. Add a row to `FILES` in
-   [`scripts/process-screenshots.mjs`](scripts/process-screenshots.mjs):
-   `[source, output, cropTop, maxHeight]`.
-3. Run `npm run screens` and note the `WxH` it prints.
-4. Add an entry to `SHOTS` in [`src/content/shots.ts`](src/content/shots.ts)
-   with **those exact dimensions**.
-
-Step 4 matters: `next/image` reserves space from the declared width and
-height, so a wrong number means the page shifts as images load.
-
-Every primary screen is cropped to a single device viewport (`maxHeight: 844`,
-or `1266` for the 1.5x-scale Home capture). The site lays screenshots out
-flat, so a tall scroll-capture would either squash or need its own scroll
-container.
-
-The pipeline generates **only the five images the page renders**. Raw sources
-for every other screen stay committed in `assets/screenshots/`, so bringing one
-back is a pipeline row plus a `shots.ts` entry — but see the note above first.
-
-## Pricing
-
-The section renders `FALLBACK_TIERS` from
-[`src/content/pricing.ts`](src/content/pricing.ts) immediately, then upgrades
-to live numbers if `NEXT_PUBLIC_API_URL` is set and `GET /plans` answers. A
-failed or absent API is not an error — the fallback simply stays. Keep those
-values in sync by hand with the server's `src/config/plans.ts`.
-
-**The card leads with BDT** (৳299/mo) and shows `≈ $2.45` underneath, because
-BDT is the currency actually charged — the catalogue is fixed to BDT in v1.
-`USD_DISPLAY_RATE` in [`src/lib/plans.ts`](src/lib/plans.ts) is a
-hand-maintained approximation for the secondary line only; do not promote it
-back to the headline figure.
-
-## Environment
-
-| Variable | Effect if unset |
-| --- | --- |
-| `NEXT_PUBLIC_SITE_URL` | Falls back to `https://deenomics.com` — a **guess**, never confirmed — for canonical URLs, OG tags and the sitemap |
-| `NEXT_PUBLIC_API_URL` | Pricing shows the hardcoded fallback tiers |
+Alternatively, since every route is static, `next build` output can be served
+by any static host.
