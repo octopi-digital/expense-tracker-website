@@ -5,33 +5,30 @@ import { useEffect, useRef, useState } from 'react';
 /**
  * Fades and lifts its children into place the first time they enter the
  * viewport, then disconnects — reveals never replay on scroll-back, which
- * would read as a page that can't hold still.
+ * would read as a page that cannot hold still.
  *
  * Renders as a single element and forwards `className`, so it can *be* the
- * grid/flex container it wraps rather than inserting a div that would break
- * the parent's layout. The visual states live in globals.css under
+ * grid or flex container it wraps rather than inserting a div that would
+ * break the parent's layout. The visual states live in globals.css under
  * `[data-reveal]`.
  *
- * `variant="zoom"` swaps the rise-and-fade for a scale-down-to-size settle
- * (starts oversized, shrinks to its real size as it fades in) — used on
- * section headlines specifically, see `[data-reveal-variant='zoom']` in
- * globals.css.
+ * This is the only scroll-driven effect on the site. It replaced a pinned
+ * WebGL tour, sticky-stacked section overlaps, a pointer-following glow and
+ * a per-character magnify — all of which are gone.
  */
 export function Reveal({
   children,
   className = '',
   delay = 0,
   as: Tag = 'div',
-  variant = 'default',
 }: {
   children: React.ReactNode;
   className?: string;
   /** Stagger offset in ms, for siblings that should arrive in sequence. */
   delay?: number;
-  as?: 'div' | 'section' | 'header';
-  variant?: 'default' | 'zoom';
+  as?: 'div' | 'section' | 'header' | 'li' | 'article' | 'ul' | 'ol';
 }) {
-  const ref = useRef<HTMLDivElement>(null);
+  const ref = useRef<HTMLElement>(null);
   const [shown, setShown] = useState(false);
 
   useEffect(() => {
@@ -50,11 +47,14 @@ export function Reveal({
       return;
     }
 
-    // Already on screen at mount (above the fold): reveal on the next frame so
-    // the transition still runs from the SSR'd "out" state.
     const observer = new IntersectionObserver(
       ([entry]) => {
-        if (!entry.isIntersecting) return;
+        // `top < 0` means the element is already above the viewport. That is
+        // not an intersection, but it must still reveal: on a reload where
+        // the browser restores a mid-page scroll position, everything above
+        // that point mounts already passed, and waiting for an intersection
+        // would leave it blank until the reader scrolled back up to it.
+        if (!entry.isIntersecting && entry.boundingClientRect.top >= 0) return;
         setShown(true);
         observer.disconnect();
       },
@@ -67,15 +67,21 @@ export function Reveal({
     return () => observer.disconnect();
   }, []);
 
+  // Widened to ElementType so the single ref types against every tag `as`
+  // accepts. Naming a union of concrete elements instead makes the ref an
+  // intersection of them — HTMLDivElement & HTMLLIElement, which nothing
+  // satisfies — and the component stops compiling the moment a second tag is
+  // allowed.
+  const Component = Tag as React.ElementType;
+
   return (
-    <Tag
-      ref={ref as React.Ref<HTMLDivElement & HTMLElement>}
+    <Component
+      ref={ref}
       data-reveal={shown ? 'in' : 'out'}
-      data-reveal-variant={variant}
       style={delay ? { transitionDelay: `${delay}ms` } : undefined}
       className={className}
     >
       {children}
-    </Tag>
+    </Component>
   );
 }

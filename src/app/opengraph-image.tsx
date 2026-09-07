@@ -14,9 +14,10 @@ export const contentType = 'image/png';
  *
  * Built in code rather than exported from a design tool so it can't drift
  * from the brand tokens — the greens below are the same values
- * `lib/brand.ts` mirrors from the app's `constants/theme.js`. It uses the
- * dark theme unconditionally: an OG card has no way to know the viewer's
- * preference, and the dark composition is the one with the accent glow.
+ * `lib/brand.ts` mirrors from the app's `constants/theme.js`, and the
+ * composition is the site's own hero: white ground, near-black display type,
+ * one emerald accent. It used to be a dark card carrying an accent glow,
+ * which stopped matching anything the moment the site went light-only.
  *
  * No custom font is loaded. Urbanist would have to be fetched or vendored as
  * a .ttf purely for this one image, and Satori's fallback sans renders the
@@ -30,7 +31,7 @@ export const contentType = 'image/png';
  */
 export default async function Image() {
   const icon = await readFile(
-    join(process.cwd(), 'public', 'islamic-expense-tracker-icon.png')
+    join(process.cwd(), 'public', 'deenomics-icon.png')
   );
   const iconSrc = `data:image/png;base64,${icon.toString('base64')}`;
 
@@ -43,7 +44,7 @@ export default async function Image() {
           display: 'flex',
           flexDirection: 'column',
           justifyContent: 'space-between',
-          background: '#06110a',
+          background: '#ffffff',
           padding: 80,
           position: 'relative',
         }}
@@ -61,14 +62,13 @@ export default async function Image() {
             // leaves a faint straight seam where the bloom meets the edge.
             borderRadius: 380,
             background:
-              'radial-gradient(circle, rgba(25,204,80,0.28) 0%, rgba(25,204,80,0) 70%)',
+              'radial-gradient(circle, rgba(16,108,49,0.13) 0%, rgba(16,108,49,0) 70%)',
           }}
         />
 
         <div style={{ display: 'flex', alignItems: 'center', gap: 20 }}>
-          {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src={iconSrc} width={64} height={64} alt="" style={{ borderRadius: 16 }} />
-          <span style={{ fontSize: 30, color: 'rgba(255,255,255,0.72)' }}>{app.name}</span>
+          <span style={{ fontSize: 30, color: 'rgba(14,26,19,0.66)' }}>{app.name}</span>
         </div>
 
         <div style={{ display: 'flex', flexDirection: 'column' }}>
@@ -76,7 +76,7 @@ export default async function Image() {
             style={{
               fontSize: 82,
               fontWeight: 700,
-              color: '#ffffff',
+              color: '#0e1a13',
               letterSpacing: -2,
               lineHeight: 1.05,
             }}
@@ -87,7 +87,7 @@ export default async function Image() {
             style={{
               marginTop: 26,
               fontSize: 32,
-              color: 'rgba(255,255,255,0.6)',
+              color: 'rgba(85,101,92,1)',
               lineHeight: 1.35,
               maxWidth: 860,
             }}
@@ -97,14 +97,14 @@ export default async function Image() {
         </div>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-          <div style={{ width: 10, height: 10, borderRadius: 10, background: '#19cc50' }} />
+          <div style={{ width: 10, height: 10, borderRadius: 10, background: '#106c31' }} />
           {/* Latin script only. Setting the language names in their own
               scripts (বাংলা, العربية, اردو) fails the build outright —
               Satori's fallback font has no shaping tables for them and
               throws "lookupType: 5 - substFormat: 3 is not yet supported".
               Rendering them natively would mean vendoring a Bengali and an
               Arabic font just for this card; not worth it for one line. */}
-          <span style={{ fontSize: 26, color: 'rgba(255,255,255,0.45)' }}>
+          <span style={{ fontSize: 26, color: 'rgba(138,150,143,1)' }}>
             English · Bangla · Arabic · Urdu
           </span>
         </div>

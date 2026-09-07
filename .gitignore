@@ -31,7 +31,6 @@ yarn-error.log*
 .pnpm-debug.log*
 
 # env files (can opt-in for committing if needed)
-.env*
 
 # vercel
 .vercel
@@ -46,3 +45,4 @@ next-env.d.ts
 # Raw source model (33 MB). The committed, web-ready file is
 # public/models/phone.glb, produced by scripts/optimize-model.mjs.
 /assets/phone-raw.glb
+config.bat

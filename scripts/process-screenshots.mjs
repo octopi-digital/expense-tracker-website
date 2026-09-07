@@ -39,38 +39,26 @@ const OUT_DIR = path.join(root, 'public/screens');
 
 // [source under assets/screenshots, output path under public/screens, optional top-crop px, optional max height (single-screen crop from the top)]
 const FILES = [
-  ['Home.png', 'derived/home-full.webp', 0],
-  // Single-screen crop of the same source used for `derived/health-score-full`,
-  // for a static (non-scrolling) spotlight display.
+  // Five screens, because the page renders five. Every one is cropped to a
+  // single device viewport — the site lays screenshots out flat, so a tall
+  // scroll-capture would either squash or need a scroll container of its own.
+  // `maxHeight` is that crop.
+  //
+  // The Home capture is 585px wide (1.5x the others), so its single-viewport
+  // height is 844 * 585/390 = 1266, not 844. Cropping it to 844 would keep the
+  // top two-thirds of the screen, not the whole screen.
+  //
+  // Raw sources for every other screen are still committed under
+  // assets/screenshots/. To bring one back, add its row here, run
+  // `npm run screens`, and add an entry to src/content/shots.ts with the
+  // dimensions this script prints.
+  ['Home.png', 'derived/home-frame.webp', 0, 1266],
   ['Transactions-tab/Transaction financial Health Score.png', 'derived/health-score-frame.webp', 0, 844],
-  ['Transactions-tab/Transaction financial Health Score.png', 'derived/health-score-full.webp', 0],
-  ['Profile/Zakat & Donations.png', 'derived/zakat-full.webp', 0],
-  ['Transactions-tab/Transaction Expense.png', 'derived/transaction-expense-full.webp', 0],
-  ['Transactions-tab/Transaction Inbox.png', 'transaction-inbox.webp', 0],
-  ['Transactions-tab/Transaction income.png', 'transaction-income.webp', 0],
-  // Source has the phone's own status bar / a stray notification baked in
-  // (WhatsApp banner, low battery, wrong clock, a demo email address) above
-  // the app's actual "Gold Rate" sheet. Crop it off so only real app UI ships.
-  ['goldRate.jpeg', 'gold-rate.webp', 185],
-
-  // Secondary feature grid (below the 3D tour) and How It Works section.
-  ['Goals/Goals Overview.png', 'secondary/goals-overview.webp', 0],
-  ['Goals/Create New Goal.png', 'secondary/create-goal.webp', 0],
-  ['Profile/Islamic Guides.png', 'secondary/islamic-guides.webp', 0],
-  ['Profile/secret-vault/Secret Vault-home.png', 'secondary/secret-vault.webp', 0],
-  ['Profile/Zakat Vault PIN Page.png', 'secondary/zakat-pin.webp', 0],
-  ['currency.jpeg', 'secondary/currency.webp', 0],
-  ['Analysis Report (Insight).png', 'secondary/analysis-report.webp', 0],
-  ['Add Income (Manually).png', 'secondary/add-income.webp', 0],
-  ['AI Chat.png', 'secondary/ai-chat.webp', 0],
+  ['Profile/Zakat & Donations.png', 'derived/zakat-frame.webp', 0, 844],
+  ['Transactions-tab/Transaction Inbox.png', 'transaction-inbox.webp', 0, 844],
+  // Poster frame for public/video/ai-voice-call.mp4 — the clip is 4 MB and
+  // must not download until someone presses play. Native capture, not cropped.
   ['ai Voice Call.jpeg', 'secondary/ai-voice-call.webp', 0],
-
-  // Real onboarding flow, for the How It Works pinned tour.
-  ['new account/Sign Up.png', 'secondary/onboarding-signup.webp', 0],
-  ['new account/Survey Page - 1.png', 'secondary/onboarding-survey-1.webp', 0],
-  ['new account/Survey Page - 2.png', 'secondary/onboarding-survey-2.webp', 0],
-  ['new account/Survey Page - 3.png', 'secondary/onboarding-survey-3.webp', 0],
-  ['new account/Currency setting.png', 'secondary/onboarding-currency.webp', 0],
 ];
 
 await mkdir(path.join(OUT_DIR, 'derived'), { recursive: true });
