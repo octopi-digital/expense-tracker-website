@@ -10,6 +10,7 @@ expense tracker app. Built fresh; it shares nothing with the empty
 - **Tailwind CSS 4** — tokens declared in `src/app/globals.css` under `@theme`
 - **TypeScript**, no other runtime dependencies
 
+
 ## Run it
 
 ```bash
