@@ -1,168 +1,114 @@
-# Islamic Expense Tracker marketing site
+# Deenomics — marketing site
 
-Next.js 16 + Tailwind. The centrepiece is a scroll-driven 3D phone: a real
-three.js model that floats at a 3/4 angle in the hero, straightens up as you
-scroll, and scrolls app screenshots on its screen.
-
-The hero and the product tour are deliberately **one** pinned section. The
-phone has to travel continuously from its hero pose into the tour poses, and
-that is only possible if a single WebGL scene spans both.
+Next.js 16 (App Router, Turbopack) + Tailwind v4. One long landing page, plus
+`/privacy` and `/terms`. Everything is statically prerendered.
 
 ```bash
-npm run dev     # http://localhost:3000
-npm run build
+npm run dev      # http://localhost:3000
+npm run screens  # regenerate public/screens from assets/screenshots
+npm run build    # runs `screens` first via prebuild
+npm run lint
 ```
 
-## Adding a screenshot
+The site is **light-only** and has no WebGL, no theme toggle, and no
+dependencies beyond Next and React. If you are looking for the scroll-driven
+3D phone described in older notes, it was removed — see
+[HANDOFF.md](HANDOFF.md).
 
-1. Drop the image in `public/screens/`. Full device resolution, portrait.
-2. Add an entry to `SCREENS` in [`src/lib/screens.ts`](src/lib/screens.ts).
+**Product imagery is deliberately scarce: six pieces on the whole page.** Before
+adding a seventh, read §5 of [HANDOFF.md](HANDOFF.md) — the count is a design
+decision, not an oversight.
 
-That is the whole process — the section's scroll height, the copy rail, and the
-progress dots are all derived from that array, so adding a beat needs no other
-change.
+## Layout of the source
 
-Set `aspect` to the image's true `width / height` — the shader uses it for
-cover-fit and will crop wrongly if it is off.
+| Path | What lives there |
+| --- | --- |
+| `src/content/` | **All copy**, as typed data. No JSX. |
+| `src/components/ui/` | The six primitives every section is built from |
+| `src/components/sections/` | One file per band on the page |
+| `src/app/page.tsx` | The running order, and only that |
+| `src/lib/` | Brand tokens, and the `/plans` catalogue merge |
+| `scripts/process-screenshots.mjs` | Raw captures → optimised WebP |
 
-### How motion on the glass works
+### Changing the brand name
 
-The screen **scrolls**; it never cross-fades. Two behaviours combine:
+`app.name` in [`src/lib/brand.ts`](src/lib/brand.ts) is the only place it
+exists; everything else reads it. `app.meaning` holds "Deen + Economics", shown
+in the hero and the footer. The store identifiers next to them are *not* the
+brand — see §3 of [HANDOFF.md](HANDOFF.md) before touching those.
 
-- **Pan** moves the visible window down a single long capture, so the app's own
-  content scrolls as the page scrolls. Requires `fit: 'scroll'`.
-- **Slide** stacks the next screenshot directly beneath the current one and
-  pushes both upward, so changing screenshot reads as more scrolling rather
-  than a dissolve.
+### Changing copy
 
-| `fit` | Use for | Behaviour |
-| --- | --- | --- |
-| `frame` | A normal single-viewport capture | Covers the screen, centred, and holds still |
-| `scroll` | A long scroll-capture, taller than one viewport | Starts at the image's **top** on arrival and pans down as you scroll on |
+Edit the matching file in `src/content/`. Nothing user-visible is written
+inline in a component, so a wording change never means reading JSX. This is
+also what would make a Bangla version a content addition rather than a
+rewrite.
 
-Beats sharing one `src` are treated as a single **run** and pan continuously
-across it — top of the image at the run's first beat, bottom at its last, no
-seam or restart. Each beat currently has its own screenshot, so every run is
-one beat long.
+### Adding a section
 
-A `scroll` beat pins to the top of its image on arrival because each beat's
-headline describes what is at the *top* of that screen. An earlier version
-centred the window instead, which parked "Net worth, live" on the middle of the
-home capture with the net worth figure scrolled out of frame.
+1. Add its copy to `src/content/<name>.ts`.
+2. Build the section in `src/components/sections/<Name>.tsx` using `Section`,
+   `SectionHeading` and the other primitives.
+3. Mount it in `src/app/page.tsx`.
 
-### How the phone moves between beats
+**Give it `divider` and leave it on the default ground.** Sections are
+separated by a hairline rule and whitespace, not by a colour change. Only two
+leave the common ground — Zakat (`white`) and the AI coach (`dark`) — and that
+is what makes those two register. Adding a third costs the other two their
+effect.
 
-Each boundary has its own signature move, declared per beat as `enter`. They
-deliberately use different degrees of freedom so they read as different *kinds*
-of motion rather than different amounts of one — see
-[`transitions.ts`](src/components/showcase/transitions.ts).
+**Then give it a form its neighbours do not have.** Because the palette is
+constant, shape is the only thing distinguishing one band from the next, and a
+run of sections built the same way stops reading as separate sections at all —
+which is exactly what happened here and had to be undone. Setup is a track,
+Guidance is an index, FeatureGrid is the ruled grid. See §2 of
+[HANDOFF.md](HANDOFF.md) before reaching for a fourth ruled grid.
 
-| Effect | Mechanism | Screenshot swap |
-| --- | --- | --- |
-| `barrel-roll` | Stands the phone upright, *then* a full 360° yaw — the only move that shows the phone's back | Hard cut while reversed |
-| `hand-off` | Pure lateral travel, no rotation at all | Slide |
-| `push-back` | Recedes into depth and returns | Hard cut at the far point |
-| `pendulum` | In-plane `rotateZ` swing; screen stays readable | Slide |
-| `card-turn` | Yaws to a 90° sliver and back | Hard cut while edge-on |
+## Screenshots
 
-Two rules hold across all of them:
+Raw captures live in `assets/screenshots/` (committed). `npm run screens`
+crops and re-encodes them into `public/screens/`, and `prebuild` runs it on
+every build so a bundle can never ship images older than their sources.
 
-- **Every effect starts and ends face-on.** Resting poses never carry yaw — an
-  earlier tour left a few degrees on each beat and it read as being made to
-  view the screen from off to one side.
-- **A move gets a runway and travels it at an even rate.** Each stop is worth
-  `VIEWPORTS_PER_STOP` (1.6) viewports, spent reading first and moving second,
-  so the move owns ~0.8 of a viewport to itself and holds near-constant speed
-  across it.
+To add one:
 
-That second rule replaced its own opposite. The eases used to be *steeper* in
-the centre, to hurry through the unreadable part of a rotation — but at any
-real scrolling pace that stopped the 360° roll reading as a rotation at all
-and turned it into a jump. Room, not speed.
+1. Drop the file in `assets/screenshots/`.
+2. Add a row to `FILES` in
+   [`scripts/process-screenshots.mjs`](scripts/process-screenshots.mjs):
+   `[source, output, cropTop, maxHeight]`.
+3. Run `npm run screens` and note the `WxH` it prints.
+4. Add an entry to `SHOTS` in [`src/content/shots.ts`](src/content/shots.ts)
+   with **those exact dimensions**.
 
-### The tour runs at its own pace
+Step 4 matters: `next/image` reserves space from the declared width and
+height, so a wrong number means the page shifts as images load.
 
-Progress **trails the scrollbar** rather than being pinned to it, capped at
-`STOPS_PER_SECOND` (0.7). However fast the page is flicked, the phone still
-stands up, turns its full circle and settles at that rate — the scrollbar
-arrives early and the performance finishes on its own time.
+Every primary screen is cropped to a single device viewport (`maxHeight: 844`,
+or `1266` for the 1.5x-scale Home capture). The site lays screenshots out
+flat, so a tall scroll-capture would either squash or need its own scroll
+container.
 
-At reading pace the gap stays small, the exponential `APPROACH` term dominates,
-and the phone tracks the scrollbar closely enough to feel directly connected
-(~0.03 stops behind). The rate cap only takes over once someone flicks.
+The pipeline generates **only the five images the page renders**. Raw sources
+for every other screen stay committed in `assets/screenshots/`, so bringing one
+back is a pipeline row plus a `shots.ts` entry — but see the note above first.
 
-Crucially it is **progress** that is damped, never the pose. Damping the pose
-lets a rotation take the short way round, and a 360° roll then simply never
-happens — the phone eases toward a target that has already returned to where it
-started. Progress is one-dimensional and monotonic, so easing it makes the
-phone walk every step of the authored path no matter how violently someone
-scrolls.
+## Pricing
 
-The copy follows the damped value too, so a heading never appears for a screen
-that is not on the glass yet.
+The section renders `FALLBACK_TIERS` from
+[`src/content/pricing.ts`](src/content/pricing.ts) immediately, then upgrades
+to live numbers if `NEXT_PUBLIC_API_URL` is set and `GET /plans` answers. A
+failed or absent API is not an error — the fallback simply stays. Keep those
+values in sync by hand with the server's `src/config/plans.ts`.
 
-### Timing within a segment
+**The card leads with BDT** (৳299/mo) and shows `≈ $2.45` underneath, because
+BDT is the currency actually charged — the catalogue is fixed to BDT in v1.
+`USD_DISPLAY_RATE` in [`src/lib/plans.ts`](src/lib/plans.ts) is a
+hand-maintained approximation for the secondary line only; do not promote it
+back to the headline figure.
 
-```
- 0 ───────────── READ_UNTIL (0.5) ──────────────── 1
- │  phone parked, screenshot pans │  phone moves   │
-```
+## Environment
 
-The two phases never overlap, and that is deliberate: when they did, the phone
-began its move while the screenshot was still scrolling, so a screen was pulled
-away before it had finished showing itself and the transition read as an
-interruption rather than a hand-over.
-
-When a move hides the glass, the screenshot is swapped behind it as a hard cut
-and the phone returns already showing the next screen. When the glass stays
-readable, the swap falls back to the slide.
-
-Under `prefers-reduced-motion` the signature move is dropped entirely rather
-than scaled down — the content still scrolls, but the phone does not perform.
-
-## The phone model
-
-`public/models/phone.glb` is the web-ready model (375 KB). It is generated from
-the 33 MB Sketchfab source, which lives at `assets/phone-raw.glb` and is
-**gitignored** — keep a copy somewhere durable, it is not in this repo.
-
-```bash
-node scripts/optimize-model.mjs    # assets/phone-raw.glb -> public/models/phone.glb
-```
-
-Nearly all the weight is textures; the geometry is only ~280 KB. The script
-resizes and re-encodes each texture to WebP, forcing sRGB first because
-gltf-transform's built-in `optimize` fails on these particular PNGs (Sketchfab
-exports them with no declared colour space).
-
-### If you replace the model
-
-The screenshot plane is positioned from measured numbers, not guesses. Re-run
-the probe and paste its output into
-[`src/components/showcase/phone-metrics.ts`](src/components/showcase/phone-metrics.ts):
-
-```bash
-node scripts/find-screen-rect.mjs   # reports the screen quad in world space
-```
-
-## Checking the render
-
-`scripts/capture-beats.mjs` drives a headless browser through the section and
-writes a PNG per beat, so 3D framing can be reviewed without scrolling by hand.
-Requires the dev server to be running, and `playwright` installed.
-
-```bash
-node scripts/capture-beats.mjs .captures
-```
-
-## Processing real screenshots
-
-`scripts/process-screenshots.mjs` converts raw device captures from
-`assets/screenshots/` (not shipped — the user's own working folder) into
-optimized WebP files under `public/screens/`, and is the only place resizing
-or cropping (e.g. trimming a stray status bar) happens. Add a new screenshot
-there, then reference the output path from `SCREENS` in `src/lib/screens.ts`.
-
-```bash
-node scripts/process-screenshots.mjs
-```
+| Variable | Effect if unset |
+| --- | --- |
+| `NEXT_PUBLIC_SITE_URL` | Falls back to `https://deenomics.com` — a **guess**, never confirmed — for canonical URLs, OG tags and the sitemap |
+| `NEXT_PUBLIC_API_URL` | Pricing shows the hardcoded fallback tiers |

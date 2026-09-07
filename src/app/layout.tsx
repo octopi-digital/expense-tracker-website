@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { Urbanist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import { ThemeProvider } from "@/lib/theme";
 import { app, siteUrl } from "@/lib/brand";
 
 // Same family the mobile app ships (src/constants/theme.js's `fontFamily`),
@@ -30,7 +29,11 @@ export const metadata: Metadata = {
   },
   description: DESCRIPTION,
   applicationName: app.name,
+  // Brand name first, then the descriptive terms people actually search for.
+  // A newly coined name has no search volume of its own yet, so the generic
+  // phrases are what has to carry discovery until it does.
   keywords: [
+    "Deenomics",
     "Islamic expense tracker",
     "halal budgeting app",
     "Zakat calculator",
@@ -63,17 +66,26 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="en"
-      data-theme="light"
+      // The inline script below adds a `js` class to this element before React
+      // hydrates, so the DOM's className legitimately differs from the one
+      // rendered on the server. Without this, that mismatch is reported as a
+      // hydration error on every page load.
       suppressHydrationWarning
       className={`${urbanist.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col" suppressHydrationWarning>
+      <body className="min-h-full">
+        {/*
+          Runs before anything paints, and is the switch that lets the scroll
+          reveals hide their content at all — see `.js [data-reveal='out']` in
+          globals.css. If this never runs, every revealed element simply stays
+          visible, which is the correct no-JavaScript rendering of this page.
+        */}
         <script
           dangerouslySetInnerHTML={{
-            __html: `try{var t=localStorage.getItem('islamic-expense-tracker-theme');if(t==='dark')document.documentElement.setAttribute('data-theme','dark');}catch(e){}`,
+            __html: "document.documentElement.classList.add('js')",
           }}
         />
-        <ThemeProvider>{children}</ThemeProvider>
+        {children}
       </body>
     </html>
   );

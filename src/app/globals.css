@@ -1,382 +1,237 @@
 @import "tailwindcss";
 
-:root,
-[data-theme="dark"] {
-  --surface: #06110a;
-  --surface-card: rgba(255, 255, 255, 0.04);
-  --surface-gradient-1: #123d24;
-  --surface-gradient-2: #0b2416;
-  --surface-gradient-3: #06110a;
-  --text-primary: #ffffff;
-  --text-secondary: rgba(255, 255, 255, 0.6);
-  --text-tertiary: rgba(255, 255, 255, 0.4);
-  --text-quaternary: rgba(255, 255, 255, 0.3);
-  --text-dim: rgba(255, 255, 255, 0.2);
-  --border: rgba(255, 255, 255, 0.12);
-  --accent: #19cc50;
-  --accent-gold: #e3b341;
-  --ledger-line: rgba(255, 255, 255, 0.04);
-  /* On a dark surface a drop shadow does almost nothing; depth comes from the
-     top-edge highlight instead, with the shadow only deepening the seam. */
-  --card-shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 0 12px 32px -12px rgba(0, 0, 0, 0.6);
-  --card-highlight: rgba(255, 255, 255, 0.14);
-}
-
 /*
- * Light theme is a deliberately different composition, not an inverted
- * palette — see PhoneShowcase.tsx's `theme === 'light'` branch. Tokens here
- * back a warm "ledger" look: paper surface, a contained gradient plinth for
- * the phone instead of a full-bleed pool, and a gold second accent for
- * Zakat-flavoured highlights.
+ * Neutral-grey, light-only palette.
+ *
+ * The greys carry no colour cast. An earlier version tinted every neutral
+ * toward the brand green, which meant the emerald never read as an accent —
+ * it was just the most saturated point on a page that was already green.
+ * Here the page is genuinely neutral and the emerald is the only saturated
+ * thing on it, which is what gives it force.
+ *
+ * The ground is #f3f3f3, not white. White reserves itself for the panels that
+ * are meant to sit *above* the page, so a card needs no shadow to separate —
+ * the tonal step does it.
  */
-[data-theme="light"] {
-  --surface: #fbfaf6;
-  --surface-card: #ffffff;
-  --surface-gradient-1: #eaf7ee;
-  --surface-gradient-2: #fbf6e8;
-  --surface-gradient-3: #fbfaf6;
-  --text-primary: #14201a;
-  --text-secondary: rgba(20, 32, 26, 0.66);
-  --text-tertiary: rgba(20, 32, 26, 0.5);
-  --text-quaternary: rgba(20, 32, 26, 0.4);
-  --text-dim: rgba(20, 32, 26, 0.16);
-  --border: rgba(20, 32, 26, 0.12);
-  --accent: #106c31;
-  --accent-gold: #b8860b;
-  --ledger-line: rgba(20, 32, 26, 0.07);
-  /* White-on-paper needs a real shadow to separate at all — two layers so the
-     card has both a contact edge and an ambient falloff. Tinted toward the
-     surface's warm green rather than neutral grey. */
-  --card-shadow: 0 1px 2px rgba(20, 32, 26, 0.05), 0 16px 40px -16px rgba(20, 32, 26, 0.16);
-  --card-highlight: rgba(255, 255, 255, 0.9);
-}
-
-/* Shared easing. A decelerating curve (fast start, soft landing) is what
-   reads as "considered" versus the browser default ease. Theme-independent,
-   so it lives outside the palette blocks. */
 :root {
+  --surface: #f3f3f3;
+  /* Plinths: the flat grey slabs product imagery sits on. */
+  --surface-plinth: #e7e7e5;
+  --surface-card: #ffffff;
+  --surface-dark: #121312;
+
+  /* Ink as opacities of one near-black, the way a print palette works —
+     so secondary text is the same colour at less strength, not a different
+     grey that can drift out of family. */
+  --ink: #111211;
+  --ink-secondary: rgba(17, 18, 17, 0.58);
+  --ink-tertiary: rgba(17, 18, 17, 0.4);
+
+  --border: rgba(17, 18, 17, 0.11);
+  --border-strong: rgba(17, 18, 17, 0.2);
+
+  /* The fixed brand emerald. `--accent` is a *role* and gets reassigned per
+     band (white on the emerald CTA, bright green on the dark one), so a band
+     that paints itself with `var(--accent)` while also redefining `--accent`
+     resolves against its own override and paints the wrong colour. `--emerald`
+     is the literal, never reassigned, and is what those backgrounds use. */
+  --emerald: #106c31;
+  --accent: var(--emerald);
+  --accent-hover: #0d5a29;
+  --accent-bright: #19cc50;
+  --accent-soft: #e6f0e9;
+  --accent-on: #ffffff;
+  --accent-gold: #8a6206;
+
+  /* Almost nothing casts a shadow here. Depth comes from the tonal steps
+     between ground, plinth and card; a drop shadow on top of that reads as a
+     second, competing system. What remains is a whisper for the few panels
+     that genuinely float. */
+  --shadow-card: 0 1px 2px rgba(17, 18, 17, 0.04);
+  --shadow-float: 0 2px 4px rgba(17, 18, 17, 0.04), 0 12px 32px -16px rgba(17, 18, 17, 0.18);
+  /* The one place a real shadow is earned. A screenshot with only a hairline
+     reads as a decal printed on the plinth rather than an object resting on
+     it — the slab and the screen end up occupying the same plane. Two layers:
+     a tight contact shadow for the edge, and a wide soft one for the lift. */
+  --shadow-device: 0 2px 6px rgba(17, 18, 17, 0.06), 0 24px 48px -20px rgba(17, 18, 17, 0.3);
+
   --ease-out-soft: cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 @theme inline {
   --color-background: var(--surface);
-  --color-foreground: var(--text-primary);
+  --color-foreground: var(--ink);
   --font-sans: var(--font-urbanist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
-/* Nothing on this page is meant to scroll sideways, and several things are
-   deliberately wider than the viewport: `Reveal variant="zoom"` parks each
-   section heading at scale(1.4) until it enters view (a 1440px-wide h2 sits
-   at left:-53px meanwhile), and the ambient glows behind the devices are
-   sized past 100% on purpose. Together they gave the page a real horizontal
-   scrollbar that disappeared as soon as the headings settled and came back
-   on reload.
-
-   `clip`, not `hidden`: `overflow-x: hidden` would make this a scroll
-   container, which retargets every `position: sticky` inside it and breaks
-   both StickyStack sections and the pinned HowItWorks tour. `clip` just
-   clips — no scrollport, so sticky keeps resolving against the viewport.
-   It also permits `overflow-y: visible` to stay visible, which `hidden`
-   does not. */
-html,
-body {
-  overflow-x: clip;
-}
-
 body {
   background: var(--surface);
-  color: var(--text-primary);
-  /* Urbanist is loaded in layout.tsx and exposed as --font-urbanist-sans —
-     the same family the mobile app ships, for a consistent brand voice
-     across web and app. This used to hardcode Arial, which silently
-     overrode whatever font was configured here. */
+  color: var(--ink-secondary);
+  /* Urbanist is loaded in layout.tsx — the same family the mobile app ships,
+     so site and app read as one product. */
   font-family: var(--font-urbanist-sans), ui-sans-serif, system-ui, sans-serif;
-  transition: background-color 0.3s ease, color 0.3s ease;
+  font-size: 16px;
+  line-height: 1.55;
 }
 
-/* Display type: large headings get optical tightening. At 36px+ the default
-   tracking reads loose and generic; -0.02em is the usual correction. */
+/*
+ * Display type is set at regular weight, not bold.
+ *
+ * This is the single biggest thing separating a considered marketing page
+ * from a template one. At 48px+ a semibold or bold weight reads as shouting
+ * and as generic — the size alone is already carrying the emphasis, and
+ * adding weight on top of it just thickens the page. Regular weight at a
+ * large size with tight negative tracking is what reads as editorial.
+ *
+ * Tracking scales with size: the larger the type, the looser the default
+ * spacing looks, so h1 takes more correction than h2 and h3 takes least.
+ */
 h1,
+h2,
+h3 {
+  color: var(--ink);
+  font-weight: 400;
+}
+
+h1 {
+  font-size: clamp(2.5rem, 4.8vw, 3.5rem);
+  line-height: 1.06;
+  letter-spacing: -0.032em;
+}
+
 h2 {
-  letter-spacing: -0.02em;
+  font-size: clamp(1.875rem, 3.4vw, 2.75rem);
+  line-height: 1.1;
+  letter-spacing: -0.028em;
 }
 
 h3 {
-  letter-spacing: -0.01em;
+  font-size: 1.0625rem;
+  line-height: 1.35;
+  letter-spacing: -0.012em;
+  font-weight: 500;
 }
 
-/* Faint horizontal rule lines — the "ledger" cue for the light theme only. */
-[data-theme="light"] .ledger-bg {
-  background-image: repeating-linear-gradient(
-    to bottom,
-    var(--ledger-line) 0,
-    var(--ledger-line) 1px,
-    transparent 1px,
-    transparent 48px
-  );
+/* Anchor scrolling has to clear the sticky header, or every in-page jump
+   lands with the section's heading tucked under the bar. */
+:where(section[id], div[id]) {
+  scroll-margin-top: 5rem;
 }
 
-/* Slow breathing pulse on the light theme's grounding glow behind the phone. */
-@keyframes light-glow-breathe {
-  0%,
-  100% {
-    opacity: 0.9;
-    transform: scale(1);
-  }
-  50% {
-    opacity: 1;
-    transform: scale(1.04);
-  }
-}
-
-.light-glow-pulse {
-  animation: light-glow-breathe 6s ease-in-out infinite;
+html {
+  scroll-behavior: smooth;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .light-glow-pulse {
-    animation: none;
+  html {
+    scroll-behavior: auto;
   }
 }
 
-/* Caption crossfade in the onboarding tour panel — a plain opacity-in, no
-   motion, so it reads as the next line arriving rather than sliding in. */
-@keyframes caption-fade-in {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
+/* Visible focus for keyboard users on every interactive element, in the
+   accent rather than the browser default blue. */
+:where(a, button, summary, input, [tabindex]):focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 4px;
 }
 
-.caption-fade-in {
-  animation: caption-fade-in 0.4s ease-out;
-}
+/* ── Plinth motif ──────────────────────────────────────────────────────────
+   A khatam — the eight-pointed star made by overlaying two squares at 45° —
+   tiled across the slab a device sits on.
 
-@media (prefers-reduced-motion: reduce) {
-  .caption-fade-in {
-    animation: none;
-  }
-}
+   It is there because the plinth is otherwise a plain grey rectangle with a
+   phone floating in the middle of it, and the empty thirds either side of the
+   device had nothing to say. A motif is the one kind of filler that is not
+   filler: it is the only place on this site where the "Deen" half of the name
+   shows up visually, and it costs nothing but a tiled SVG.
 
-/* Dot-grid texture for the dark pricing section, echoing the template's
-   checkerboard background. Kept as a flat dot grid rather than trying to
-   reproduce rounded squares exactly — close enough at a glance, far cheaper
-   than an SVG/image tile. */
-.dot-grid {
-  background-image: radial-gradient(rgba(255, 255, 255, 0.08) 1px, transparent 1.5px);
-  background-size: 22px 22px;
+   Kept at 5% of the ink colour and stroked at a single hairline, because the
+   moment it is legible as decoration it competes with the screenshot — the
+   reader should register texture, not pattern. Same reason it is drawn in the
+   neutral ink and not in the emerald or the gold. */
+.plinth-motif {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='56' height='56' viewBox='0 0 56 56'%3E%3Cg fill='none' stroke='%23111211' stroke-width='1'%3E%3Crect x='14' y='14' width='28' height='28'/%3E%3Crect x='14' y='14' width='28' height='28' transform='rotate(45 28 28)'/%3E%3C/g%3E%3C/svg%3E");
+  background-size: 56px 56px;
+  opacity: 0.05;
+  /* Fades out toward the middle so the pattern never runs under the device,
+     where it would show through the screen's own rounded corners. */
+  mask-image: radial-gradient(ellipse 44% 60% at 50% 45%, transparent 30%, black 85%);
+  -webkit-mask-image: radial-gradient(ellipse 44% 60% at 50% 45%, transparent 30%, black 85%);
 }
 
 /* ── Scroll reveal ─────────────────────────────────────────────────────────
    Driven by components/Reveal.tsx, which flips data-reveal to "in" the first
-   time the element enters the viewport. Contents fade and rise into place;
-   the element never moves the layout, so this is purely a paint-time effect.
-   Elements start "out" during SSR — Reveal falls back to "in" immediately
-   when IntersectionObserver is unavailable or motion is reduced. */
+   time an element enters the viewport.
+
+   Scoped to `.js`, which the inline script in layout.tsx adds to <html>
+   before first paint. Without that scope the page is blank to anyone without
+   JavaScript: Reveal server-renders every element as `out` (opacity 0) and
+   only flips it from a `useEffect`, which never runs. Scoping the *hidden*
+   state rather than the visible one is also what avoids a flash — markup
+   arrives visible, and the class that hides it is already on <html> by the
+   time anything paints. */
 [data-reveal] {
   transition:
-    opacity 0.7s var(--ease-out-soft),
-    transform 0.7s var(--ease-out-soft);
-  will-change: opacity, transform;
+    opacity 0.6s var(--ease-out-soft),
+    transform 0.6s var(--ease-out-soft);
 }
 
-[data-reveal='out'] {
+.js [data-reveal='out'] {
   opacity: 0;
-  transform: translateY(20px);
+  transform: translateY(14px);
 }
 
 [data-reveal='in'] {
   opacity: 1;
   transform: none;
-  /* Drop the hint once settled so long pages don't hold dozens of layers. */
-  will-change: auto;
-}
-
-/* variant="zoom" (section headlines): starts oversized and settles down to
-   its real size, instead of rising from below. Higher specificity than the
-   plain [data-reveal='out']/['in'] rules above so it wins on the same
-   element. */
-[data-reveal='out'][data-reveal-variant='zoom'] {
-  opacity: 0;
-  transform: scale(1.4);
-}
-
-[data-reveal='in'][data-reveal-variant='zoom'] {
-  opacity: 1;
-  transform: scale(1);
 }
 
 @media (prefers-reduced-motion: reduce) {
   [data-reveal],
-  [data-reveal='out'],
-  [data-reveal='out'][data-reveal-variant='zoom'] {
+  .js [data-reveal='out'] {
     opacity: 1;
     transform: none;
     transition: none;
   }
 }
 
-/* ── Surfaces ──────────────────────────────────────────────────────────────
-   Cards were a bare border over a 4% fill, which reads flat — and in the
-   light theme #ffffff on #fbfaf6 is nearly invisible. `.surface-card` adds
-   the two cues that make a panel feel lit: a soft ambient shadow, and a
-   brighter hairline along the top edge where light would catch. */
-.surface-card {
-  background: var(--surface-card);
-  border: 1px solid var(--border);
-  /* Inset highlight first so it draws inside the radius, then the ambient
-     shadow. An inset shadow rather than a masked pseudo-element — same
-     result, no mask-composite support gap. */
-  box-shadow: inset 0 1px 0 var(--card-highlight), var(--card-shadow);
-}
-
-/* Ambient bloom used behind hero/spotlight devices so they sit in light
-   rather than on flat colour. Sized by the element it's placed in. */
-.ambient-glow {
-  background: radial-gradient(
-    ellipse at center,
-    color-mix(in srgb, var(--accent) 22%, transparent) 0%,
-    transparent 70%
-  );
-}
-
-/* Glow behind the hero copy. --glow-x/--glow-y drive the gradient's
-   center; registering them via @property is what makes the keyframe
-   drift below interpolate smoothly between stops instead of jumping —
-   unregistered custom properties animate as discrete steps. Browsers
-   without @property support just lose the smoothing, not the effect. */
-@property --glow-x {
-  syntax: '<percentage>';
-  inherits: false;
-  initial-value: 30%;
-}
-@property --glow-y {
-  syntax: '<percentage>';
-  inherits: false;
-  initial-value: 20%;
-}
-
-/* Loose circular path so the idle drift reads as "orbiting" rather than
-   bouncing between two points. HeroMouseGlow.tsx toggles `.is-idle` off
-   the instant the pointer moves (killing this animation outright, not
-   just pausing it) so its own inline --glow-x/--glow-y can take over. */
-@keyframes hero-glow-drift {
-  0% {
-    --glow-x: 30%;
-    --glow-y: 20%;
-  }
-  25% {
-    --glow-x: 70%;
-    --glow-y: 15%;
-  }
-  50% {
-    --glow-x: 65%;
-    --glow-y: 50%;
-  }
-  75% {
-    --glow-x: 30%;
-    --glow-y: 45%;
-  }
-  100% {
-    --glow-x: 30%;
-    --glow-y: 20%;
-  }
-}
-
-/* A free-standing circle parked at the pointer — not a gradient painted
-   into a section-sized box.
-
-   It used to be the latter: `background: radial-gradient(600px circle at
-   var(--glow-x) var(--glow-y))` on an `inset-0` element. A background only
-   paints inside its own element, so as soon as the pointer came within
-   ~420px of the hero's top or bottom the circle was sliced off dead
-   straight along that edge — most obvious at the top, where the cut landed
-   right under the header.
-
-   Sizing the element to the glow instead of the section means there is no
-   nearby box edge left to slice it. `left`/`top` keep taking --glow-x and
-   --glow-y as percentages of the section (the offset parent), exactly as
-   before, so the idle drift keyframes and the pointer handler both keep
-   working unchanged. Requires the hero to clip on the x axis only — see
-   Hero.tsx. */
-.hero-mouse-glow {
-  position: absolute;
-  left: var(--glow-x);
-  top: var(--glow-y);
-  /* Twice the old 600px gradient radius, so the falloff below lands in the
-     same place it always did. */
-  width: 1200px;
-  height: 1200px;
-  transform: translate(-50%, -50%);
-  background: radial-gradient(
-    circle,
-    color-mix(in srgb, var(--accent) 16%, transparent) 0%,
-    transparent 70%
-  );
-}
-
-.hero-mouse-glow.is-idle {
-  animation: hero-glow-drift 18s ease-in-out infinite;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .hero-mouse-glow.is-idle {
-    animation: none;
-  }
-}
-
-/* Dock-style magnify for MagnifyText.tsx. Scale is set inline per
-   character on pointermove; this only owns the settle-back transition
-   and the anchor point letters grow from. */
-.magnify-char {
-  transition: transform 0.12s var(--ease-out-soft);
-  transform-origin: bottom center;
-}
-
-/* Interactive polish: everything clickable lifts slightly rather than just
-   dimming. 180ms on a decelerating curve is the standard "responsive but
-   not twitchy" range. */
+/* ── Interaction ───────────────────────────────────────────────────────────
+   Colour and border only. The previous version lifted every clickable thing
+   by a pixel on hover; against flat plinths and hairlines that reads as the
+   page twitching, so the lift is gone and only the tonal change remains. */
 .lift {
   transition:
-    transform 0.18s var(--ease-out-soft),
-    box-shadow 0.18s var(--ease-out-soft),
     background-color 0.18s var(--ease-out-soft),
+    border-color 0.18s var(--ease-out-soft),
+    color 0.18s var(--ease-out-soft),
     opacity 0.18s var(--ease-out-soft);
 }
 
-.lift:hover {
-  transform: translateY(-1px);
+/* ── FAQ accordion ─────────────────────────────────────────────────────────
+   Built on <details>/<summary> so it opens without JavaScript and its answers
+   stay in the DOM for indexing. These rules only remove the default marker
+   and rotate our own chevron. */
+.faq-item summary::-webkit-details-marker {
+  display: none;
 }
 
-.lift:active {
-  transform: translateY(0);
+.faq-item summary {
+  list-style: none;
+  cursor: pointer;
+}
+
+.faq-item[open] .faq-chevron {
+  transform: rotate(180deg);
+}
+
+.faq-chevron {
+  transition: transform 0.2s var(--ease-out-soft);
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .lift,
-  .lift:hover,
-  .lift:active {
-    transform: none;
-    transition: none;
-  }
-}
-
-/* Pointer-follow 3D tilt, used on the pricing cards. --tilt-rx/--tilt-ry
-   are written directly by TiltCard's pointermove handler; the CSS side
-   only owns the perspective, the transform composition, and the
-   settle-back transition when the pointer leaves. */
-.tilt-card {
-  transform: perspective(1000px) rotateX(var(--tilt-rx, 0deg)) rotateY(var(--tilt-ry, 0deg));
-  transition: transform 0.3s var(--ease-out-soft);
-  will-change: transform;
-}
-
-@media (hover: none), (prefers-reduced-motion: reduce) {
-  .tilt-card {
-    transform: none !important;
+  .faq-chevron {
     transition: none;
   }
 }

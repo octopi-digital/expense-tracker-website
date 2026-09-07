@@ -1,310 +1,356 @@
-# Islamic Expense Tracker marketing site — handoff
+# Deenomics marketing site — handoff
 
-Context for picking this up in a fresh conversation. Read
-[README.md](README.md) too — it covers day-to-day usage (adding screenshots,
-regenerating the model). This file covers **why things are the way they are**,
-what is unfinished, and what is waiting on the user.
-
-Working directory: `c:\Jrfin\website`. The React Native app it markets is at
-`c:\Jrfin\expense-tracker-app`.
+Why things are the way they are, what bit us, and what is still open. Read
+[README.md](README.md) for day-to-day usage.
 
 ---
 
-## 1. What this is
+## 1. What happened here
 
-A marketing site for **Islamic Expense Tracker**, a Bangladesh-focused personal finance app
-(net worth, financial health score, goals, Zakat, AI coach, SMS
-auto-detection). Brand: emerald `#106C31`, bright green `#19CC50`, gold
-`#D7A225`, Urbanist. Tokens mirrored into [src/lib/brand.ts](src/lib/brand.ts)
-from the app's `src/constants/theme.js`.
+The site has been rebuilt twice.
 
-Stack: **Next.js 16.3.0** (App Router, Turbopack), Tailwind v4, React Three
-Fiber + drei + three.
+**First pass** replaced a dark-emerald page carrying a scroll-driven WebGL
+phone, sticky-stacked section overlaps, a pointer glow, per-character magnify
+on the `<h1>`, a starfield and pointer-tilt cards. Two things were wrong with
+it, in the user's words: it **looked dated and not premium**, and its
+**structure did not lead anywhere** — every "Get the app" button pointed at
+`#download`, which was the *footer*, so a reader following a call to action
+landed on the copyright line. Zakat, the one thing no competing tracker does,
+had no section of its own.
 
-> ⚠️ `AGENTS.md` in this repo warns that this Next.js version has breaking
-> changes vs. training data. Read `node_modules/next/dist/docs/` before writing
-> framework code. One consequence already bit us: **`dynamic(..., {ssr:false})`
-> only works when declared inside a Client Component**, which is why the canvas
-> boundary lives in `PhoneShowcase`, not `page.tsx`.
+**Second pass** followed [chroniclehq.com](https://chroniclehq.com) as an
+explicit reference, and cut the screenshot count. What the first pass produced
+was clean but still template-shaped: white ground, bold headings, a shadowed
+card around everything, a colour-striped page, and eighteen phone screenshots.
 
----
+Decisions, all explicitly confirmed:
 
-## 2. The centrepiece: scroll-driven 3D phone
-
-One pinned section covers **both** the hero and the product tour. They are not
-two sections — the phone travels continuously from its hero pose into the tour
-poses, which is only possible inside a single WebGL scene.
-
-### Files
-
-| File | Role |
+| | |
 | --- | --- |
-| [src/lib/screens.ts](src/lib/screens.ts) | The script: hero pose + copy, per-beat pose/copy/screenshot. **Edit this to change the tour.** |
-| [PhoneShowcase.tsx](src/components/showcase/PhoneShowcase.tsx) | Pinned section, scroll measurement, copy overlays, theme branches |
-| [StageCanvas.tsx](src/components/showcase/StageCanvas.tsx) | The `<Canvas>`; split out purely so `ssr:false` works |
-| [PhoneStage.tsx](src/components/showcase/PhoneStage.tsx) | Lights + Lightformer environment |
-| [PhoneModel.tsx](src/components/showcase/PhoneModel.tsx) | Model load, material fixes, pose easing, **lens shift** |
-| [ScreenSurface.tsx](src/components/showcase/ScreenSurface.tsx) | Custom shader drawing screenshots on the glass |
-| [transitions.ts](src/components/showcase/transitions.ts) | The per-boundary signature moves and their easing |
-| [scroll-progress.ts](src/components/showcase/scroll-progress.ts) | Position/segment/pan maths |
-| [phone-metrics.ts](src/components/showcase/phone-metrics.ts) | **Measured** screen rectangle — do not eyeball these |
+| Reference | chroniclehq.com |
+| Name | **Deenomics** (Deen + Economics), renamed from Islamic Expense Tracker |
+| 3D phone and heavy scroll effects | **Dropped entirely** |
+| Theme | **Light-only.** No toggle, no dual tokens |
+| Copy | Kept and re-ordered, not rewritten |
+| Languages | English only for now, but all copy lives in `src/content/` so Bangla is a content addition |
 
-### Key decisions, and why
-
-**Scroll progress is a ref, not state.** The scene reads it every frame in
-`useFrame`. Only the copy is React state, and it changes once per beat. Do not
-"simplify" this into state.
-
-**Stops are `[HERO, ...SCREENS]`**, so `STOP_COUNT = SCREENS.length + 1` and the
-section is that many viewports tall. Position 0 = hero, 1..N = beats.
-
-**Motion on the glass is scrolling, never cross-fading.** Two mechanisms in the
-shader: *pan* (window moves down a long capture) and *slide* (next screenshot
-stacks beneath the current one and both push up). Which you get is **inferred**:
-adjacent beats sharing a `src` form a "run" that pans continuously with no seam;
-different `src` produces a slide. The user explicitly asked for this — they
-disliked the original cross-fade.
-
-**Beats are face-on at rest. `rotateY` and `rotateX` are 0 at every stop and
-must stay that way.** The user found the earlier ±9° resting yaw uncomfortable
-— "like I have to see the screen from the right side."
-
-Rotation is therefore something that happens strictly *between* stops. Each
-boundary carries its own signature move (`enter` on the beat, implemented in
-`transitions.ts`), and every one resolves face-on. The user asked for exactly
-this: a 360° spin out of the hero, and a *different* effect on every boundary
-after it.
-
-**Pacing is the thing they are most sensitive to here.** The first build of
-this rushed each move — a steep-centred ease inside a 0.55-viewport window —
-on the theory that hurrying through the unreadable part of a rotation was
-worth it. The user's verdict was immediate and correct: *"the 360 degree effect
-is so fast… it look like mobile just move… i dont feel any smoothness."* Two
-things fixed it, and both should be preserved:
-
-- `VIEWPORTS_PER_STOP` (1.6) gives every stop more than one screen of scroll,
-  so a move owns ~0.8 of a viewport instead of half of one.
-- `glide()` holds a near-constant rate (peak 1.20× average, where the old curve
-  peaked at 1.875×) so angular velocity does not spike mid-turn.
-
-They also caught the overlap: the content pan used to still be running when the
-phone started moving, so a screen was yanked away mid-scroll. `READ_UNTIL`
-now splits each segment — **read first, move second**, never both.
-
-**The tour runs at its own pace, not the scrollbar's.** The user asked for this
-directly: *"no matter how much i scroll fast, effect will remain there natural
-speed."* `PhoneShowcase` damps progress toward the measured scroll position and
-caps the rate at `STOPS_PER_SECOND` (0.7), so a flick cannot fast-forward a
-move.
-
-Two things about this are load-bearing:
-
-- **It damps progress, never the pose.** Pose damping lets a rotation take the
-  short way round, and the 360° roll then never happens at all — the phone
-  eases toward a target that has already come back to where it started. This is
-  the same trap as the `lerp`-on-rotation bug above, in a different costume.
-- **The copy follows the damped value**, not the raw scroll, or a heading
-  appears for a screen still several hundred degrees away.
-
-⚠️ **Known trade-off, not yet judged by the user:** flick the *entire* 9.6
-viewport section past in one gesture and the phone needs ~7 s to finish, by
-which point the sticky container has released and the section has scrolled
-away — so the tour plays to an empty room and the reader misses it. Realistic
-scrolling never does this, but if it proves a problem the fix is a ceiling on
-how far progress may trail (say 1.2 stops), which preserves natural speed
-*within* a transition while stopping the phone falling arbitrarily far behind.
-
-**The barrel roll is two phases, and must stay that way.** It stands the phone
-upright first (`STAND_UP`, 42% of the move), *then* turns it. Blending the
-un-reclining and the turn together — the obvious one-curve implementation —
-resolves yaw, recline and roll simultaneously, and the phone tumbles through a
-diagonal about no particular axis. The user spotted this immediately and asked
-for the standing-up to finish first. It is also why the hero segment skips its
-reading phase (`stopSegmentAt`): with nothing to pan there, handing the whole
-1.6 viewports to the move is what lets both phases breathe (0.67vh standing,
-0.93vh spinning).
-
-Two traps were hit building this, both worth knowing:
-
-- **Do not `lerp` rotation toward the transition's output.** The curves are
-  already eased, so a per-frame follow is not a smoother, it is a lag — and on
-  a 360° roll it is destructive, because the target sweeps a full turn while
-  the follow covers a fraction of it and the spin silently never happens. Worse,
-  how much is lost depends on frame rate. Rotation, scale and lens shift are
-  now driven straight from scroll.
-- **Depth and `scale` are two dials on the same apparent size.** The camera is
-  only 7.2 units out and one phone-height is ~2.6, so a depth offset that looks
-  modest as a number moves the phone a third of the way to the lens. The first
-  push-back spent both hard and shrank the phone to a third of its size.
-
-**Horizontal composition uses a lens shift, not world movement.**
-`PhoneModel` keeps the phone at `x = 0` and calls `camera.setViewOffset()`. This
-matters: under a 30° lens, parking the phone half a half-width right puts it
-~12° off the optical axis, and *perspective alone* turns it away from the viewer
-regardless of its rotation. Shifting the frustum keeps it dead-on. `offsetX` in
-a pose is a lens-shift fraction, not a position.
-
-**The hero pose** is reclined onto its back (`rotateX: -62`, negative = screen
-faces **up**), rolled so the charging port points **left** (`rotateZ: -85`), and
-floats on a slow bob. The user iterated hard on this — do not change it casually.
-
----
-
-## 3. The model
-
-`public/models/phone.glb` (375 KB) is generated from a 33 MB Sketchfab source at
-`assets/phone-raw.glb`, which is **gitignored — the user must keep their own
-copy.**
+The client bundle contains no WebGL code at all — worth re-checking after any
+dependency change:
 
 ```bash
-node scripts/optimize-model.mjs      # raw -> public/models/phone.glb
+grep -rl "WebGLRenderer\|react-three" .next/static/chunks   # expect nothing
 ```
 
-Nearly all the weight was textures (three 4096² PNGs); geometry is only ~280 KB,
-so it is left uncompressed rather than shipping a Draco decoder. The script
-re-encodes textures by hand because `gltf-transform optimize --texture-compress`
-**fails** on these files — Sketchfab exported them without a declared colour
-space and sharp errors with `colourspace: parameter space not set`. The fix is
-forcing `.toColourspace('srgb')` before WebP encode.
-
-If the model is ever replaced, re-run `node scripts/find-screen-rect.mjs` and
-paste its output into `phone-metrics.ts`. It finds the screen by clustering the
-mesh's triangles by normal and taking the largest front-facing plane — the
-screen mesh is not flat, so a bounding box is wrong.
+Both earlier implementations are in git history if any of them is wanted back.
 
 ---
 
-## 4. ⚠️ The verification harness lies unless you let it settle
+## 2. The five ideas the design runs on
 
-`scripts/capture-beats.mjs` drives headless Chromium through the section and
-writes a PNG per beat. **It requires the dev server running.**
+### Display type is set at regular weight
 
-```bash
-npm run dev
-node scripts/capture-beats.mjs .captures 6
+`h1`/`h2`/`h3` are **400**, not 600 or 700. This is the single biggest thing
+separating a considered marketing page from a template one: at 48px the size
+is already carrying the emphasis, and adding weight on top only thickens the
+page. Regular weight at a large size with tight negative tracking (-0.03em,
+scaled down as the type gets smaller) is what reads as editorial. Chronicle
+sets its 54px hero at weight 400; so does this.
+
+### Sections are separated by rules, not by colour
+
+The page holds one ground (`#f3f3f3`) and divides itself with hairlines and
+whitespace. Only two sections leave it — Zakat is `white`, the AI coach is
+`dark` — and that scarcity is exactly what makes those two land. An
+alternating light/dark stripe down a long page reads as unrelated pages
+stapled together.
+
+The previous pass alternated `default` / `alt` on every section. It looked
+fine and meant nothing.
+
+### `Section` owns the palette, not the components
+
+Each `tone` **locally redefines** `--ink`, `--border`, `--surface-card`,
+`--accent` and `--accent-on`. Children just use `var(--ink)` and land the right
+colour for whatever band they are in — which is why no component takes an
+`inverted` prop, and why the same `<Button variant="primary">` is emerald on
+the light ground and bright green on the dark one.
+
+Two consequences worth knowing:
+
+- **`--accent` is a role and gets reassigned. `--emerald` is the literal and
+  never does.** A band that paints itself `bg-[var(--accent)]` while also
+  setting `--accent` on the same element resolves against its own override.
+  That is exactly what happened once: the emerald CTA band set
+  `--accent: #ffffff` for its children and painted itself with
+  `var(--accent)`, rendering a white section with white text.
+- `--accent-on` (the text colour that goes *on* the accent) has to travel with
+  the accent. White on emerald passes AA; white on the bright green is ~1.9:1
+  and does not.
+
+The greys carry **no colour cast**. An earlier version tinted every neutral
+toward the brand green, which meant the emerald never read as an accent — it
+was just the most saturated point on an already-green page.
+
+### All copy is data
+
+`src/content/` holds every user-visible string as typed objects, including the
+screenshot registry with each capture's true pixel dimensions. Components
+import and render; they never contain sentences. Icons are referenced by key
+(`icon: 'analysis'`) and resolved to inline SVG inside the section, so content
+stays translatable without touching markup.
+
+### Colour stays constant, so *form* has to carry the variety
+
+The corollary of the rule above, and it was missed the first time. Holding one
+ground and separating with hairlines is right — but it was then applied so
+uniformly that Zakat's points, AutoCapture's steps, the coach's points,
+Guidance, the feature grid and Setup were all the same object: a hairline, a
+15px title, 14px grey body, in a grid. Six of those in a row and no section
+reads as its own; the page becomes one undifferentiated list and the eye stops
+finding edges.
+
+The fix is not colour — it is giving a section the form its content already
+has:
+
+| Section | Form | Because |
+| --- | --- | --- |
+| Setup | Five markers on a connecting track | It is the one genuinely *ordered* list on the page, so drawing the order is information, not ornament — and "five stops on a short path" is the claim the section makes |
+| Guidance | A full-bleed contents index | Eight guides are a library's contents, and a contents page is the plainest way to say "there is a body of material here" |
+| FeatureGrid | The ruled grid, unchanged | Something has to stay the baseline, and eleven unordered items genuinely are a grid |
+
+**So: reach for a different form before a different colour.** A new section
+still gets `divider` and the default ground (README's rule stands) — but if its
+shape is identical to both neighbours', it will not register no matter how good
+the copy is.
+
+The other constraint that falls out of this: **Setup owns the mono step
+numbers now.** AutoCapture uses them too, but those two are far apart and one
+is a track while the other is a ruled list. A third numbered sequence would
+make all three read as the same component.
+
+---
+
+## 3. The name
+
+**Deenomics** — Deen + Economics. It is a portmanteau, so the page decodes it
+twice: as a small line above the `<h1>`, and again under the footer wordmark
+(`app.meaning` in `lib/brand.ts`). A coined word above the fold that a reader
+cannot unpack is just an unfamiliar noun; unpacked, it is the positioning in
+three words.
+
+The rename touched almost nothing, because the name only ever existed in one
+place — `app.name` in [`src/lib/brand.ts`](src/lib/brand.ts). Everything else
+reads it. Keep it that way.
+
+Two things deliberately **not** renamed:
+
+- **`androidPackage` / `iosBundleId`** stay `com.islamicexpensetracker`. An
+  Android `applicationId` is the app's permanent identity on Play — changing it
+  does not rename a listing, it publishes a different app, and existing
+  installs never receive an update. If those should change it has to happen in
+  the app project, before its first release. The site mirrors whatever the app
+  actually ships.
+- **The logo.** `public/deenomics-icon.png` is the file renamed, not the
+  artwork — it is still the app's own icon. A wordmark or mark drawn for the
+  new name would be an improvement; nobody has supplied one.
+
+`siteUrl`'s fallback moved to `https://deenomics.com`. It was and remains a
+**guess** — the real origin belongs in `NEXT_PUBLIC_SITE_URL`, and the fallback
+only exists so local builds don't crash.
+
+---
+
+## 4. Traps hit while building this
+
+**A component must not bake in a `display` utility.** `Button` originally had
+`inline-flex` in its base classes. The header's `hidden sm:inline-flex` then
+lost — Tailwind cannot dedupe conflicting utilities, so the winner is whichever
+lands later in the generated stylesheet, which the call site does not control.
+The full-size CTA rendered at 390px and pushed the page 16px wide. `Button` now
+takes `display={false}` when the caller owns it.
+
+**The page was blank without JavaScript.** `Reveal` server-renders every
+element as `data-reveal="out"` (opacity 0) and only flips it in a `useEffect`.
+With JS off, all 114 revealed elements — the entire body of the page — stayed
+invisible. Fixed by scoping the *hidden* state to `.js [data-reveal='out']`,
+where the class is added to `<html>` by an inline script in `layout.tsx` before
+first paint. Scoping the hidden state rather than the visible one is what
+avoids a flash. That script is also why `<html>` needs
+`suppressHydrationWarning`.
+
+**Test it, it is easy to regress:**
+
+```js
+await browser.newContext({ javaScriptEnabled: false })
+// expect 0 elements with computed opacity 0
 ```
 
-It originally waited a fixed 1400 ms after each scroll. That produced
-**silently wrong screenshots**: the phone eases toward its pose at a fixed
-fraction *per frame*, and headless Chromium renders WebGL through SwiftShader on
-the CPU at a few FPS. Live values showed target `rotateX 0, rotateY 0` while the
-*applied* rotation was still `x -19°, y -8°, z -26°` — mostly leftover hero pose.
-Several screenshots shown to the user were partly stale, and a diagnosis was
-built on them.
-
-It now polls until two consecutive frames are byte-identical (`settle()`).
-
-`settle()` has now been run and behaves as predicted: beats reach two identical
-frames in **2–3 polls**, while any sample inside the hero's idle bob burns all
-60 and warns. That warning is expected, not a failure — but it costs ~15 s per
-hero sample, which is most of the runtime. Freezing the bob for captures is
-still the obvious improvement.
-
-**A second way this harness lies, learned the hard way:** do not edit anything
-under `src/` while a capture is running. Turbopack hot-reloads mid-run, the
-React tree remounts, `progressRef` resets to 0 while the page stays scrolled,
-and you get frames showing the hero copy with no phone at beat 6. They look
-like real bugs and they are not. The tell is a frame whose copy and pose
-disagree. Let the run finish, *then* edit.
+**A screenshot of a phone is not a phone.** The "everything else" cards once
+showed each device cropped to a 210px strip anchored to the card's bottom edge.
+At that height a 390x844 capture shows one header and half a row, and it reads
+as a broken image. A narrower device shown *complete* costs the same vertical
+space and is legible.
 
 ---
 
-## 5. Current state
+## 5. The screenshot budget
 
-Verified by the user in a browser (earlier sessions):
+**Six pieces of product imagery on the whole page**, down from eighteen:
 
-- Hero: reclined, screen up, port left, floating
-- Light/dark theme system (`useTheme`, `POSE_TRACK_LIGHT`, a light "ledger"
-  composition in `PhoneShowcase`)
+| Section | What |
+| --- | --- |
+| Hero | Home / net worth |
+| Features | Home, and the health score |
+| Zakat | The Zakat breakdown |
+| AutoCapture | The SMS inbox |
+| AICoach | The voice-call clip (poster only until pressed) |
 
-Built but **not yet confirmed by the user on a real browser** — `tsc` and
-`npm run build` pass, and headless captures look right, but nobody has scrolled
-it:
+Everything else — guidance, the eleven-item feature list, the five setup steps,
+the gold rate — is text. This is a rule, not an accident. When every section
+carries a device, none of them mean anything and the page becomes a scroll
+through a photo album of one app; the four screens above are load-bearing
+precisely because they are the only ones.
 
-- **Real screenshots throughout.** The placeholder crops are gone; every beat
-  has its own capture, processed by `scripts/process-screenshots.mjs` from the
-  user's raw folder at `assets/screenshots/` (gitignored working material, not
-  shipped).
-- **Five beats**, alternating sides down the page: Home (right), Transactions
-  (left), Financial health (**centre**, with `flank` stats down the other
-  side), Zakat (right), Gold rate (left).
-- **A different signature move on every boundary** — see §2.
+Three specific images were cut for saying nothing their sentence had not
+already said: the guides library (a device showing eight rows, next to the same
+eight rows set as text), the gold-rate sheet (a whole screenshot to say "you
+can set a rate"), and five near-identical onboarding form screens.
 
-**Placeholder / throwaway:**
+### How a screenshot is mounted, and where it is allowed to be cut
 
-- Everything below the tour is a stub. No nav, feature grid, pricing, FAQ, or
-  footer yet.
+Every one sits on a `Plinth`. With `bleed` it drops its bottom padding, so a
+device taller than the plinth is cut by the edge and reads as continuing below
+the slab.
 
-**Known rough edge:** the gold-rate capture is a `frame` beat whose source had
-the phone's own status bar and a stray WhatsApp notification baked in; that is
-cropped off in `process-screenshots.mjs` (`cropTop`), not in the source file.
+The slab is built from three layers under the content, and each is doing a job:
+
+1. **A khatam motif** — the eight-pointed star of two squares overlaid at 45°,
+   tiled at 5% of the ink colour and masked to fade out before it reaches the
+   device (`.plinth-motif` in globals.css). The plinth is otherwise a plain
+   grey rectangle with a phone in the middle, and the empty thirds either side
+   had nothing to say. It is also the only place the *Deen* half of the name
+   shows up visually. Keep it below legibility: the moment it reads as
+   decoration it competes with the screenshot, which is why it is drawn in the
+   neutral ink and not in the emerald or the gold.
+2. **A light** from the top, so the slab reads as a surface.
+3. **A floor** — a faint darkening toward the bottom, which gives the surface
+   somewhere to recede to and the device's shadow something to fall onto.
+
+**The device is the one thing on the site that carries a real shadow**
+(`--shadow-device`). Cards separate by tone alone, deliberately — but a
+screenshot with only a hairline sits in the same plane as the slab under it and
+reads as a decal printed on the grey rather than an object resting on it.
+
+**The cut is hard, and the crop heights are measured.** An earlier version
+faded it with a scrim in the plinth's colour, on the theory that a soft edge
+makes any crop point look intentional. On a photographic screen it does the
+opposite: the home screenshot's landscape and the white card under it turned to
+a grey smear with a ghost of the card floating in it — it looked like a
+rendering fault. The scrim is gone.
+
+A hard edge is only ugly when it bisects a distinct element. So the fix is not
+to soften the cut but to *put it somewhere*. Every screenshot here is 9:19.5,
+so at a shared render width they all crop at the same rendered y, and the safe
+bands can be found once:
+
+| Where | Plinth `max-h` | Rendered cut | Why there |
+| --- | --- | --- | --- |
+| Hero | 508px | 460 | Home's Income card ends ~446; the white gauge starts ~478 |
+| Features | 400px | 352 | The score screen's alert card ends ~347; home's Income card starts ~366 |
+
+Both are `48px top padding + cut`. **Re-measure before changing either.** These
+were wrong twice from eyeballing: 344 looked clean and was four pixels inside
+the alert card, because a large flat card is just as uniform as background. The
+reliable test is the row's mean *colour* returning to the page background, not
+its uniformity — there is a short script in the transcript, and
+`sharp(file).raw()` plus a per-row mean is all it takes.
+
+The devices are also deliberately **large** — 300px, cropped to roughly their
+top half. A small whole device centred in a wide slab is the worst of both: half
+the plinth is dead grey and the UI inside is too small to read, which defeats
+the only reason to show a screenshot at all.
+
+`src/content/shots.ts` and the pipeline manifest both hold **only the five
+images that render**. A registry is not an archive: an entry nothing renders is
+a `public/` file that ships for no reason. Raw captures for everything else are
+still committed in `assets/screenshots/`.
 
 ---
 
-## 6. Agreed page structure
+## 6. ⚠️ The capture harness lies in two different ways
 
-The 3D tour cannot carry a dozen beats — each costs a full viewport of scroll
-and the WebGL section is expensive on mobile. Agreed shape:
+Both cost real time. Neither is a bug in the site.
 
-1. **3D phone tour — 5 beats.** ✅ Built: Home/net worth, Transactions,
-   Financial health, Zakat, Gold rate. AI Coach joins as a sixth when the
-   recording lands. If the section then feels too long, **Gold Rate is the one
-   to demote** into the feature grid — it is the least essential of the five.
-2. **Feature grid — everything else.** Static CSS phone frames, no WebGL:
-   Islamic guides, security/PIN, profile, currency rate, analysis, goals.
-   Ordinary single-screen shots are fine here.
-3. **Pricing — HTML cards, never screenshots.** Must be readable, indexable, and
-   have working CTAs; a screenshot of a paywall goes stale and converts badly.
-4. **FAQ + footer** — support links, privacy policy, store badges.
+**Fast programmatic scrolling skips reveals.** A tight `scrollTo` loop jumps
+whole elements between two intersection samples, so `IntersectionObserver`
+never fires and screenshots show empty sections. Measured: 400px steps at 40ms
+revealed 10 of 114 elements; 300px steps at 220ms revealed all 114. Scroll at
+human pace before capturing, and verify with a count:
+
+```js
+[...document.querySelectorAll('[data-reveal]')].filter(e => e.dataset.reveal === 'out').length
+```
+
+**Full-page screenshots duplicate content on very tall pages.** At 390px the
+page is ~21,700px tall, and Chrome's stitched `fullPage` capture reproduced the
+hero again two-thirds of the way down. The DOM was correct throughout — one
+`<h1>`, eleven sections, verified by scrolling to the offset and taking a plain
+viewport screenshot, which showed the right content. **If a full-page capture
+shows something impossible, check a viewport capture at that scroll offset
+before believing it.**
 
 ---
 
-## 7. Waiting on the user
+## 7. Open items
 
-**Screenshots — largely delivered.** `assets/screenshots/` now holds real
-captures with realistic demo data (Karim Ahmed, ৳40,23,000 net worth, 32/100
-Improving), covering Home, Transactions, Financial health, Zakat, gold rate,
-currency, Goals, Profile, Islamic guides, Secret Vault, and the add-income /
-add-expense flows. The `Test` account name and ৳0 income problem is resolved.
+**Blocking nothing, but each is a real gap:**
 
-Still outstanding:
+1. **The Play Store URL is still unknown.** `STORE.url` in
+   [`src/content/site.ts`](src/content/site.ts) is `null`, which renders
+   "Coming soon on Google Play" as a non-link. Set it and every CTA on the page
+   becomes a real link — no other change needed.
 
-1. **AI Coach — the one real gap.** The user is recording it, along with the AI
-   voice call. It is the most distinctive feature and a still cannot sell it, so
-   a 5–10s screen recording is worth more than a screenshot. Not currently in
-   the tour; slot it in as its own beat when it lands, which will need a sixth
-   `enter` effect choosing.
-2. A **high-res logo** — wanted for the phone's back (see below), not just the
-   site chrome.
+2. ~~**Pricing displays USD but charges BDT.**~~ **Resolved.** The card now
+   leads with ৳299/mo and carries "≈ $2.45" underneath, so the headline figure
+   is the one actually charged (catalogue currency is fixed to BDT in v1 —
+   server `config/plans.ts`, `sslcommerz.gateway.ts`, IMPLEMENTATION-PLAN
+   decision D6). `USD_DISPLAY_RATE` in `lib/plans.ts` is still a
+   hand-maintained `1/122`; now that it is visibly an approximation, a stale
+   rate is cosmetic drift rather than a wrong price.
 
-**Decided since:** the app is **Android-only**, so the generic Android
-quad-camera model is correct and stays. The user has *not* yet decided whether
-to brand the phone's back. Worth knowing: the body texture is a near-flat dark
-slab whose only detail is the camera cluster and a speaker grille, and the
-barrel roll off the hero is the one moment it is on screen. Branding it in
-emerald with the gold mark would turn that moment into the thing people
-screenshot; leaving it plain is not broken, just anonymous.
+3. **The sign-up copy may be wrong about Apple.** `SETUP_STEPS[0]` says "or
+   continue with Google", and a comment records that the app ships Google
+   sign-in only — but the raw capture
+   (`assets/screenshots/new account/Sign Up.png`) shows a Google **and an
+   Apple** button. The screenshot no longer ships, so nothing contradicts
+   itself on screen any more, but the sentence is still making a claim that
+   one of those two sources says is wrong. Not guessing which.
 
-An older note, now **resolved** — kept only so it is not re-raised: the first
-sample showed Income ৳0 / Savings ৳-1,970 under an account named "Test". The
-replacement captures fixed both.
+4. **Bangla.** The app is Bangla-first and ships four languages; the site is
+   English only. Asked and deferred, not forgotten. `src/content/` is shaped
+   so this is adding files, not reopening components.
 
-**Also outstanding:**
+5. **The AI coach clip is unused.** `public/video/ai-coach.mp4` (2.1 MB) ships
+   but nothing references it — only `ai-voice-call.mp4` is used. The chat side
+   of that section is deliberately text now, so this is very likely a delete;
+   left in place because removing someone's media without being asked is not
+   mine to do.
 
-- App Store / Play Store links, or confirmation to show "Coming soon" (Play
-  Store only — the app is Android-only)
-- Pricing tiers **as text** (names, prices, what is in each)
-- Whether the site should have a **Bangla version** (the app is Bangla-first;
-  this has been asked three times and still not answered)
-- High-res logo, or confirmation to use `expense-tracker-app/src/assets/icon.png`
+**Videos are click-to-play and must stay that way.** The two clips are 2.1 MB
+and 4.0 MB. `VideoPlayer` does not mount the `<video>` element at all until the
+poster is pressed, because `preload="none"` is only a hint and browsers ignore
+it often enough to matter. Verify with:
+
+```js
+performance.getEntriesByType('resource').filter(r => r.name.endsWith('.mp4')).length  // expect 0
+```
 
 ---
 
 ## 8. Working style
 
 The user is **cost-sensitive** and prefers incremental work — do not fan out
-parallel subagents. They iterate rapidly and precisely on visual details, often
-correcting direction (left/right, up/down) across several short messages. When
-they describe a visual problem, **verify against a real render rather than
-reasoning about the maths** — the one time that was skipped, the diagnosis was
-wrong. Equally, check the harness is telling the truth before trusting it.
+parallel subagents. They iterate quickly and precisely on visual details.
+When they describe a visual problem, **verify against a real render rather
+than reasoning about it** — and per §4, check that the render itself is
+telling the truth.
