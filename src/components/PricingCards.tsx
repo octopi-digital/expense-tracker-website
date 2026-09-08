@@ -23,8 +23,10 @@ const bestSaving = Math.max(
 function Check({ featured }: { featured: boolean }) {
   return (
     <span
-      className={`mt-0.5 grid h-4.5 w-4.5 shrink-0 place-items-center rounded-full ${
-        featured ? 'bg-gold/20 text-gold-light' : 'bg-green-tint text-emerald-brand'
+      className={`btn-gloss mt-0.5 grid h-4.5 w-4.5 shrink-0 place-items-center rounded-full ${
+        featured
+          ? 'bg-gold/25 text-gold-light shadow-[inset_0_1px_0_rgba(255,255,255,0.25)]'
+          : 'bg-green-bright/20 text-green-bright shadow-[inset_0_1px_0_rgba(255,255,255,0.18)]'
       }`}
       style={{ height: '1.15rem', width: '1.15rem' }}
     >
@@ -47,7 +49,7 @@ function CycleToggle({
       <div
         role="radiogroup"
         aria-label="Billing period"
-        className="inline-flex items-center gap-1 rounded-full border border-divider bg-white p-1.5 shadow-card"
+        className="glass inline-flex items-center gap-1 rounded-full p-1.5"
       >
         {cycles.map((c) => {
           const active = c === cycle;
@@ -61,14 +63,14 @@ function CycleToggle({
               className={`relative rounded-full px-5 py-2.5 text-[0.95rem] font-bold transition-all duration-300 ${
                 active
                   ? 'bg-emerald-brand text-white shadow-[0_8px_20px_-8px_rgba(16,108,49,0.8)]'
-                  : 'text-slate-body hover:text-ink'
+                  : 'text-slate-body hover:bg-white/10 hover:text-ink'
               }`}
             >
               {billing.cycles[c].label}
               {c === 'yearly' && bestSaving > 0 ? (
                 <span
                   className={`ml-2 rounded-full px-2 py-0.5 text-[0.68rem] font-extrabold ${
-                    active ? 'bg-gold text-emerald-ink' : 'bg-[rgba(215,162,37,0.15)] text-gold-deep'
+                    active ? 'bg-gold text-emerald-ink' : 'bg-[rgba(215,162,37,0.15)] text-gold-light'
                   }`}
                 >
                   save up to {bestSaving}%
@@ -116,8 +118,8 @@ export function PricingCards({
               <div
                 className={`relative flex h-full flex-col rounded-3xl p-6 ${
                   plan.featured
-                    ? 'bg-gradient-to-br from-emerald-deep via-emerald-ink to-emerald-night text-white shadow-lift ring-1 ring-gold/30'
-                    : 'border border-divider bg-white shadow-card'
+                    ? 'glass-emerald glass-hover text-white'
+                    : 'glass glass-hover'
                 }`}
               >
                 {plan.badge ? (
@@ -126,7 +128,7 @@ export function PricingCards({
                   </span>
                 ) : null}
 
-                <h3 className={`text-[1.02rem] font-bold ${plan.featured ? 'text-gold-light' : 'text-emerald-brand'}`}>
+                <h3 className={`text-[1.02rem] font-bold ${plan.featured ? 'text-gold-light' : 'text-green-bright'}`}>
                   {plan.name}
                 </h3>
 
@@ -191,9 +193,9 @@ export function PricingCards({
           <div className="mt-6 grid gap-5 lg:grid-cols-2">
             {extraPlans.map((plan, i) => (
               <Reveal key={plan.id} delay={i * 100} className="h-full">
-                <div className="flex h-full flex-col gap-6 rounded-3xl border border-divider bg-white p-7 shadow-card sm:flex-row sm:items-start">
+                <div className="glass glass-hover flex h-full flex-col gap-6 rounded-3xl p-7 sm:flex-row sm:items-start">
                   <div className="sm:w-[46%] sm:shrink-0">
-                    <p className="text-[0.68rem] font-bold uppercase tracking-widest text-gold-deep">
+                    <p className="text-[0.68rem] font-bold uppercase tracking-widest text-gold-light">
                       {plan.kicker}
                     </p>
                     <h4 className="mt-2 text-[1.3rem] font-extrabold tracking-tight text-ink">{plan.name}</h4>

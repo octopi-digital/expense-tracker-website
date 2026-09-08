@@ -4,13 +4,15 @@ import { Reveal } from '@/components/Reveal';
 export function Eyebrow({ children, tone = 'dark' }: { children: ReactNode; tone?: 'dark' | 'light' }) {
   return (
     <span
-      className={`inline-flex items-center gap-2 rounded-full px-3.5 py-1.5 text-[0.7rem] font-bold uppercase tracking-[0.18em] ${
-        tone === 'light'
-          ? 'bg-white/10 text-gold-light ring-1 ring-inset ring-white/15'
-          : 'bg-green-tint text-emerald-brand ring-1 ring-inset ring-emerald-brand/10'
+      className={`glass-btn relative inline-flex items-center gap-2.5 overflow-hidden rounded-full py-1.5 pl-3 pr-4 text-[0.7rem] font-bold uppercase tracking-[0.2em] ${
+        tone === 'light' ? 'text-gold-light' : 'glass-btn-light text-green-bright'
       }`}
     >
-      <span className="h-1.5 w-1.5 rounded-full bg-current" />
+      {/* Light crossing the pill, then a long rest. */}
+      <span aria-hidden="true" className="pill-sweep" />
+      {/* A lit marker rather than a flat dot: the halo is what stops it
+          reading as a bullet point, and the ring makes it read as live. */}
+      <span className="relative h-1.5 w-1.5 shrink-0 rounded-full bg-current shadow-[0_0_7px_currentColor,0_0_2px_currentColor] after:absolute after:inset-0 after:rounded-full after:bg-current after:animate-pulse-ring" />
       {children}
     </span>
   );

@@ -37,10 +37,10 @@ const bestYearlySaving = Math.max(
 );
 
 const planColumns: { key: keyof Omit<ComparisonRow, 'label'>; label: string; accent: string }[] = [
-  { key: 'free', label: 'Free', accent: 'text-emerald-brand' },
-  { key: 'basic', label: 'Basic', accent: 'text-emerald-brand' },
-  { key: 'premium', label: 'Premium', accent: 'text-emerald-brand' },
-  { key: 'family', label: 'Family', accent: 'text-gold-deep' },
+  { key: 'free', label: 'Free', accent: 'text-green-bright' },
+  { key: 'basic', label: 'Basic', accent: 'text-green-bright' },
+  { key: 'premium', label: 'Premium', accent: 'text-green-bright' },
+  { key: 'family', label: 'Family', accent: 'text-gold-light' },
   { key: 'business', label: 'Business', accent: 'text-slate-body' },
 ];
 
@@ -52,7 +52,7 @@ function Cell({ value, highlight }: { value: string; highlight?: boolean }) {
     return (
       <span
         className={`mx-auto grid h-6 w-6 place-items-center rounded-full ${
-          highlight ? 'bg-gold/20 text-gold-deep' : 'bg-green-tint text-emerald-brand'
+          highlight ? 'bg-gold/20 text-gold-light' : 'bg-green-tint text-green-bright'
         }`}
       >
         <svg viewBox="0 0 24 24" className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth="3.2" strokeLinecap="round" strokeLinejoin="round">
@@ -62,7 +62,7 @@ function Cell({ value, highlight }: { value: string; highlight?: boolean }) {
     );
   }
   return (
-    <span className={`text-[0.85rem] font-semibold ${highlight ? 'text-gold-deep' : 'text-ink'}`}>
+    <span className={`text-[0.85rem] font-semibold ${highlight ? 'text-gold-light' : 'text-ink'}`}>
       {value}
     </span>
   );
@@ -82,22 +82,22 @@ export default function PricingPage() {
         lede={`Tracking your money and calculating your Zakat should not be behind a paywall. They never will be. Everything above Free is optional \u2014 from \u09f3149 a month, with up to ${bestYearlySaving}% off when you pay yearly.`}
       />
 
-      <section className="bg-[#FAFBFB] py-20 sm:py-24">
+      <section className="overflow-hidden pane-tint py-20 sm:py-24">
         <div className="mx-auto max-w-7xl px-5 sm:px-8">
           <PricingCards />
         </div>
       </section>
 
       {/* -------------------------------------------- Comparison table */}
-      <section className="bg-white py-24 sm:py-28">
+      <section className="overflow-hidden pane py-24 sm:py-28">
         <div className="mx-auto max-w-6xl px-5 sm:px-8">
           <SectionHeading eyebrow="Side by side" title="Compare every feature" />
 
           <Reveal delay={100} className="mt-12">
-            <div className="overflow-x-auto rounded-3xl border border-divider shadow-card">
-              <table className="w-full min-w-[54rem] border-collapse bg-white text-left">
+            <div className="glass overflow-x-auto rounded-3xl">
+              <table className="w-full min-w-[54rem] border-collapse text-left">
                 <thead>
-                  <tr className="border-b border-divider bg-[#FAFBFB]">
+                  <tr className="border-b border-white/10 bg-white/[0.06]">
                     <th scope="col" className="px-5 py-5 text-[0.78rem] font-bold uppercase tracking-widest text-slate-body">
                       Feature
                     </th>
@@ -116,7 +116,7 @@ export default function PricingPage() {
                 </thead>
                 <tbody>
                   {planComparison.map((row) => (
-                    <tr key={row.label} className="border-b border-divider last:border-0 transition-colors hover:bg-[#FAFBFB]">
+                    <tr key={row.label} className="border-b border-white/10 transition-colors last:border-0 hover:bg-white/[0.05]">
                       <th scope="row" className="px-5 py-4 text-[0.9rem] font-semibold text-ink">
                         {row.label}
                       </th>
@@ -147,7 +147,7 @@ export default function PricingPage() {
       </section>
 
       {/* ------------------------------------------------------ FAQ */}
-      <section className="bg-[#FAFBFB] py-24 sm:py-28">
+      <section className="overflow-hidden pane-tint py-24 sm:py-28">
         <div className="mx-auto max-w-3xl px-5 sm:px-8">
           <SectionHeading eyebrow="Billing" title="Questions about paying" />
           <Reveal delay={100} className="mt-12">

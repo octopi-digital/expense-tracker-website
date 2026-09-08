@@ -8,10 +8,10 @@ export const site = {
   name: 'Deenomics',
   tagline: 'Deen + Economics',
   /** Update once the domain is live — used for canonical URLs and the sitemap. */
-  url: 'https://deenomics.app',
+  url: 'https://deenomics.com',
   description:
     'Deenomics is the Islamic wealth and expense tracker: automatic transaction capture, Zakat and Sadaqah on autopilot, an AI coach that answers in line with your deen, and goals from Hajj to your first home.',
-  email: 'support@deenomics.app',
+  email: 'support@deenomics.com',
   /** Placeholders — swap for the real listings the day you publish. */
   playStoreUrl: '#',
   appStoreUrl: '#',

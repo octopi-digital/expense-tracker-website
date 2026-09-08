@@ -2,19 +2,77 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { Logo } from '@/components/Logo';
 import { navLinks } from '@/lib/site';
 
 /**
- * The header floats transparently over the dark hero and turns into a solid
- * white bar once the page scrolls, so it stays readable on the light sections
- * further down without needing a per-page variant.
+ * The header floats transparently over the dark hero and turns into a pane
+ * of glass once the page scrolls, so it stays readable on the light sections
+ * further down without needing a per-page variant. The glass is doing real
+ * work here rather than decoration: the content scrolling beneath it stays
+ * visible as colour and movement, which is what tells you the bar is a layer
+ * over the page rather than part of it.
  */
+/**
+ * The brand's eight-point star, reduced to a mark. Same construction as the
+ * <GeometricPattern> ornament — two squares, one turned 45° — so the menu is
+ * built from the site's own geometry rather than a generic dot or underline.
+ */
+function StarMark({ className = '' }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" className={className} fill="none" stroke="currentColor" strokeWidth="2.6" aria-hidden="true">
+      <rect x="5" y="5" width="14" height="14" />
+      <rect x="5" y="5" width="14" height="14" transform="rotate(45 12 12)" />
+    </svg>
+  );
+}
+
 export function Nav() {
   const pathname = usePathname();
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
+
+  // The lens rests on the current page and follows the pointer while it is
+  // over the menu. `null` means there is nothing to point at — an inner page
+  // like /privacy has no nav entry, so the lens stays hidden until hover.
+  const railRef = useRef<HTMLDivElement>(null);
+  const [hovered, setHovered] = useState<string | null>(null);
+  const [lens, setLens] = useState<{ left: number; width: number } | null>(null);
+  // Suppresses the slide on the very first placement, so the lens does not
+  // fly in from the left edge on load.
+  const [settled, setSettled] = useState(false);
+
+  const activeHref = navLinks.some((l) => l.href === pathname) ? pathname : null;
+  const lensTarget = hovered ?? activeHref;
+
+  const measure = useCallback(() => {
+    const rail = railRef.current;
+    // With no target the lens keeps its last position and fades out there,
+    // rather than unmounting and snapping back on the next hover.
+    if (!rail || !lensTarget) return;
+    const el = rail.querySelector<HTMLElement>(`[data-nav="${lensTarget}"]`);
+    if (el) setLens({ left: el.offsetLeft, width: el.offsetWidth });
+  }, [lensTarget]);
+
+  useEffect(() => {
+    measure();
+    const rail = railRef.current;
+    if (!rail) return;
+    // Label widths change when the web font swaps in and when the viewport
+    // resizes, and the lens is positioned from those widths.
+    const ro = new ResizeObserver(measure);
+    ro.observe(rail);
+    document.fonts?.ready.then(measure).catch(() => {});
+    return () => ro.disconnect();
+  }, [measure]);
+
+  // Let the first placement land before enabling the travel transition.
+  useEffect(() => {
+    if (!lens || settled) return;
+    const id = requestAnimationFrame(() => setSettled(true));
+    return () => cancelAnimationFrame(id);
+  }, [lens, settled]);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 24);
@@ -39,7 +97,7 @@ export function Nav() {
   return (
     <header
       className={`fixed inset-x-0 top-0 z-50 transition-all duration-300 ${
-        solid ? 'border-b border-divider bg-white/85 backdrop-blur-xl' : 'border-b border-transparent'
+        solid ? 'glass-rail' : 'border-b border-transparent'
       }`}
     >
       <nav className="mx-auto flex h-[4.5rem] max-w-7xl items-center justify-between px-5 sm:px-8" aria-label="Main">
@@ -47,29 +105,58 @@ export function Nav() {
           <Logo tone={solid ? 'dark' : 'light'} />
         </Link>
 
-        <div className="hidden items-center gap-1 lg:flex">
+        {/* The menu is one capsule of glass with a lens travelling inside it,
+            rather than four separate links. */}
+        <div
+          ref={railRef}
+          onMouseLeave={() => setHovered(null)}
+          className={`relative hidden items-center rounded-full p-1.5 lg:flex ${
+            solid ? 'nav-rail nav-rail-light' : 'nav-rail'
+          }`}
+        >
+          {lens ? (
+            <span
+              aria-hidden="true"
+              className={`nav-lens pointer-events-none absolute inset-y-1.5 rounded-full ${
+                solid ? 'nav-lens-light' : ''
+              }`}
+              style={{
+                left: lens.left,
+                width: lens.width,
+                opacity: lensTarget ? 1 : 0,
+                transition: settled ? undefined : 'none',
+              }}
+            />
+          ) : null}
+
           {navLinks.map((link) => {
             const active = pathname === link.href;
             return (
               <Link
                 key={link.href}
                 href={link.href}
+                data-nav={link.href}
                 aria-current={active ? 'page' : undefined}
-                className={`relative rounded-full px-4 py-2 text-[0.95rem] font-semibold transition-colors ${
+                onMouseEnter={() => setHovered(link.href)}
+                onFocus={() => setHovered(link.href)}
+                onBlur={() => setHovered(null)}
+                className={`relative z-10 rounded-full px-5 py-2 text-[0.95rem] font-semibold transition-colors duration-300 ${
                   solid
                     ? active
-                      ? 'text-emerald-brand'
-                      : 'text-ink/70 hover:text-emerald-brand'
+                      ? 'text-green-bright'
+                      : 'text-ink/70 hover:text-green-bright'
                     : active
                       ? 'text-gold-light'
                       : 'text-white/75 hover:text-white'
                 }`}
               >
                 {link.label}
+                {/* Stays put while the lens is off visiting another item, so
+                    you can always see which page you are actually on. */}
                 {active ? (
-                  <span
-                    className={`absolute inset-x-4 -bottom-0.5 h-0.5 rounded-full ${
-                      solid ? 'bg-emerald-brand' : 'bg-gold-light'
+                  <StarMark
+                    className={`absolute bottom-0.5 left-1/2 h-2 w-2 -translate-x-1/2 ${
+                      solid ? 'text-green-bright/70' : 'text-gold-light/80'
                     }`}
                   />
                 ) : null}
@@ -81,10 +168,10 @@ export function Nav() {
         <div className="flex items-center gap-3">
           <Link
             href="/download"
-            className={`hidden rounded-full px-5 py-2.5 text-[0.95rem] font-bold transition-all duration-300 hover:-translate-y-0.5 sm:inline-flex ${
+            className={`btn-gloss hidden rounded-full px-5 py-2.5 text-[0.95rem] font-bold transition-all duration-300 hover:-translate-y-0.5 sm:inline-flex ${
               solid
-                ? 'bg-emerald-brand text-white shadow-[0_10px_28px_-12px_rgba(16,108,49,0.8)]'
-                : 'bg-gradient-to-r from-gold-light to-gold text-emerald-ink shadow-[0_10px_28px_-12px_rgba(215,162,37,0.8)]'
+                ? 'bg-emerald-brand text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.28),0_10px_28px_-12px_rgba(16,108,49,0.8)]'
+                : 'bg-gradient-to-r from-gold-light to-gold text-emerald-ink shadow-[inset_0_1px_0_rgba(255,255,255,0.5),0_10px_28px_-12px_rgba(215,162,37,0.8)]'
             }`}
           >
             Get the app
@@ -95,8 +182,8 @@ export function Nav() {
             onClick={() => setOpen((v) => !v)}
             aria-expanded={open}
             aria-label={open ? 'Close menu' : 'Open menu'}
-            className={`grid h-10 w-10 place-items-center rounded-full border transition-colors lg:hidden ${
-              solid ? 'border-divider text-ink' : 'border-white/25 text-white'
+            className={`grid h-10 w-10 place-items-center rounded-full transition-all lg:hidden ${
+              solid ? 'glass-btn glass-btn-light text-ink' : 'glass-btn text-white'
             }`}
           >
             <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
@@ -107,20 +194,29 @@ export function Nav() {
       </nav>
 
       {open ? (
-        <div className="border-t border-divider bg-white lg:hidden">
+        <div className="glass-rail border-t border-white/12 lg:hidden">
           <div className="space-y-1 px-5 pb-6 pt-4">
-            {navLinks.map((link) => (
-              <Link
-                key={link.href}
-                href={link.href}
-                className="block rounded-xl px-4 py-3 text-base font-semibold text-ink hover:bg-green-tint hover:text-emerald-brand"
-              >
-                {link.label}
-              </Link>
-            ))}
+            {navLinks.map((link) => {
+              const active = pathname === link.href;
+              return (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  aria-current={active ? 'page' : undefined}
+                  className={`flex items-center justify-between rounded-xl px-4 py-3 text-base font-semibold transition-colors ${
+                    active
+                      ? 'glass-btn glass-btn-light text-green-bright'
+                      : 'text-ink hover:bg-white/10 hover:text-green-bright'
+                  }`}
+                >
+                  {link.label}
+                  {active ? <StarMark className="h-3 w-3 text-green-bright/70" /> : null}
+                </Link>
+              );
+            })}
             <Link
               href="/download"
-              className="mt-3 block rounded-full bg-emerald-brand px-4 py-3.5 text-center text-base font-bold text-white"
+              className="btn-gloss mt-3 block rounded-full bg-emerald-brand px-4 py-3.5 text-center text-base font-bold text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.28)]"
             >
               Get the app
             </Link>

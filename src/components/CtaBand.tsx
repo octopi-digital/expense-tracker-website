@@ -10,14 +10,14 @@ export function CtaBand({
   lede?: string;
 }) {
   return (
-    <section className="relative overflow-hidden bg-emerald-ink pt-24 pb-16 sm:pt-32 sm:pb-20">
+    <section className="relative overflow-hidden pane-ink pt-24 pb-16 sm:pt-32 sm:pb-20">
       <GeometricPattern
         className="mask-fade-bottom pointer-events-none absolute inset-0 h-full w-full"
         opacity={0.09}
         stroke="#FADB8A"
       />
       <div
-        className="pointer-events-none absolute left-1/2 top-1/2 h-[30rem] w-[52rem] -translate-x-1/2 -translate-y-1/2 rounded-full blur-3xl"
+        className="pointer-events-none absolute left-1/2 top-1/2 h-[30rem] w-[52rem] -translate-x-1/2 -translate-y-1/2 rounded-full"
         style={{ background: 'radial-gradient(circle, rgba(25,204,80,0.18), transparent 70%)' }}
       />
 

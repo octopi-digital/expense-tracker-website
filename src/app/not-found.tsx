@@ -3,7 +3,7 @@ import { GeometricPattern, Ornament } from '@/components/Pattern';
 
 export default function NotFound() {
   return (
-    <section className="relative flex min-h-screen items-center overflow-hidden bg-gradient-to-br from-emerald-deep via-emerald-ink to-emerald-night py-32">
+    <section className="relative flex min-h-screen items-center overflow-hidden pane-deep py-32">
       <GeometricPattern className="pointer-events-none absolute inset-0 h-full w-full" opacity={0.08} stroke="#FADB8A" />
       <div className="relative mx-auto max-w-2xl px-5 text-center sm:px-8">
         <p className="text-[5rem] font-extrabold leading-none tracking-tight text-gradient-gold sm:text-[7rem]">404</p>

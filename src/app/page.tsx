@@ -42,15 +42,15 @@ export default function HomePage() {
   return (
     <>
       {/* ---------------------------------------------------------- Hero */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-emerald-deep via-emerald-ink to-emerald-night pb-24 pt-32 sm:pb-32 sm:pt-40">
+      <section className="relative overflow-hidden pane-deep pb-24 pt-32 sm:pb-32 sm:pt-40">
         <GeometricPattern className="pointer-events-none absolute inset-0 h-full w-full" opacity={0.09} stroke="#FADB8A" />
         <div className="bg-grid pointer-events-none absolute inset-0 opacity-40" />
         <div
-          className="pointer-events-none absolute -left-40 top-10 h-[34rem] w-[34rem] rounded-full blur-3xl"
+          className="pointer-events-none absolute -left-40 top-10 h-[34rem] w-[34rem] rounded-full"
           style={{ background: 'radial-gradient(circle, rgba(25,204,80,0.22), transparent 70%)' }}
         />
         <div
-          className="pointer-events-none absolute -right-32 bottom-0 h-[28rem] w-[28rem] rounded-full blur-3xl"
+          className="pointer-events-none absolute -right-32 bottom-0 h-[28rem] w-[28rem] rounded-full"
           style={{ background: 'radial-gradient(circle, rgba(215,162,37,0.16), transparent 70%)' }}
         />
 
@@ -121,9 +121,15 @@ export default function HomePage() {
         {/* Stat strip */}
         <div className="relative mx-auto mt-20 max-w-7xl px-5 sm:px-8">
           <Reveal>
-            <dl className="grid grid-cols-2 gap-px overflow-hidden rounded-3xl border border-white/10 bg-white/10 lg:grid-cols-4">
+            {/* Hairlines are drawn per-cell rather than with a gap, so the four
+                stats share one uninterrupted pane of glass: two columns on
+                mobile, four from lg. */}
+            <dl className="glass-dark grid grid-cols-2 overflow-hidden rounded-3xl lg:grid-cols-4">
               {stats.map((stat) => (
-                <div key={stat.label} className="bg-emerald-night/70 px-6 py-7 text-center backdrop-blur">
+                <div
+                  key={stat.label}
+                  className="border-white/10 px-6 py-7 text-center [&:nth-child(even)]:border-l [&:nth-child(n+3)]:border-t lg:[&:nth-child(n+2)]:border-l lg:[&:nth-child(n+3)]:border-t-0"
+                >
                   <dt className="sr-only">{stat.label}</dt>
                   <dd>
                     <span className="block text-3xl font-extrabold tracking-tight text-gold-light">{stat.value}</span>
@@ -137,7 +143,7 @@ export default function HomePage() {
       </section>
 
       {/* ------------------------------------------------------- Marquee */}
-      <section className="border-y border-divider bg-white py-5" aria-hidden="true">
+      <section className="border-y border-ink/[0.06] pane-tint py-5" aria-hidden="true">
         <div className="mask-fade-edges flex overflow-hidden">
           <div className="animate-marquee flex shrink-0 items-center gap-10 pr-10">
             {[...marqueeItems, ...marqueeItems].map((item, i) => (
@@ -156,14 +162,14 @@ export default function HomePage() {
       </section>
 
       {/* ------------------------------------------------------ Features */}
-      <section className="relative bg-[#FAFBFB] py-24 sm:py-32">
+      <section className="relative overflow-hidden pane-tint py-24 sm:py-32">
         <div className="mx-auto max-w-7xl px-5 sm:px-8">
           <FeatureIndex />
         </div>
       </section>
 
       {/* -------------------------------------------- Auto-capture split */}
-      <section className="overflow-hidden bg-white py-24 sm:py-32">
+      <section className="overflow-hidden pane py-24 sm:py-32">
         <div className="mx-auto grid max-w-7xl items-center gap-16 px-5 sm:px-8 lg:grid-cols-2">
           <Reveal className="flex justify-center lg:justify-start">
             <PhoneFrame glow={false} className="lg:sticky lg:top-28">
@@ -209,10 +215,10 @@ export default function HomePage() {
       </section>
 
       {/* --------------------------------------------- Zakat spotlight */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-[#5C4210] via-emerald-ink to-emerald-night py-24 sm:py-32">
+      <section className="relative overflow-hidden pane-gold py-24 sm:py-32">
         <GeometricPattern className="pointer-events-none absolute inset-0 h-full w-full" opacity={0.1} stroke="#FADB8A" />
         <div
-          className="pointer-events-none absolute right-0 top-1/4 h-[30rem] w-[30rem] rounded-full blur-3xl"
+          className="pointer-events-none absolute right-0 top-1/4 h-[30rem] w-[30rem] rounded-full"
           style={{ background: 'radial-gradient(circle, rgba(215,162,37,0.22), transparent 70%)' }}
         />
 
@@ -239,12 +245,24 @@ export default function HomePage() {
                   { k: 'Assets', v: 'Cash, gold, stock, property', i: 'M4 20h16v2H4v-2ZM5 11h3v8H5v-8Zm5.5-5h3v13h-3V6ZM16 9h3v10h-3V9Z' },
                   { k: 'Vault', v: 'PIN-locked and private', i: 'M17 9V7a5 5 0 0 0-10 0v2H5v13h14V9h-2Zm-8-2a3 3 0 0 1 6 0v2H9V7Z' },
                 ].map((item) => (
-                  <div key={item.k} className="rounded-2xl border border-white/10 bg-white/[0.04] p-5 backdrop-blur transition-colors hover:border-gold/35">
-                    <svg viewBox="0 0 24 24" className="h-6 w-6 text-gold-light" fill="currentColor">
-                      <path d={item.i} />
-                    </svg>
-                    <p className="mt-4 text-[0.7rem] font-bold uppercase tracking-widest text-gold-light/70">{item.k}</p>
-                    <p className="mt-1.5 text-[0.98rem] font-semibold text-white">{item.v}</p>
+                  /* Header row, rule, then the value — rather than a bare glyph
+                     floating above two stacked lines with a hole between them. */
+                  <div key={item.k} className="glass-dark glass-hover rounded-2xl p-5">
+                    <div className="flex items-center gap-3">
+                      <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-gold/[0.20] text-gold-light ring-1 ring-inset ring-gold/35">
+                        <svg viewBox="0 0 24 24" className="h-[1.15rem] w-[1.15rem]" fill="currentColor">
+                          <path d={item.i} />
+                        </svg>
+                      </span>
+                      <span className="text-[0.68rem] font-bold uppercase tracking-[0.2em] text-gold-light/80">
+                        {item.k}
+                      </span>
+                    </div>
+                    <span
+                      aria-hidden="true"
+                      className="mt-4 block h-px w-full bg-gradient-to-r from-white/20 via-white/8 to-transparent"
+                    />
+                    <p className="mt-3.5 text-[1.02rem] font-semibold leading-snug text-white">{item.v}</p>
                   </div>
                 ))}
               </div>
@@ -269,7 +287,7 @@ export default function HomePage() {
       </section>
 
       {/* --------------------------------------------------- AI spotlight */}
-      <section className="overflow-hidden bg-white py-24 sm:py-32">
+      <section className="overflow-hidden pane py-24 sm:py-32">
         <div className="mx-auto grid max-w-7xl items-center gap-16 px-5 sm:px-8 lg:grid-cols-2">
           <div className="order-2 lg:order-1">
             <SectionHeading
@@ -294,10 +312,10 @@ export default function HomePage() {
                 ].map((q) => (
                   <div
                     key={q}
-                    className="flex items-center gap-3 rounded-2xl border border-divider bg-[#FAFBFB] px-5 py-4 transition-colors hover:border-lavender/40 hover:bg-white"
+                    className="glass flex items-center gap-3.5 rounded-2xl px-5 py-4 transition-colors hover:border-lavender-bright/50"
                   >
-                    <span className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-[rgba(101,95,238,0.1)]">
-                      <svg viewBox="0 0 24 24" className="h-3.5 w-3.5 text-lavender" fill="currentColor">
+                    <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-lavender-bright/[0.18] ring-1 ring-inset ring-lavender-bright/35">
+                      <svg viewBox="0 0 24 24" className="h-4 w-4 text-lavender-bright" fill="currentColor">
                         <path d="M12 2.5 13.7 8 19 9.7 13.7 11.4 12 17l-1.7-5.6L5 9.7 10.3 8 12 2.5Z" />
                       </svg>
                     </span>
@@ -323,7 +341,7 @@ export default function HomePage() {
       </section>
 
       {/* ------------------------------------------------- Islamic guide */}
-      <section className="relative overflow-hidden bg-emerald-ink py-24 sm:py-32">
+      <section className="relative overflow-hidden pane-ink py-24 sm:py-32">
         <GeometricPattern className="pointer-events-none absolute inset-0 h-full w-full" opacity={0.07} />
         <div className="relative mx-auto max-w-7xl px-5 sm:px-8">
           <SectionHeading
@@ -341,7 +359,7 @@ export default function HomePage() {
           <div className="mt-14 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {guideTopics.map((topic, i) => (
               <Reveal key={topic.title} delay={i * 70}>
-                <div className="group h-full rounded-2xl border border-white/12 bg-white/[0.055] p-6 transition-all duration-300 hover:-translate-y-1 hover:border-gold/40 hover:bg-white/[0.09]">
+                <div className="glass-dark glass-hover group h-full rounded-2xl p-6">
                   <h3 className="flex items-center gap-2.5 text-[1.05rem] font-bold text-white">
                     <svg viewBox="0 0 24 24" className="h-4 w-4 shrink-0 text-gold" fill="none" stroke="currentColor" strokeWidth="1.5">
                       <rect x="5" y="5" width="14" height="14" />
@@ -373,7 +391,7 @@ export default function HomePage() {
       </section>
 
       {/* ---------------------------------------------------- How it works */}
-      <section className="bg-[#FAFBFB] py-24 sm:py-32">
+      <section className="overflow-hidden pane-tint py-24 sm:py-32">
         <div className="mx-auto max-w-7xl px-5 sm:px-8">
           <SectionHeading
             eyebrow="Getting started"
@@ -388,7 +406,7 @@ export default function HomePage() {
       </section>
 
       {/* ------------------------------------------------------- Pricing */}
-      <section className="bg-white py-24 sm:py-32">
+      <section className="overflow-hidden pane py-24 sm:py-32">
         <div className="mx-auto max-w-7xl px-5 sm:px-8">
           <SectionHeading
             eyebrow="Pricing"
@@ -401,7 +419,7 @@ export default function HomePage() {
           <Reveal delay={140}>
             <p className="mt-10 text-center text-[0.95rem] text-slate-body">
               Want the full breakdown?{' '}
-              <Link href="/pricing" className="font-bold text-emerald-brand underline decoration-emerald-brand/30 underline-offset-4 hover:decoration-emerald-brand">
+              <Link href="/pricing" className="font-bold text-green-bright underline decoration-green-bright/40 underline-offset-4 hover:decoration-green-bright">
                 Compare every feature
               </Link>
             </p>
@@ -410,7 +428,7 @@ export default function HomePage() {
       </section>
 
       {/* ----------------------------------------------------------- FAQ */}
-      <section className="bg-[#FAFBFB] py-24 sm:py-32">
+      <section className="overflow-hidden pane-tint py-24 sm:py-32">
         <div className="mx-auto max-w-3xl px-5 sm:px-8">
           <SectionHeading eyebrow="Questions" title="Things people ask first" />
           <Reveal delay={100} className="mt-12">
@@ -419,11 +437,11 @@ export default function HomePage() {
           <Reveal delay={160}>
             <p className="mt-8 text-center text-[0.95rem] text-slate-body">
               Still stuck?{' '}
-              <Link href="/support" className="font-bold text-emerald-brand underline decoration-emerald-brand/30 underline-offset-4 hover:decoration-emerald-brand">
+              <Link href="/support" className="font-bold text-green-bright underline decoration-green-bright/40 underline-offset-4 hover:decoration-green-bright">
                 Talk to support
               </Link>{' '}
               or email{' '}
-              <a href={`mailto:${site.email}`} className="font-bold text-emerald-brand underline decoration-emerald-brand/30 underline-offset-4 hover:decoration-emerald-brand">
+              <a href={`mailto:${site.email}`} className="font-bold text-green-bright underline decoration-green-bright/40 underline-offset-4 hover:decoration-green-bright">
                 {site.email}
               </a>
               .

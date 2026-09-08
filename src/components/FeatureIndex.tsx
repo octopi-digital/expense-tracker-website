@@ -12,11 +12,13 @@ import { features, type Feature } from '@/lib/site';
  */
 
 const accents: Record<Feature['accent'], { hex: string; tint: string; icon: string }> = {
-  green: { hex: '#106C31', tint: 'rgba(16,108,49,0.05)', icon: 'from-emerald-brand to-green-bright' },
-  gold: { hex: '#A4731D', tint: 'rgba(215,162,37,0.07)', icon: 'from-gold-deep to-gold' },
-  blue: { hex: '#1E5FC4', tint: 'rgba(46,125,247,0.05)', icon: 'from-[#1E5FC4] to-savings' },
-  lavender: { hex: '#4A3FD0', tint: 'rgba(101,95,238,0.05)', icon: 'from-[#3C2FA8] to-lavender' },
-  orange: { hex: '#B87503', tint: 'rgba(240,157,5,0.06)', icon: 'from-[#B87503] to-expense' },
+  /* Bright variants: these sit on the dark world, where the original
+     light-background hexes fell to ~3:1. */
+  green: { hex: '#3FE07E', tint: 'rgba(25,204,80,0.10)', icon: 'from-emerald-brand to-green-bright' },
+  gold: { hex: '#F2C660', tint: 'rgba(215,162,37,0.12)', icon: 'from-gold-deep to-gold' },
+  blue: { hex: '#7FB4FF', tint: 'rgba(46,125,247,0.10)', icon: 'from-[#1E5FC4] to-savings' },
+  lavender: { hex: '#A9A4FF', tint: 'rgba(101,95,238,0.10)', icon: 'from-[#3C2FA8] to-lavender' },
+  orange: { hex: '#FFB74D', tint: 'rgba(240,157,5,0.11)', icon: 'from-[#B87503] to-expense' },
 };
 
 const icons: Record<string, React.ReactNode> = {
@@ -44,10 +46,14 @@ function Row({
       className="group relative grid grid-cols-[auto_1fr] gap-x-5 gap-y-4 border-t border-divider py-8 transition-colors duration-300 sm:gap-x-8 sm:py-9 lg:grid-cols-[auto_1fr_auto] lg:items-center"
       style={{ ['--accent' as string]: accent.hex, ['--tint' as string]: accent.tint }}
     >
-      {/* Accent wash and left rule, both revealed on hover. */}
+      {/* Accent wash and left rule, both revealed on hover. The wash is a
+          pane of glass rather than a flat tint, so a row lights up in the
+          same material as the cards elsewhere on the page — the index keeps
+          its hairline layout at rest and only becomes a surface under the
+          cursor. */}
       <span
         aria-hidden="true"
-        className="pointer-events-none absolute inset-x-[-1.25rem] inset-y-0 -z-10 rounded-2xl bg-[color:var(--tint)] opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+        className="pointer-events-none absolute inset-x-[-1.25rem] inset-y-0 -z-10 rounded-2xl bg-[color:var(--tint)] opacity-0 shadow-[inset_0_1px_0_rgba(255,255,255,0.28),0_16px_36px_-18px_rgba(2,18,10,0.5)] ring-1 ring-inset ring-white/20 transition-opacity group-hover:backdrop-blur-md duration-300 group-hover:opacity-100"
       />
       <span
         aria-hidden="true"
@@ -55,7 +61,7 @@ function Row({
       />
 
       {/* The index number is the anchor of the whole layout. */}
-      <span className="select-none self-start text-[2.4rem] font-extrabold leading-none tracking-tight text-ink/[0.13] tabular-nums transition-colors duration-300 group-hover:text-[color:var(--accent)] sm:text-[3rem] lg:self-center">
+      <span className="select-none self-start text-[2.4rem] font-extrabold leading-none tracking-tight text-ink/38 tabular-nums transition-colors duration-300 group-hover:text-[color:var(--accent)] sm:text-[3rem] lg:self-center">
         {String(index + 1).padStart(2, '0')}
       </span>
 
@@ -82,7 +88,7 @@ function Row({
           than flowing after the tags, where it read as a stray square. */}
       <div className="absolute right-0 top-8 flex items-center gap-4 sm:top-9 lg:static lg:col-start-3 lg:flex-col-reverse lg:gap-3">
         <span
-          className={`grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-gradient-to-br ${accent.icon} shadow-[0_10px_24px_-12px_rgba(15,23,42,0.55)] transition-transform duration-300 group-hover:scale-105`}
+          className={`btn-gloss grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-gradient-to-br ${accent.icon} shadow-[inset_0_1px_0_rgba(255,255,255,0.35),0_10px_24px_-12px_rgba(15,23,42,0.55)] transition-transform duration-300 group-hover:scale-105`}
         >
           <svg viewBox="0 0 24 24" className="h-6 w-6 text-white" fill="currentColor">
             {icons[feature.slug]}

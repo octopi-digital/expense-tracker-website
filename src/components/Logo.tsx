@@ -53,7 +53,7 @@ export function Logo({
         </span>
         <span
           className={`mt-1 text-[0.62rem] font-semibold uppercase tracking-[0.22em] ${
-            tone === 'light' ? 'text-gold-light/80' : 'text-gold-deep'
+            tone === 'light' ? 'text-gold-light/80' : 'text-gold-light'
           }`}
         >
           Deen + Economics

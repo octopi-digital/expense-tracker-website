@@ -21,7 +21,7 @@ export default function TermsPage() {
         lede={`The agreement between you and ${site.name}. Last updated ${UPDATED}.`}
       />
 
-      <section className="bg-white py-20 sm:py-24">
+      <section className="overflow-hidden pane py-20 sm:py-24">
         <div className="mx-auto max-w-3xl px-5 sm:px-8">
           <Prose>
             <p>

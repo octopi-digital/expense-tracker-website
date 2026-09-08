@@ -58,7 +58,7 @@ export default function DownloadPage() {
       </PageHero>
 
       {/* ---------------------------------------------- QR + device */}
-      <section className="bg-white py-24 sm:py-28">
+      <section className="overflow-hidden pane py-24 sm:py-28">
         <div className="mx-auto grid max-w-6xl items-center gap-16 px-5 sm:px-8 lg:grid-cols-2">
           <Reveal className="flex justify-center lg:justify-start">
             <PhoneFrame glow={false}>
@@ -74,9 +74,12 @@ export default function DownloadPage() {
               lede="No feature is locked behind a waiting period. Set your baseline and the app starts working the same day."
             />
             <Reveal delay={120}>
-              <dl className="mt-9 grid gap-px overflow-hidden rounded-2xl border border-divider bg-divider sm:grid-cols-2">
+              <dl className="glass mt-9 grid overflow-hidden rounded-2xl sm:grid-cols-2">
                 {requirements.map((r) => (
-                  <div key={r.k} className="bg-white px-6 py-5">
+                  <div
+                    key={r.k}
+                    className="border-white/10 px-6 py-5 [&:not(:first-child)]:border-t sm:[&:nth-child(even)]:border-l sm:[&:nth-child(2)]:border-t-0"
+                  >
                     <dt className="text-[0.72rem] font-bold uppercase tracking-widest text-slate-body">{r.k}</dt>
                     <dd className="mt-1.5 text-[1.02rem] font-bold text-ink">{r.v}</dd>
                   </div>
@@ -86,7 +89,7 @@ export default function DownloadPage() {
             <Reveal delay={180}>
               <p className="mt-7 text-[0.95rem] leading-relaxed text-slate-body">
                 Not seeing the app in your region yet? Email{' '}
-                <a href={`mailto:${site.email}`} className="font-bold text-emerald-brand underline decoration-emerald-brand/30 underline-offset-4 hover:decoration-emerald-brand">
+                <a href={`mailto:${site.email}`} className="font-bold text-green-bright underline decoration-green-bright/40 underline-offset-4 hover:decoration-green-bright">
                   {site.email}
                 </a>{' '}
                 and we will tell you the moment it lands.
@@ -97,7 +100,7 @@ export default function DownloadPage() {
       </section>
 
       {/* -------------------------------------------- Permissions */}
-      <section className="relative overflow-hidden bg-emerald-ink py-24 sm:py-28">
+      <section className="relative overflow-hidden pane-ink py-24 sm:py-28">
         <GeometricPattern className="pointer-events-none absolute inset-0 h-full w-full" opacity={0.07} stroke="#FADB8A" />
         <div className="relative mx-auto max-w-5xl px-5 sm:px-8">
           <SectionHeading
@@ -110,7 +113,7 @@ export default function DownloadPage() {
           <div className="mt-14 grid gap-4 sm:grid-cols-2">
             {permissions.map((p, i) => (
               <Reveal key={p.t} delay={i * 80}>
-                <div className="h-full rounded-2xl border border-white/10 bg-white/[0.03] p-6">
+                <div className="glass-dark glass-hover h-full rounded-2xl p-6">
                   <h3 className="text-[1.08rem] font-extrabold text-white">{p.t}</h3>
                   <p className="mt-2.5 text-[0.93rem] leading-relaxed text-white/55">{p.d}</p>
                 </div>

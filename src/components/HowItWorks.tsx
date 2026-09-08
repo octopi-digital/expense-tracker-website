@@ -9,10 +9,16 @@ import { Reveal } from '@/components/Reveal';
 
 function StageFrame({ children }: { children: React.ReactNode }) {
   return (
-    <div className="relative flex h-[196px] items-center justify-center overflow-hidden rounded-2xl bg-gradient-to-br from-[#F4F7F5] to-[#FAFBFB] px-4 ring-1 ring-inset ring-divider/70">
+    <div className="relative flex h-[196px] items-center justify-center overflow-hidden rounded-2xl bg-gradient-to-br from-[#EDF4EF] to-[#FBFCFB] px-4 shadow-[inset_0_2px_8px_rgba(2,18,10,0.35),0_0_0_1px_rgba(255,255,255,0.22)] px-4">
+      {/* Two colour sources inside the well, so the mini screens sitting on
+          it are lit rather than floating on flat grey. */}
       <div
-        className="pointer-events-none absolute -right-10 -top-10 h-28 w-28 rounded-full blur-2xl"
-        style={{ background: 'radial-gradient(circle, rgba(25,204,80,0.16), transparent 70%)' }}
+        className="pointer-events-none absolute -right-10 -top-10 h-28 w-28 rounded-full"
+        style={{ background: 'radial-gradient(circle, rgba(25,204,80,0.20), transparent 70%)' }}
+      />
+      <div
+        className="pointer-events-none absolute -bottom-12 -left-8 h-24 w-24 rounded-full"
+        style={{ background: 'radial-gradient(circle, rgba(215,162,37,0.16), transparent 70%)' }}
       />
       {children}
     </div>
@@ -29,18 +35,18 @@ function BaselineStage() {
   return (
     <StageFrame>
       <div className="w-full max-w-[212px] rounded-xl bg-white p-3.5 shadow-card">
-        <p className="text-[0.55rem] font-bold uppercase tracking-[0.16em] text-slate-body">
+        <p className="text-[0.55rem] font-bold uppercase tracking-[0.16em] text-body-app">
           Your baseline
         </p>
         <div className="mt-2.5 space-y-2">
           {rows.map((r) => (
             <div key={r.label} className="flex items-center justify-between gap-2">
-              <span className="text-[0.62rem] text-slate-body">{r.label}</span>
-              <span className="text-[0.66rem] font-bold text-ink">{r.value}</span>
+              <span className="text-[0.62rem] text-body-app">{r.label}</span>
+              <span className="text-[0.66rem] font-bold text-ink-app">{r.value}</span>
             </div>
           ))}
         </div>
-        <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-card">
+        <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-card-app">
           <div className="h-full w-full rounded-full bg-gradient-to-r from-emerald-brand to-green-bright" />
         </div>
         <p className="mt-2 flex items-center gap-1.5 text-[0.58rem] font-bold text-emerald-brand">
@@ -79,13 +85,13 @@ function CaptureStage() {
 
         <div className="flex items-center justify-between gap-2 rounded-xl bg-white px-3 py-2.5 shadow-card">
           <span className="flex items-center gap-1.5">
-            <span className="rounded bg-green-tint px-1.5 py-0.5 text-[0.48rem] font-bold text-emerald-brand">
+            <span className="rounded bg-tint-app px-1.5 py-0.5 text-[0.48rem] font-bold text-emerald-brand">
               Groceries
             </span>
-            <span className="text-[0.68rem] font-extrabold text-ink">৳2,450</span>
+            <span className="text-[0.68rem] font-extrabold text-ink-app">৳2,450</span>
           </span>
           <span className="flex gap-1.5">
-            <span className="grid h-5 w-5 place-items-center rounded-full bg-card text-[0.55rem] text-slate-body">✕</span>
+            <span className="grid h-5 w-5 place-items-center rounded-full bg-card-app text-[0.55rem] text-body-app">✕</span>
             <span className="grid h-5 w-5 place-items-center rounded-full bg-emerald-brand text-[0.55rem] text-white">✓</span>
           </span>
         </div>
@@ -102,12 +108,12 @@ function ResultStage() {
         <div className="flex items-center gap-2.5 rounded-xl bg-white p-2.5 shadow-card">
           <HealthGauge value={78} size={52} label="Growing" showLabel={false} />
           <div>
-            <p className="text-[0.62rem] font-bold text-ink">Financial health</p>
+            <p className="text-[0.62rem] font-bold text-ink-app">Financial health</p>
             <p className="mt-1 flex items-center gap-1.5">
-              <span className="rounded-full bg-green-tint px-1.5 py-0.5 text-[0.48rem] font-bold text-emerald-brand">
+              <span className="rounded-full bg-tint-app px-1.5 py-0.5 text-[0.48rem] font-bold text-emerald-brand">
                 Growing
               </span>
-              <span className="text-[0.55rem] text-slate-body">up 6 this month</span>
+              <span className="text-[0.55rem] text-body-app">up 6 this month</span>
             </p>
           </div>
         </div>
@@ -118,7 +124,7 @@ function ResultStage() {
               45 days
             </span>
           </div>
-          <p className="mt-1 text-[0.78rem] font-extrabold text-ink">৳ 12,066</p>
+          <p className="mt-1 text-[0.78rem] font-extrabold text-ink-app">৳ 12,066</p>
           <div className="mt-1.5 h-1 overflow-hidden rounded-full bg-gold/15">
             <div className="h-full w-[62%] rounded-full bg-gradient-to-r from-gold-light to-gold" />
           </div>
@@ -154,7 +160,7 @@ function StepArrow() {
   return (
     <span
       aria-hidden="true"
-      className="absolute -right-[1.35rem] top-[7.2rem] z-10 hidden h-9 w-9 place-items-center rounded-full border border-divider bg-white text-emerald-brand shadow-card lg:grid"
+      className="glass absolute -right-[1.35rem] top-[7.2rem] z-10 hidden h-9 w-9 place-items-center rounded-full text-green-bright lg:grid"
     >
       <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round">
         <path d="M5 12h13m-5-6 6 6-6 6" />
@@ -168,7 +174,7 @@ export function HowItWorks() {
     <ol className="grid gap-6 lg:grid-cols-3">
       {steps.map((step, i) => (
         <Reveal key={step.n} delay={i * 110} as="li" className="relative h-full list-none">
-          <div className="group flex h-full flex-col rounded-3xl border border-divider bg-white p-5 shadow-card transition-all duration-400 hover:-translate-y-1.5 hover:border-emerald-brand/20 hover:shadow-lift">
+          <div className="glass glass-hover group flex h-full flex-col rounded-3xl p-5">
             {step.stage}
 
             <div className="flex flex-1 flex-col p-2 pt-5">

@@ -1,19 +1,23 @@
 import Link from 'next/link';
 import type { ComponentProps, ReactNode } from 'react';
 
-type Variant = 'primary' | 'gold' | 'ghost' | 'outline';
+type Variant = 'primary' | 'gold' | 'ghost' | 'outline' | 'glass';
 
 const base =
   'inline-flex items-center justify-center gap-2 rounded-full font-semibold transition-all duration-300 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green-bright';
 
 const variants: Record<Variant, string> = {
   primary:
-    'bg-emerald-brand text-white shadow-[0_10px_30px_-10px_rgba(16,108,49,0.7)] hover:bg-green-link hover:shadow-[0_16px_40px_-12px_rgba(25,204,80,0.65)] hover:-translate-y-0.5',
+    'btn-gloss bg-emerald-brand text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.28),inset_0_-2px_0_rgba(0,0,0,0.12),0_10px_30px_-10px_rgba(16,108,49,0.7)] hover:bg-green-link hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.34),inset_0_-2px_0_rgba(0,0,0,0.12),0_16px_40px_-12px_rgba(25,204,80,0.65)] hover:-translate-y-0.5',
   gold:
-    'bg-gradient-to-r from-gold-light to-gold text-emerald-ink shadow-[0_10px_30px_-10px_rgba(215,162,37,0.8)] hover:-translate-y-0.5 hover:shadow-[0_16px_40px_-12px_rgba(215,162,37,0.7)]',
+    'btn-gloss bg-gradient-to-r from-gold-light to-gold text-emerald-ink shadow-[inset_0_1px_0_rgba(255,255,255,0.5),inset_0_-2px_0_rgba(120,84,10,0.18),0_10px_30px_-10px_rgba(215,162,37,0.8)] hover:-translate-y-0.5 hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.6),inset_0_-2px_0_rgba(120,84,10,0.18),0_16px_40px_-12px_rgba(215,162,37,0.7)]',
   ghost: 'text-white/85 hover:text-white hover:bg-white/10',
-  outline:
-    'border border-white/25 text-white backdrop-blur hover:border-gold/60 hover:bg-white/5 hover:-translate-y-0.5',
+  /* `outline` is the secondary action on dark sections — now a pill of
+     glass rather than a hairline box, so it reads as the same material as
+     the panes around it. */
+  outline: 'glass-btn text-white hover:-translate-y-0.5',
+  /* The same pill over light sections. */
+  glass: 'glass-btn glass-btn-light text-ink hover:-translate-y-0.5 hover:text-green-bright',
 };
 
 const sizes = {

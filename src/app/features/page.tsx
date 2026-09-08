@@ -37,7 +37,7 @@ export default function FeaturesPage() {
         lede="Six pillars, one app. Tracking that runs itself, obligations that calculate themselves, and guidance you can actually ask questions of."
       />
 
-      <section className="bg-[#FAFBFB] py-20 sm:py-24">
+      <section className="overflow-hidden pane-tint py-20 sm:py-24">
         <div className="mx-auto max-w-7xl px-5 sm:px-8">
           <FeatureIndex withIntro={false} />
         </div>
@@ -51,7 +51,7 @@ export default function FeaturesPage() {
             key={feature.slug}
             id={feature.slug}
             className={`scroll-mt-24 overflow-hidden py-24 sm:py-28 ${
-              dark ? 'bg-emerald-ink' : 'bg-white'
+              dark ? 'pane-ink' : 'pane'
             }`}
           >
             <div
@@ -84,7 +84,7 @@ export default function FeaturesPage() {
                       <li key={point} className="flex gap-3.5">
                         <span
                           className={`mt-1 grid h-5 w-5 shrink-0 place-items-center rounded-full ${
-                            dark ? 'bg-gold/20 text-gold-light' : 'bg-green-tint text-emerald-brand'
+                            dark ? 'bg-gold/20 text-gold-light' : 'bg-green-tint text-green-bright'
                           }`}
                         >
                           <svg viewBox="0 0 24 24" className="h-3 w-3" fill="none" stroke="currentColor" strokeWidth="3.4" strokeLinecap="round" strokeLinejoin="round">

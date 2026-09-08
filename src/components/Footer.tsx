@@ -34,7 +34,7 @@ const columns: { title: string; links: { href: string; label: string }[] }[] = [
 
 export function Footer() {
   return (
-    <footer className="relative overflow-hidden bg-emerald-night text-white">
+    <footer className="relative overflow-hidden pane-night text-white">
       {/* The footer usually follows a section painted emerald-ink. Starting on
           that exact colour and easing down to emerald-night removes the hard
           step where the two met, and is invisible on the pages whose last

@@ -24,11 +24,11 @@ export function ContactForm() {
   };
 
   const field =
-    'mt-2 w-full rounded-xl border border-divider bg-white px-4 py-3 text-[0.98rem] text-ink outline-none transition-colors placeholder:text-slate-body/50 focus:border-emerald-brand focus:ring-2 focus:ring-emerald-brand/15';
+    'glass-field mt-2 w-full rounded-xl px-4 py-3 text-[0.98rem] text-ink outline-none placeholder:text-slate-body/50';
   const label = 'block text-[0.88rem] font-bold text-ink';
 
   return (
-    <form onSubmit={onSubmit} className="rounded-3xl border border-divider bg-white p-7 shadow-card sm:p-9">
+    <form onSubmit={onSubmit} className="glass glass-strong rounded-3xl p-7 sm:p-9">
       <div className="grid gap-5 sm:grid-cols-2">
         <label className={label}>
           Your name
@@ -36,7 +36,7 @@ export function ContactForm() {
             required
             value={name}
             onChange={(e) => setName(e.target.value)}
-            placeholder="Abdullah Rahman"
+            placeholder="Jewel Rana"
             className={field}
           />
         </label>
@@ -76,7 +76,7 @@ export function ContactForm() {
 
       <button
         type="submit"
-        className="mt-7 inline-flex w-full items-center justify-center gap-2 rounded-full bg-emerald-brand px-8 py-4 text-base font-bold text-white shadow-[0_10px_30px_-10px_rgba(16,108,49,0.7)] transition-all duration-300 hover:-translate-y-0.5 hover:bg-green-link sm:w-auto"
+        className="btn-gloss mt-7 inline-flex w-full items-center justify-center gap-2 rounded-full bg-emerald-brand px-8 py-4 text-base font-bold text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.28),inset_0_-2px_0_rgba(0,0,0,0.12),0_10px_30px_-10px_rgba(16,108,49,0.7)] transition-all duration-300 hover:-translate-y-0.5 hover:bg-green-link sm:w-auto"
       >
         Send message
         <svg viewBox="0 0 24 24" className="h-4 w-4" fill="currentColor">

@@ -20,10 +20,10 @@ export function PageHero({
   children?: ReactNode;
 }) {
   return (
-    <section className="relative overflow-hidden bg-gradient-to-br from-emerald-deep via-emerald-ink to-emerald-night pb-20 pt-36 sm:pb-24 sm:pt-44">
+    <section className="relative overflow-hidden pane-deep pb-20 pt-36 sm:pb-24 sm:pt-44">
       <GeometricPattern className="pointer-events-none absolute inset-0 h-full w-full" opacity={0.08} stroke="#FADB8A" />
       <div
-        className="pointer-events-none absolute -top-40 left-1/2 h-96 w-[46rem] -translate-x-1/2 rounded-full blur-3xl"
+        className="pointer-events-none absolute -top-40 left-1/2 h-96 w-[46rem] -translate-x-1/2 rounded-full"
         style={{ background: 'radial-gradient(circle, rgba(25,204,80,0.22), transparent 70%)' }}
       />
       <div className="relative mx-auto max-w-4xl px-5 text-center sm:px-8">

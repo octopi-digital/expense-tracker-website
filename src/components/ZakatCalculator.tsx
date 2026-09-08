@@ -96,12 +96,12 @@ export function ZakatCalculator() {
     `${currency.symbol} ${n.toLocaleString('en-US', { maximumFractionDigits: 0 })}`;
 
   const field =
-    'w-full rounded-xl border border-divider bg-white px-4 py-3 text-[0.98rem] font-semibold text-ink outline-none transition-colors placeholder:font-normal placeholder:text-slate-body/50 focus:border-emerald-brand focus:ring-2 focus:ring-emerald-brand/15';
+    'glass-field w-full rounded-xl px-4 py-3 text-[0.98rem] font-semibold text-ink outline-none placeholder:font-normal placeholder:text-slate-body/50';
 
   return (
     <div className="grid gap-6 lg:grid-cols-[1.35fr_1fr] lg:items-start">
       {/* Inputs */}
-      <div className="rounded-3xl border border-divider bg-white p-6 shadow-card sm:p-8">
+      <div className="glass glass-strong rounded-3xl p-6 sm:p-8">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <h3 className="text-[1.2rem] font-extrabold tracking-tight text-ink">What you own</h3>
           <label className="flex items-center gap-2 text-[0.85rem] font-semibold text-slate-body">
@@ -109,7 +109,7 @@ export function ZakatCalculator() {
             <select
               value={currencyCode}
               onChange={(e) => onCurrencyChange(e.target.value)}
-              className="rounded-lg border border-divider bg-white px-3 py-1.5 font-bold text-ink outline-none focus:border-emerald-brand"
+              className="glass-field rounded-lg px-3 py-1.5 font-bold text-ink outline-none"
             >
               {currencies.map((c) => (
                 <option key={c.code} value={c.code}>
@@ -190,7 +190,7 @@ export function ZakatCalculator() {
 
       {/* Result */}
       <div className="lg:sticky lg:top-28">
-        <div className="overflow-hidden rounded-3xl bg-gradient-to-br from-emerald-deep via-emerald-ink to-emerald-night p-7 text-white shadow-lift ring-1 ring-gold/20 sm:p-8">
+        <div className="glass-emerald overflow-hidden rounded-3xl p-7 text-white sm:p-8">
           <p className="text-[0.7rem] font-bold uppercase tracking-[0.2em] text-gold-light/70">
             {result.due ? 'Zakat payable' : 'Zakat not yet due'}
           </p>
@@ -232,7 +232,7 @@ export function ZakatCalculator() {
             ))}
           </dl>
 
-          <p className="mt-6 rounded-xl border border-white/10 bg-white/[0.04] px-4 py-3 text-[0.78rem] leading-relaxed text-white/50">
+          <p className="glass-dark mt-6 rounded-xl px-4 py-3 text-[0.78rem] leading-relaxed text-white/50">
             Nisab is taken as the lower of {NISAB_GOLD_G}g of gold and {NISAB_SILVER_G}g of silver.
             This is an estimate for guidance — for a ruling on your specific situation, consult a
             qualified scholar.

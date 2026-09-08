@@ -35,7 +35,7 @@ export default function DataDeletionPage() {
       />
 
       {/* --------------------------------------------------- In-app */}
-      <section className="bg-white py-20 sm:py-24">
+      <section className="overflow-hidden pane py-20 sm:py-24">
         <div className="mx-auto max-w-4xl px-5 sm:px-8">
           <Reveal>
             <h2 className="text-[1.8rem] font-extrabold tracking-tight text-ink">Option 1 — from inside the app</h2>
@@ -47,7 +47,7 @@ export default function DataDeletionPage() {
           <div className="mt-10 grid gap-4 sm:grid-cols-2">
             {inAppSteps.map((s, i) => (
               <Reveal key={s.n} delay={i * 80}>
-                <div className="flex h-full gap-4 rounded-2xl border border-divider bg-[#FAFBFB] p-6">
+                <div className="glass flex h-full gap-4 rounded-2xl p-6">
                   <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-emerald-brand text-[0.95rem] font-extrabold text-white">
                     {s.n}
                   </span>
@@ -61,11 +61,11 @@ export default function DataDeletionPage() {
           </div>
 
           <Reveal delay={120}>
-            <div className="mt-10 rounded-2xl border border-divider bg-white p-7 shadow-card">
+            <div className="glass glass-strong mt-10 rounded-2xl p-7">
               <h3 className="text-[1.15rem] font-bold text-ink">Option 2 — by email</h3>
               <p className="mt-3 text-[0.98rem] leading-relaxed text-slate-body">
                 If you have lost access to the app, email{' '}
-                <a href={`mailto:${site.email}?subject=Account%20deletion%20request`} className="font-semibold text-emerald-brand underline decoration-emerald-brand/30 underline-offset-4 hover:decoration-emerald-brand">
+                <a href={`mailto:${site.email}?subject=Account%20deletion%20request`} className="font-semibold text-green-bright underline decoration-green-bright/40 underline-offset-4 hover:decoration-green-bright">
                   {site.email}
                 </a>{' '}
                 from the address on your account with the subject{' '}
@@ -79,7 +79,7 @@ export default function DataDeletionPage() {
       </section>
 
       {/* --------------------------------------------------- What goes */}
-      <section className="bg-[#FAFBFB] py-20 sm:py-24">
+      <section className="overflow-hidden pane-tint py-20 sm:py-24">
         <div className="mx-auto max-w-3xl px-5 sm:px-8">
           <Prose>
             <h2 id="what-is-deleted">What gets deleted</h2>

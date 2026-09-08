@@ -17,7 +17,7 @@ function Badge({
     <Link
       href={href}
       aria-disabled={unavailable}
-      className={`group flex items-center gap-3 rounded-2xl border border-white/15 bg-white/5 px-5 py-3 backdrop-blur transition-all duration-300 hover:border-gold/50 hover:bg-white/10 ${
+      className={`glass-btn group flex items-center gap-3 rounded-2xl px-5 py-3 transition-all duration-300 ${
         unavailable ? 'cursor-default' : 'hover:-translate-y-0.5'
       }`}
     >

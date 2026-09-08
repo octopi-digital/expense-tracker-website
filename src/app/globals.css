@@ -1,5 +1,19 @@
 @import 'tailwindcss';
 
+/* Registered so they can be transitioned — an unregistered custom property
+   jumps between values, and the lag is the whole point. */
+@property --gx {
+  syntax: '<percentage>';
+  initial-value: 28%;
+  inherits: true;
+}
+
+@property --gy {
+  syntax: '<percentage>';
+  initial-value: 16%;
+  inherits: true;
+}
+
 /* ------------------------------------------------------------------
    Deenomics design tokens.
    Brand colors are lifted verbatim from the app's single source of
@@ -13,20 +27,37 @@
   --color-emerald-night: #02120a;
   --color-green-bright: #19cc50;
   --color-green-link: #129244;
-  --color-green-tint: #e2f2e9;
+  --color-green-tint: rgb(25 204 80 / 0.16);
 
   --color-gold: #d7a225;
   --color-gold-light: #fadb8a;
   --color-gold-deep: #a4731d;
 
-  --color-ink: #0f172a;
-  --color-slate-body: #647488;
-  --color-divider: #e2e8f0;
-  --color-card: #f3f3f4;
+  /* Dark-theme semantics. The names are kept because they are used in ~110
+     places and still mean the same thing — `ink` is the strongest text,
+     `slate-body` is secondary copy — but the site now reads light-on-dark.
+     `ink-dark` keeps the old value for the few surfaces that stay light
+     (the simulated app screens, which must go on depicting the real UI). */
+  --color-ink: #f1f7f3;
+  --color-slate-body: #a9c0b3;
+  --color-divider: rgb(255 255 255 / 0.12);
+  --color-card: rgb(255 255 255 / 0.07);
+  /* The simulated app screens (PhoneMockup, the HowItWorks stages) still
+     depict a light product UI, so they keep the original light-surface
+     values. Named `-app` because that is exactly what they are for: the
+     picture of the app, not the site around it. */
+  --color-ink-app: #0f172a;
+  --color-body-app: #56657a;
+  --color-divider-app: #e2e8f0;
+  --color-card-app: #f3f3f4;
+  --color-tint-app: #e2f2e9;
 
   --color-expense: #f09d05;
   --color-savings: #2e7df7;
   --color-lavender: #655fee;
+  /* #655fee was drawn for light backgrounds and all but disappears on the
+     dark world. This is its dark-context counterpart. */
+  --color-lavender-bright: #a9a4ff;
   --color-danger: #e5484d;
 
   --font-sans: var(--font-jakarta), ui-sans-serif, system-ui, sans-serif;
@@ -37,10 +68,16 @@
   --shadow-lift: 0 2px 4px rgb(15 23 42 / 0.04), 0 24px 60px -20px rgb(15 23 42 / 0.22);
   --shadow-phone: 0 40px 90px -30px rgb(2 18 10 / 0.65), 0 0 0 1px rgb(255 255 255 / 0.06);
 
+  /* Glass elevation. Softer and wider than --shadow-card: a pane of glass
+     floats above the page rather than sitting on it. */
+  --shadow-glass: 0 1px 2px rgb(15 23 42 / 0.04), 0 18px 44px -18px rgb(15 23 42 / 0.20);
+  --shadow-glass-lift: 0 2px 8px rgb(15 23 42 / 0.05), 0 36px 74px -24px rgb(15 23 42 / 0.30);
+
   --animate-marquee: marquee 40s linear infinite;
   --animate-float: float 7s ease-in-out infinite;
   --animate-pulse-ring: pulse-ring 3s ease-out infinite;
   --animate-shimmer: shimmer 3s linear infinite;
+  --animate-drift: drift 26s ease-in-out infinite;
 }
 
 @keyframes marquee {
@@ -64,6 +101,24 @@
   to { background-position: -200% 0; }
 }
 
+/* The world's colour bodies drift slowly, so the backdrop a pane refracts is
+   never quite the same twice. */
+@keyframes pill-sweep {
+  0%, 64% { transform: translate3d(-130%, 0, 0); }
+  100%    { transform: translate3d(130%, 0, 0); }
+}
+
+@keyframes sheen {
+  0%, 100% { transform: translate3d(-6%, -3%, 0) rotate(0deg); }
+  50%      { transform: translate3d(6%, 4%, 0) rotate(3deg); }
+}
+
+@keyframes drift {
+  0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
+  33%      { transform: translate3d(3%, -4%, 0) scale(1.08); }
+  66%      { transform: translate3d(-3%, 3%, 0) scale(0.95); }
+}
+
 /* ------------------------------------------------------------------ */
 
 html {
@@ -72,7 +127,9 @@ html {
 }
 
 body {
-  background: #ffffff;
+  /* The .world layer supplies the backdrop; this is only the fallback ground
+     underneath it. */
+  background: #02120a;
   color: var(--color-ink);
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
@@ -82,7 +139,7 @@ body {
 
 ::selection {
   background: var(--color-green-bright);
-  color: var(--color-emerald-ink);
+  color: var(--color-emerald-night);
 }
 
 /* Scroll-reveal: elements start hidden and are released by an
@@ -150,4 +207,924 @@ body {
    visibly restart where two dark sections meet. */
 .mask-fade-top {
   mask-image: linear-gradient(to bottom, transparent 0%, black 22%);
+}
+
+/* ==================================================================
+   Liquid glass
+   ------------------------------------------------------------------
+   Every glass surface is built from the same four ingredients:
+
+     1. a backdrop-filter that blurs AND saturates what is behind it,
+        because real glass concentrates colour as well as diffusing it;
+     2. a translucent fill with a gradient, so the pane is not uniformly
+        milky top to bottom;
+     3. a specular rim — bright along the top edge, dim along the
+        bottom — which is what reads as "thickness" to the eye;
+     4. a refraction sheen (::before) that catches light across the
+        pane's upper-left shoulder.
+
+   Glass only works if there is something behind it worth refracting.
+   That is what `.world` is for: a single fixed backdrop of brand colour
+   and ornament that every section is translucent over. Without it the
+   whole system collapses into plain translucency.
+   ================================================================== */
+
+:root {
+  --glass-blur: 30px;
+  --glass-saturate: 200%;
+  --glass-radius: 1.5rem;
+  /* Thickness of the refracted band around a pane's rim. */
+  --glass-edge: 2px;
+}
+
+@layer components {
+
+
+
+
+  /* ============================================================ The world */
+
+  /* Everything on the site is layered over this. It is `position: fixed`, so
+     it does not scroll: sections slide across it, which is what makes them
+     read as panes of glass moving over a world rather than as opaque bands
+     that happen to be tinted.
+
+     It has to stay predominantly light — every light section is translucent
+     over it, so the colour here lands underneath body copy. The blobs are
+     wide and low-alpha for that reason. */
+  .world {
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    overflow: hidden;
+    /* Deep emerald ground with bright veins running through it. The glass is
+       near-clear now, so this is most of what you actually see — it has to
+       carry real light and dark, not a pale wash, or there is nothing for a
+       pane to bend. */
+    background-color: #02120a;
+    background-image:
+      radial-gradient(120% 85% at 12% 18%, rgb(25 204 80 / 0.50), transparent 56%),
+      radial-gradient(105% 75% at 88% 26%, rgb(215 162 37 / 0.42), transparent 56%),
+      radial-gradient(95% 65% at 72% 88%, rgb(16 108 49 / 0.62), transparent 60%),
+      radial-gradient(85% 58% at 22% 92%, rgb(250 219 138 / 0.24), transparent 60%),
+      conic-gradient(from 205deg at 42% 38%,
+        rgb(255 255 255 / 0.10) 0deg,
+        transparent 60deg,
+        rgb(25 204 80 / 0.20) 150deg,
+        transparent 250deg,
+        rgb(215 162 37 / 0.14) 320deg,
+        transparent 360deg),
+      linear-gradient(158deg, #05391d 0%, #02120a 52%, #04241242 100%);
+  }
+
+  /* The bright passages. These are what a pane's edge catches and throws as
+     colour, so they are far stronger than the old ambient blobs. */
+  .world::before,
+  .world::after {
+    content: '';
+    position: absolute;
+    border-radius: 50%;
+    will-change: transform;
+  }
+
+  .world::before {
+    inset: -12% auto auto -10%;
+    height: 52rem;
+    width: 52rem;
+    background: radial-gradient(circle, rgb(58 232 122 / 0.45), rgb(25 204 80 / 0.16) 45%, transparent 70%);
+    animation: var(--animate-drift);
+  }
+
+  .world::after {
+    inset: auto -12% -14% auto;
+    height: 48rem;
+    width: 48rem;
+    background: radial-gradient(circle, rgb(250 219 138 / 0.40), rgb(215 162 37 / 0.16) 45%, transparent 70%);
+    animation: var(--animate-drift);
+    animation-delay: -13s;
+    animation-direction: reverse;
+  }
+
+  /* A specular streak crossing the field, the way light runs across polished
+     stone. Rendered as a child element because both pseudo-slots are taken. */
+  .world-streak {
+    position: absolute;
+    inset: -20% -30%;
+    background:
+      linear-gradient(104deg,
+        transparent 30%,
+        rgb(255 255 255 / 0.24) 44%,
+        rgb(214 255 231 / 0.46) 50%,
+        rgb(255 255 255 / 0.12) 62%,
+        transparent 78%);
+    animation: sheen 22s ease-in-out infinite;
+  }
+
+  .world-streak-2 {
+    inset: -30% -30%;
+    background:
+      linear-gradient(72deg,
+        transparent 36%,
+        rgb(250 219 138 / 0.30) 47%,
+        rgb(255 255 255 / 0.10) 58%,
+        transparent 74%);
+    animation-delay: -17s;
+    animation-direction: reverse;
+  }
+
+  /* ------------------------------------------------------ Section panes */
+
+  /* Sections are now barely there. The world carries the colour; a pane only
+     darkens it enough to seat white text, and alternates density so the page
+     still has a rhythm. */
+  .pane,
+  .pane-tint,
+  .pane-deep,
+  .pane-gold,
+  .pane-ink,
+  .pane-night {
+    position: relative;
+  }
+
+  /* The denser of the two content bands. */
+  .pane {
+    background: rgb(2 18 10 / 0.65);
+  }
+
+  /* The lighter band — lets more of the world through. */
+  .pane-tint {
+    background: rgb(2 18 10 / 0.52);
+  }
+
+  /* Heroes: darker still, so display type has room. */
+  .pane-deep {
+    background:
+      linear-gradient(
+        150deg,
+        rgb(4 40 19 / 0.73) 0%,
+        rgb(2 18 10 / 0.79) 55%,
+        rgb(2 18 10 / 0.83) 100%
+      );
+  }
+
+  .pane-gold {
+    background:
+      linear-gradient(
+        150deg,
+        rgb(56 40 10 / 0.73) 0%,
+        rgb(2 18 10 / 0.79) 55%,
+        rgb(2 18 10 / 0.83) 100%
+      );
+  }
+
+  .pane-ink {
+    background: rgb(2 18 10 / 0.71);
+  }
+
+  .pane-night {
+    background: rgb(2 18 10 / 0.81);
+  }
+
+  /* ------------------------------------------------------ Glass surfaces */
+
+  /* Light-context pane: the default card, over a `.pane` section. */
+  .glass {
+    position: relative;
+    isolation: isolate;
+    border-radius: var(--glass-radius);
+    background:
+      linear-gradient(
+        152deg,
+        rgb(255 255 255 / 0.13) 0%,
+        rgb(255 255 255 / 0.045) 46%,
+        rgb(255 255 255 / 0.085) 100%
+      );
+    -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate)) brightness(0.78);
+    backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate)) brightness(0.78);
+    border: 1px solid rgb(255 255 255 / 0.22);
+    box-shadow:
+      /* specular rim: bright top edge, faint bottom return */
+      inset 0 1px 0 0 rgb(255 255 255 / 0.42),
+      inset 0 -1px 0 0 rgb(255 255 255 / 0.10),
+      /* light caught inside the pane, pooling away from the edges */
+      inset 0 0 34px 0 rgb(255 255 255 / 0.06),
+      var(--shadow-glass);
+    transition:
+      transform 0.4s cubic-bezier(0.16, 1, 0.3, 1),
+      box-shadow 0.4s cubic-bezier(0.16, 1, 0.3, 1),
+      border-color 0.4s ease,
+      background 0.4s ease,
+      /* The lag. This is what reads as viscosity: the pool of light is
+         pulled along behind the cursor and settles after it stops. */
+      --gx 0.5s cubic-bezier(0.22, 1, 0.36, 1),
+      --gy 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  /* The refraction sheen. z-index -1 keeps it above the pane's own fill but
+     under its content, so text never sits in the highlight. */
+  .glass::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    border-radius: inherit;
+    pointer-events: none;
+    /* Two layers: a pool of light that tracks the pointer, over the fixed
+       shoulder highlight. The pool is what makes the pane feel like it has
+       liquid in it rather than a printed gradient. */
+    background:
+      radial-gradient(
+        62% 78% at var(--gx) var(--gy),
+        rgb(255 255 255 / 0.16) 0%,
+        rgb(255 255 255 / 0.05) 38%,
+        transparent 72%
+      ),
+      linear-gradient(
+        145deg,
+        rgb(255 255 255 / 0.20) 0%,
+        rgb(255 255 255 / 0.05) 26%,
+        transparent 52%
+      );
+  }
+
+  .glass-hover:hover::before,
+  .glass-dark.glass-hover:hover::before,
+  .glass-emerald.glass-hover:hover::before {
+    background-position: 58% 58%;
+  }
+
+  /* Heavier fill, for panes that carry long-form text or form fields where
+     legibility outranks transparency. */
+  .glass-strong {
+    background:
+      linear-gradient(
+        152deg,
+        rgb(2 18 10 / 0.52) 0%,
+        rgb(2 18 10 / 0.44) 50%,
+        rgb(2 18 10 / 0.50) 100%
+      );
+    -webkit-backdrop-filter: blur(38px) saturate(180%) brightness(0.62);
+    backdrop-filter: blur(38px) saturate(180%) brightness(0.62);
+  }
+
+  /* Dark-context pane, for the emerald sections. Same anatomy, inverted:
+     the fill is a white wash rather than a white body, and the rim carries
+     a gold cast picked up from the sections' own lighting. */
+  .glass-dark {
+    position: relative;
+    isolation: isolate;
+    border-radius: var(--glass-radius);
+    background:
+      linear-gradient(
+        152deg,
+        rgb(255 255 255 / 0.10) 0%,
+        rgb(255 255 255 / 0.022) 48%,
+        rgb(255 255 255 / 0.05) 100%
+      );
+    -webkit-backdrop-filter: blur(26px) saturate(170%);
+    backdrop-filter: blur(26px) saturate(170%);
+    border: 1px solid rgb(255 255 255 / 0.16);
+    box-shadow:
+      inset 0 1px 0 0 rgb(255 255 255 / 0.28),
+      inset 0 -1px 0 0 rgb(255 255 255 / 0.06),
+      inset 0 0 30px 0 rgb(255 255 255 / 0.05),
+      0 20px 46px -22px rgb(2 18 10 / 0.75);
+    transition:
+      transform 0.4s cubic-bezier(0.16, 1, 0.3, 1),
+      box-shadow 0.4s cubic-bezier(0.16, 1, 0.3, 1),
+      border-color 0.4s ease,
+      background 0.4s ease,
+      /* The lag. This is what reads as viscosity: the pool of light is
+         pulled along behind the cursor and settles after it stops. */
+      --gx 0.5s cubic-bezier(0.22, 1, 0.36, 1),
+      --gy 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .glass-dark::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    border-radius: inherit;
+    pointer-events: none;
+    background:
+      radial-gradient(
+        62% 78% at var(--gx) var(--gy),
+        rgb(255 255 255 / 0.17) 0%,
+        rgb(255 255 255 / 0.05) 38%,
+        transparent 72%
+      ),
+      linear-gradient(
+        145deg,
+        rgb(255 255 255 / 0.20) 0%,
+        rgb(255 255 255 / 0.05) 30%,
+        transparent 56%
+      );
+  }
+
+
+  /* The featured pricing card. Same anatomy as .glass-dark, but the fill is
+     the emerald gradient held around 0.8 alpha so the world behind still shows
+     through — a solid card beside glass ones would look like a different
+     material entirely. Written as its own class because .glass-dark's
+     `background` shorthand would otherwise overwrite a Tailwind gradient. */
+  .glass-emerald {
+    position: relative;
+    isolation: isolate;
+    background:
+      linear-gradient(
+        152deg,
+        rgb(10 74 33 / 0.80) 0%,
+        rgb(4 27 13 / 0.84) 55%,
+        rgb(2 18 10 / 0.86) 100%
+      );
+    -webkit-backdrop-filter: blur(26px) saturate(175%);
+    backdrop-filter: blur(26px) saturate(175%);
+    border: 1px solid rgb(215 162 37 / 0.34);
+    box-shadow:
+      inset 0 1px 0 0 rgb(255 255 255 / 0.20),
+      inset 0 -1px 0 0 rgb(255 255 255 / 0.05),
+      inset 0 0 34px 0 rgb(250 219 138 / 0.06),
+      0 24px 54px -22px rgb(2 18 10 / 0.8);
+    transition:
+      transform 0.4s cubic-bezier(0.16, 1, 0.3, 1),
+      box-shadow 0.4s cubic-bezier(0.16, 1, 0.3, 1),
+      border-color 0.4s ease,
+      --gx 0.5s cubic-bezier(0.22, 1, 0.36, 1),
+      --gy 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .glass-emerald::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    border-radius: inherit;
+    pointer-events: none;
+    background:
+      radial-gradient(
+        62% 78% at var(--gx) var(--gy),
+        rgb(250 219 138 / 0.18) 0%,
+        rgb(255 255 255 / 0.05) 40%,
+        transparent 72%
+      ),
+      linear-gradient(
+        145deg,
+        rgb(250 219 138 / 0.16) 0%,
+        rgb(255 255 255 / 0.04) 30%,
+        transparent 58%
+      );
+  }
+
+  .glass-emerald.glass-hover:hover {
+    transform: translateY(-4px);
+    border-color: rgb(215 162 37 / 0.55);
+    box-shadow:
+      inset 0 1px 0 0 rgb(255 255 255 / 0.24),
+      inset 0 -1px 0 0 rgb(255 255 255 / 0.06),
+      0 34px 68px -24px rgb(2 18 10 / 0.9);
+  }
+
+
+  /* ---------------------------------------------------- Edge refraction */
+
+  /* The band around a pane's rim where the backdrop is bent hardest. This is
+     the detail that separates glass from a translucent rectangle: a real pane
+     has thickness, and light entering near the edge takes a longer path
+     through it, coming out brighter, blurrier and slightly dispersed.
+
+     Built with the two-layer mask trick — one mask sized to the content box,
+     one to the border box, composited to exclude — which leaves a hairline
+     ring around the pane.
+
+     Two things keep it reading as dispersion rather than as a coloured
+     border: it is thin (2px), and the gradient is *transparent through the
+     middle*, with saturated colour only in the last few percent at each end.
+     A fringe appears where the edge turns, which is where a real bevel throws
+     colour; along the straight runs there is nothing. */
+  .glass::after,
+  .glass-dark::after,
+  .glass-emerald::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    border-radius: inherit;
+    pointer-events: none;
+    padding: var(--glass-edge);
+    -webkit-mask:
+      linear-gradient(#000 0 0) content-box,
+      linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask:
+      linear-gradient(#000 0 0) content-box,
+      linear-gradient(#000 0 0);
+    mask-composite: exclude;
+    background-size: 210% 210%;
+    background-position: var(--gx) var(--gy);
+  }
+
+  /* The prismatic rim. A real edge splits white light, so the ring runs
+     through the spectrum rather than through two brand hues — that fringe is
+     the single most recognisable thing about the reference. Kept low-alpha
+     and screened so it reads as dispersion, not as a rainbow border. */
+  .glass::after {
+    background:
+      linear-gradient(
+        135deg,
+        rgb(255 116 116 / 0.55) 0%,
+        rgb(255 196 120 / 0.38) 6%,
+        rgb(255 255 255 / 0.50) 14%,
+        rgb(255 255 255 / 0.16) 24%,
+        transparent 38%,
+        transparent 62%,
+        rgb(255 255 255 / 0.14) 76%,
+        rgb(140 255 214 / 0.32) 86%,
+        rgb(120 186 255 / 0.48) 94%,
+        rgb(178 138 255 / 0.58) 100%
+      );
+    mix-blend-mode: screen;
+  }
+
+  /* On a dark section there is little light to bend, so the ring lifts what
+     is there hard. */
+  .glass-dark::after {
+    background:
+      linear-gradient(
+        135deg,
+        rgb(255 116 116 / 0.50) 0%,
+        rgb(255 196 120 / 0.34) 6%,
+        rgb(255 255 255 / 0.46) 14%,
+        rgb(255 255 255 / 0.14) 24%,
+        transparent 38%,
+        transparent 62%,
+        rgb(255 255 255 / 0.12) 76%,
+        rgb(140 255 214 / 0.28) 86%,
+        rgb(120 186 255 / 0.44) 94%,
+        rgb(178 138 255 / 0.54) 100%
+      );
+    mix-blend-mode: screen;
+  }
+
+  /* The emerald pane is a dark card on a *light* section, so the same
+     brightness would blow its rim out into a green halo. It gets a gold
+     dispersion at close to neutral brightness instead. */
+  .glass-emerald::after {
+    background:
+      linear-gradient(
+        135deg,
+        rgb(255 210 130 / 0.55) 0%,
+        rgb(255 255 255 / 0.40) 12%,
+        transparent 34%,
+        transparent 66%,
+        rgb(140 220 255 / 0.30) 88%,
+        rgb(190 150 255 / 0.45) 100%
+      );
+    mix-blend-mode: screen;
+  }
+
+  /* Genuine displacement, Chromium only. The CSS rim above is the floor
+     everywhere else; this adds the backdrop actually bending. */
+  @supports (backdrop-filter: url("#lg-refract")) or (-webkit-backdrop-filter: url("#lg-refract")) {
+    .glass,
+    .glass-emerald {
+      -webkit-backdrop-filter: blur(10px) saturate(190%) brightness(0.80) url("#lg-refract");
+      backdrop-filter: blur(10px) saturate(190%) brightness(0.80) url("#lg-refract");
+    }
+  }
+
+  /* ------------------------------------------------------- Interactions */
+
+  /* Hover: the pane lifts, its fill clears slightly, and the rim warms to
+     gold — as if it has moved closer to the light. */
+  .glass-hover:hover {
+    transform: translateY(-4px);
+    border-color: rgb(255 255 255 / 0.40);
+    box-shadow:
+      inset 0 1px 0 0 rgb(255 255 255 / 0.60),
+      inset 0 -1px 0 0 rgb(255 255 255 / 0.16),
+      inset 0 0 40px 0 rgb(255 255 255 / 0.09),
+      0 0 0 1px rgb(255 255 255 / 0.10),
+      var(--shadow-glass-lift);
+  }
+
+  .glass-dark.glass-hover:hover {
+    transform: translateY(-4px);
+    border-color: rgb(215 162 37 / 0.45);
+    background:
+      linear-gradient(
+        152deg,
+        rgb(255 255 255 / 0.17) 0%,
+        rgb(255 255 255 / 0.08) 48%,
+        rgb(255 255 255 / 0.11) 100%
+      );
+    box-shadow:
+      inset 0 1px 0 0 rgb(255 255 255 / 0.32),
+      inset 0 -1px 0 0 rgb(255 255 255 / 0.08),
+      0 30px 60px -24px rgb(2 18 10 / 0.85);
+  }
+
+
+
+  /* --------------------------------------------------------- Button gloss */
+
+  /* The primary and gold buttons stay solid — they carry the page's highest
+     contrast and cannot be translucent — but they get the same specular
+     shoulder every other surface has, so they read as glass over colour. */
+  .btn-gloss {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+  }
+
+  .btn-gloss::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background:
+      linear-gradient(
+        158deg,
+        rgb(255 255 255 / 0.30) 0%,
+        rgb(255 255 255 / 0.07) 42%,
+        transparent 64%
+      );
+  }
+
+  /* The eyebrow's sweep. Animated with `transform` so it stays on the
+     compositor: no backdrop sampling, no per-frame repaint of the pill. */
+  .pill-sweep {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    border-radius: inherit;
+    background:
+      linear-gradient(
+        100deg,
+        transparent 34%,
+        rgb(255 255 255 / 0.10) 46%,
+        rgb(255 255 255 / 0.26) 50%,
+        rgb(255 255 255 / 0.10) 54%,
+        transparent 66%
+      );
+    transform: translate3d(-130%, 0, 0);
+    animation: pill-sweep 7.5s cubic-bezier(0.45, 0, 0.2, 1) infinite;
+  }
+
+  /* --------------------------------------------------------- Nav lens */
+
+  /* The desktop menu's indicator. Not a coloured pill behind the labels but
+     a lens: it carries its own backdrop-filter, so the capsule's glass and
+     whatever the page is showing through it are brightened and concentrated
+     as the lens passes over them. It slides between items on hover and
+     returns to the current page when the pointer leaves.
+
+     The easing overshoots slightly (the 1.4 control point) — that small
+     settle is what makes it read as liquid rather than as a sliding box. */
+  .nav-lens {
+    -webkit-backdrop-filter: brightness(1.30) saturate(1.55);
+    backdrop-filter: brightness(1.30) saturate(1.55);
+    background:
+      linear-gradient(
+        150deg,
+        rgb(255 255 255 / 0.24) 0%,
+        rgb(255 255 255 / 0.06) 62%,
+        rgb(250 219 138 / 0.10) 100%
+      );
+    box-shadow:
+      inset 0 1px 0 0 rgb(255 255 255 / 0.50),
+      inset 0 -1px 0 0 rgb(255 255 255 / 0.12),
+      0 6px 18px -8px rgb(2 18 10 / 0.55);
+    transition:
+      left 0.46s cubic-bezier(0.34, 1.4, 0.44, 1),
+      width 0.46s cubic-bezier(0.34, 1.4, 0.44, 1),
+      opacity 0.3s ease;
+  }
+
+  .nav-lens-light {
+    -webkit-backdrop-filter: brightness(1.42) saturate(1.6);
+    backdrop-filter: brightness(1.42) saturate(1.6);
+    background:
+      linear-gradient(
+        150deg,
+        rgb(255 255 255 / 0.30) 0%,
+        rgb(255 255 255 / 0.09) 62%,
+        rgb(250 219 138 / 0.14) 100%
+      );
+    box-shadow:
+      inset 0 1px 0 0 rgb(255 255 255 / 0.60),
+      0 8px 20px -10px rgb(2 18 10 / 0.5);
+  }
+
+  /* The capsule holding the links. Slightly deeper than a plain glass pill so
+     the lens inside it has something to lift. */
+  .nav-rail {
+    -webkit-backdrop-filter: blur(18px) saturate(180%);
+    backdrop-filter: blur(18px) saturate(180%);
+    background: rgb(255 255 255 / 0.07);
+    border: 1px solid rgb(255 255 255 / 0.16);
+    box-shadow:
+      inset 0 1px 0 0 rgb(255 255 255 / 0.20),
+      inset 0 -8px 18px -14px rgb(0 0 0 / 0.5);
+  }
+
+  .nav-rail-light {
+    background: rgb(255 255 255 / 0.10);
+    border-color: rgb(255 255 255 / 0.24);
+    box-shadow:
+      inset 0 1px 0 0 rgb(255 255 255 / 0.30),
+      inset 0 -8px 18px -14px rgb(0 0 0 / 0.35);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .nav-lens {
+      transition: opacity 0.2s ease;
+    }
+  }
+
+  @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+    .nav-rail { background: rgb(255 255 255 / 0.12); }
+    .nav-rail-light { background: rgb(255 255 255 / 0.85); }
+    .nav-lens { background: rgb(255 255 255 / 0.20); }
+    .nav-lens-light { background: rgb(255 255 255 / 0.92); }
+  }
+
+  @media (prefers-reduced-transparency: reduce) {
+    .nav-rail { background: rgb(4 27 13 / 0.9); }
+    .nav-rail-light { background: #fff; }
+  }
+
+  /* --------------------------------------------------------- Chrome bar */
+
+  /* The header. Blurred harder than a card and with a light-catching
+     hairline along its bottom edge, so it reads as a pane laid over the
+     page rather than a painted band. */
+  .glass-rail {
+    position: relative;
+    background: rgb(2 18 10 / 0.42);
+    -webkit-backdrop-filter: blur(40px) saturate(200%) brightness(0.72);
+    backdrop-filter: blur(40px) saturate(200%) brightness(0.72);
+    border-bottom: 1px solid rgb(255 255 255 / 0.14);
+    box-shadow:
+      inset 0 1px 0 0 rgb(255 255 255 / 0.24),
+      inset 0 -12px 24px -20px rgb(255 255 255 / 0.14),
+      0 14px 36px -16px rgb(2 18 10 / 0.5);
+  }
+
+  /* The rail's lower lip, where the page slides underneath it. */
+  .glass-rail::after {
+    content: '';
+    position: absolute;
+    inset: auto 0 -14px 0;
+    height: 14px;
+    pointer-events: none;
+    -webkit-backdrop-filter: blur(7px) saturate(150%);
+    backdrop-filter: blur(7px) saturate(150%);
+    -webkit-mask: linear-gradient(to bottom, #000, transparent);
+    mask: linear-gradient(to bottom, #000, transparent);
+  }
+
+  /* The header while it is still over the dark hero. */
+  .glass-rail-dark {
+    background: rgb(2 18 10 / 0.42);
+    -webkit-backdrop-filter: blur(24px) saturate(160%);
+    backdrop-filter: blur(24px) saturate(160%);
+    border-bottom: 1px solid rgb(255 255 255 / 0.12);
+    box-shadow:
+      inset 0 1px 0 0 rgb(255 255 255 / 0.16),
+      0 12px 32px -18px rgb(2 18 10 / 0.6);
+  }
+
+  /* ------------------------------------------------------- Glass button */
+
+  /* A pill of glass. Used for secondary actions, where a solid fill would
+     compete with the primary button beside it. */
+  .glass-btn {
+    position: relative;
+    isolation: isolate;
+    background-color: rgb(255 255 255 / 0);
+    background-image:
+      linear-gradient(
+        180deg,
+        rgb(255 255 255 / 0.15) 0%,
+        rgb(255 255 255 / 0.04) 56%,
+        rgb(255 255 255 / 0.085) 100%
+      );
+    border: 1px solid rgb(255 255 255 / 0.15);
+    box-shadow:
+      inset 0 1px 0 0 rgb(255 255 255 / 0.38),
+      inset 0 -1px 0 0 rgb(0 0 0 / 0.20),
+      0 8px 22px -12px rgb(2 18 10 / 0.6);
+    transition:
+      background-color 0.35s cubic-bezier(0.16, 1, 0.3, 1),
+      border-color 0.35s ease,
+      box-shadow 0.35s cubic-bezier(0.16, 1, 0.3, 1),
+      color 0.3s ease,
+      transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  /* The same prismatic hairline the panes carry, at 1px. No backdrop-filter —
+     it is a masked gradient, so it costs a paint and nothing more. */
+  .glass-btn::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    border-radius: inherit;
+    pointer-events: none;
+    padding: 1px;
+    background:
+      linear-gradient(
+        135deg,
+        rgb(255 150 120 / 0.62) 0%,
+        rgb(255 255 255 / 0.42) 16%,
+        transparent 40%,
+        transparent 60%,
+        rgb(140 220 255 / 0.36) 84%,
+        rgb(190 150 255 / 0.62) 100%
+      );
+    -webkit-mask:
+      linear-gradient(#000 0 0) content-box,
+      linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask:
+      linear-gradient(#000 0 0) content-box,
+      linear-gradient(#000 0 0);
+    mask-composite: exclude;
+    mix-blend-mode: screen;
+  }
+
+  .glass-btn::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    border-radius: inherit;
+    pointer-events: none;
+    background: linear-gradient(150deg, rgb(255 255 255 / 0.22), transparent 55%);
+  }
+
+  .glass-btn:hover {
+    background-color: rgb(255 255 255 / 0.11);
+    border-color: rgb(215 162 37 / 0.6);
+    box-shadow:
+      inset 0 1px 0 0 rgb(255 255 255 / 0.42),
+      0 16px 34px -14px rgb(2 18 10 / 0.6);
+  }
+
+  /* Light-context equivalent, for glass buttons over white sections. */
+  /* Kept as the *brighter* pill rather than the light one: on a dark site the
+     distinction is emphasis, not theme. */
+  .glass-btn-light {
+    background-color: rgb(255 255 255 / 0.04);
+    background-image:
+      linear-gradient(
+        180deg,
+        rgb(255 255 255 / 0.22) 0%,
+        rgb(255 255 255 / 0.075) 56%,
+        rgb(255 255 255 / 0.13) 100%
+      );
+    border-color: rgb(255 255 255 / 0.22);
+    box-shadow:
+      inset 0 1px 0 0 rgb(255 255 255 / 0.46),
+      inset 0 -1px 0 0 rgb(0 0 0 / 0.20),
+      0 8px 22px -12px rgb(2 18 10 / 0.5);
+  }
+
+  .glass-btn-light:hover {
+    background-color: rgb(255 255 255 / 0.16);
+    border-color: rgb(255 255 255 / 0.55);
+    box-shadow:
+      inset 0 1px 0 0 rgb(255 255 255 / 0.6),
+      0 16px 34px -14px rgb(2 18 10 / 0.55);
+  }
+
+  /* ---------------------------------------------------------- Fields */
+
+  /* Inputs inside a glass pane. Recessed rather than raised: an ink hairline
+     and an inner shadow, over a fill dimmer than the pane around it. A white
+     border here would be invisible. */
+  .glass-field {
+    border: 1px solid rgb(255 255 255 / 0.18);
+    background: rgb(2 18 10 / 0.42);
+    -webkit-backdrop-filter: blur(12px) saturate(160%) brightness(0.7);
+    backdrop-filter: blur(12px) saturate(160%) brightness(0.7);
+    box-shadow:
+      inset 0 2px 6px rgb(0 0 0 / 0.35),
+      inset 0 -1px 0 rgb(255 255 255 / 0.10);
+    transition:
+      border-color 0.25s ease,
+      background 0.25s ease,
+      box-shadow 0.25s ease;
+  }
+
+  .glass-field:focus,
+  .glass-field:focus-visible {
+    border-color: rgb(25 204 80 / 0.6);
+    background: rgb(2 18 10 / 0.28);
+    box-shadow:
+      inset 0 2px 6px rgb(0 0 0 / 0.28),
+      0 0 0 3px rgb(25 204 80 / 0.22);
+  }
+
+  /* --------------------------------------------------------- Divider */
+
+  /* Hairlines inside glass need to be lighter than --color-divider, which
+     was drawn to sit on opaque white and reads as a hard scratch on a pane. */
+  .glass-divide > * + * {
+    border-top: 1px solid rgb(255 255 255 / 0.10);
+  }
+
+  /* ------------------------------------------------------- Fallbacks */
+
+  /* Without backdrop-filter there is no glass, only a see-through box over
+     whatever it happens to overlap. Fill the panes in instead. */
+  @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+    .glass,
+    .glass-strong {
+      background: rgb(255 255 255 / 0.97);
+    }
+    .glass-dark {
+      background: rgb(255 255 255 / 0.09);
+    }
+    .glass-emerald {
+      background: linear-gradient(152deg, #0a4a21, #041b0d 55%, #02120a);
+    }
+    .glass-rail {
+      background: rgb(255 255 255 / 0.97);
+    }
+    .glass-rail-dark {
+      background: rgb(2 18 10 / 0.9);
+    }
+    .glass-btn {
+      background: rgb(255 255 255 / 0.16);
+    }
+    .glass-btn-light {
+      background: rgb(255 255 255 / 0.95);
+    }
+    .glass-field {
+      background: rgb(255 255 255 / 0.92);
+    }
+    .glass::after,
+    .glass-dark::after,
+    .glass-emerald::after,
+    .glass-rail::after,
+    .glass-btn::after {
+      display: none;
+    }
+  }
+
+  /* Some people find layered translucency hard to read through. Honour the
+     request: keep the rims and the elevation, drop the transparency and the
+     drifting colour fields. */
+  @media (prefers-reduced-transparency: reduce) {
+
+    .glass,
+    .glass-strong,
+    .glass-rail {
+      background: #ffffff;
+      background-image: none;
+      -webkit-backdrop-filter: none;
+      backdrop-filter: none;
+    }
+    .glass-dark,
+    .glass-emerald,
+    .glass-rail-dark {
+      background: rgb(4 27 13 / 0.96);
+      -webkit-backdrop-filter: none;
+      backdrop-filter: none;
+    }
+    .glass::before,
+    .glass::after,
+    .glass-dark::before,
+    .glass-dark::after,
+    .glass-emerald::before,
+    .glass-emerald::after,
+    .glass-rail::after,
+    .glass-btn::before,
+    .glass-btn::after {
+      display: none;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .glass,
+    .glass-dark,
+    .glass-emerald {
+      transition: none;
+    }
+    /* Pin the highlight so nothing chases the pointer. */
+    .glass,
+    .glass-dark,
+    .glass-emerald,
+    .glass::after,
+    .glass-dark::after,
+    .glass-emerald::after {
+      --gx: 28%;
+      --gy: 16%;
+    }
+  }
 }

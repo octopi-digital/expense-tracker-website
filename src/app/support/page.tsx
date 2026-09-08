@@ -46,19 +46,26 @@ export default function SupportPage() {
         lede="Most answers are below. If yours is not, three ways to reach a person who can help."
       />
 
-      <section className="bg-white py-20 sm:py-24">
+      <section className="overflow-hidden pane py-20 sm:py-24">
         <div className="mx-auto max-w-6xl px-5 sm:px-8">
           <div className="grid gap-5 md:grid-cols-3">
             {channels.map((c, i) => (
               <Reveal key={c.t} delay={i * 90}>
-                <div className="h-full rounded-3xl border border-divider bg-[#FAFBFB] p-7 transition-all duration-300 hover:-translate-y-1 hover:border-emerald-brand/20 hover:bg-white hover:shadow-lift">
-                  <span className="grid h-12 w-12 place-items-center rounded-2xl bg-gradient-to-br from-emerald-brand to-green-bright">
-                    <svg viewBox="0 0 24 24" className="h-6 w-6 text-white" fill="currentColor">
-                      <path d={c.i} />
-                    </svg>
-                  </span>
-                  <h3 className="mt-5 text-[1.18rem] font-extrabold tracking-tight text-ink">{c.t}</h3>
-                  <p className="mt-2.5 text-[0.95rem] leading-relaxed text-slate-body">{c.d}</p>
+                {/* Chip and heading share a row: the icon used to float alone
+                    above a gap, and a solid saturated tile was the only opaque
+                    thing on an otherwise translucent card. */}
+                <div className="glass glass-hover h-full rounded-3xl p-7">
+                  <div className="flex items-center gap-3.5">
+                    <span className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-green-bright/[0.18] text-green-bright ring-1 ring-inset ring-green-bright/35">
+                      <svg viewBox="0 0 24 24" className="h-[1.35rem] w-[1.35rem]" fill="currentColor">
+                        <path d={c.i} />
+                      </svg>
+                    </span>
+                    <h3 className="text-[1.12rem] font-extrabold leading-tight tracking-tight text-ink">
+                      {c.t}
+                    </h3>
+                  </div>
+                  <p className="mt-5 text-[0.95rem] leading-relaxed text-slate-body">{c.d}</p>
                 </div>
               </Reveal>
             ))}
@@ -67,7 +74,7 @@ export default function SupportPage() {
       </section>
 
       {/* ------------------------------------------------------- FAQ */}
-      <section id="faq" className="scroll-mt-24 bg-[#FAFBFB] py-24 sm:py-28">
+      <section id="faq" className="scroll-mt-24 overflow-hidden pane-tint py-24 sm:py-28">
         <div className="mx-auto max-w-3xl px-5 sm:px-8">
           <SectionHeading eyebrow="FAQ" title="Frequently asked questions" />
           <Reveal delay={100} className="mt-12">
@@ -77,7 +84,7 @@ export default function SupportPage() {
       </section>
 
       {/* --------------------------------------------------- Contact */}
-      <section id="contact" className="scroll-mt-24 bg-white py-24 sm:py-28">
+      <section id="contact" className="scroll-mt-24 overflow-hidden pane py-24 sm:py-28">
         <div className="mx-auto grid max-w-6xl gap-14 px-5 sm:px-8 lg:grid-cols-[1fr_1.3fr] lg:items-start">
           <div>
             <SectionHeading
@@ -91,7 +98,7 @@ export default function SupportPage() {
                 <div>
                   <dt className="font-bold text-ink">Email</dt>
                   <dd className="mt-1">
-                    <a href={`mailto:${site.email}`} className="text-emerald-brand underline decoration-emerald-brand/30 underline-offset-4 hover:decoration-emerald-brand">
+                    <a href={`mailto:${site.email}`} className="text-green-bright underline decoration-green-bright/40 underline-offset-4 hover:decoration-green-bright">
                       {site.email}
                     </a>
                   </dd>
@@ -104,7 +111,7 @@ export default function SupportPage() {
                   <dt className="font-bold text-ink">Account deletion</dt>
                   <dd className="mt-1 text-slate-body">
                     See{' '}
-                    <Link href="/data-deletion" className="text-emerald-brand underline decoration-emerald-brand/30 underline-offset-4 hover:decoration-emerald-brand">
+                    <Link href="/data-deletion" className="text-green-bright underline decoration-green-bright/40 underline-offset-4 hover:decoration-green-bright">
                       how to delete your data
                     </Link>
                     .

@@ -75,7 +75,7 @@ export default function ZakatPage() {
       </PageHero>
 
       {/* ------------------------------------------------- Calculator */}
-      <section id="calculator" className="scroll-mt-24 bg-[#FAFBFB] py-24 sm:py-28">
+      <section id="calculator" className="scroll-mt-24 pane-tint py-24 sm:py-28">
         <div className="mx-auto max-w-7xl px-5 sm:px-8">
           <SectionHeading
             eyebrow="Free calculator"
@@ -89,7 +89,7 @@ export default function ZakatPage() {
       </section>
 
       {/* ------------------------------------------------ How it works */}
-      <section className="overflow-hidden bg-white py-24 sm:py-28">
+      <section className="overflow-hidden pane py-24 sm:py-28">
         <div className="mx-auto grid max-w-7xl items-start gap-16 px-5 sm:px-8 lg:grid-cols-[1.15fr_1fr]">
           <div>
             <SectionHeading
@@ -124,9 +124,9 @@ export default function ZakatPage() {
       </section>
 
       {/* --------------------------------------------- What counts */}
-      <section className="relative overflow-hidden bg-emerald-ink py-24 sm:py-28">
+      <section className="relative overflow-hidden pane-ink py-24 sm:py-28">
         <div
-          className="pointer-events-none absolute left-1/2 top-0 h-96 w-[44rem] -translate-x-1/2 rounded-full blur-3xl"
+          className="pointer-events-none absolute left-1/2 top-0 h-96 w-[44rem] -translate-x-1/2 rounded-full"
           style={{ background: 'radial-gradient(circle, rgba(215,162,37,0.18), transparent 70%)' }}
         />
         <div className="relative mx-auto max-w-4xl px-5 sm:px-8">
@@ -145,7 +145,7 @@ export default function ZakatPage() {
                   className={`flex items-start gap-3 rounded-2xl border p-4 ${
                     item.yes
                       ? 'border-green-bright/25 bg-green-bright/[0.06]'
-                      : 'border-white/10 bg-white/[0.03]'
+                      : 'glass-dark'
                   }`}
                 >
                   <span
@@ -181,7 +181,7 @@ export default function ZakatPage() {
       </section>
 
       {/* ------------------------------------------------ Sadaqah + FAQ */}
-      <section className="bg-white py-24 sm:py-28">
+      <section className="overflow-hidden pane py-24 sm:py-28">
         <div className="mx-auto max-w-7xl px-5 sm:px-8">
           <div className="grid gap-6 lg:grid-cols-3">
             {[
@@ -199,7 +199,7 @@ export default function ZakatPage() {
               },
             ].map((card, i) => (
               <Reveal key={card.t} delay={i * 90}>
-                <div className="h-full rounded-3xl border border-divider bg-[#FAFBFB] p-7">
+                <div className="glass h-full rounded-3xl p-7">
                   <svg viewBox="0 0 24 24" className="h-7 w-7 text-gold" fill="none" stroke="currentColor" strokeWidth="1.4">
                     <rect x="5" y="5" width="14" height="14" />
                     <rect x="5" y="5" width="14" height="14" transform="rotate(45 12 12)" />

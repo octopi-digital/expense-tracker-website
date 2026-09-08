@@ -19,7 +19,7 @@ export function PhoneFrame({
     <div className={`relative ${className}`}>
       {glow ? (
         <div
-          className="pointer-events-none absolute -inset-10 -z-10 rounded-full blur-3xl"
+          className="pointer-events-none absolute -inset-10 -z-10 rounded-full"
           style={{ background: 'radial-gradient(circle, rgba(25,204,80,0.28), transparent 68%)' }}
         />
       ) : null}
@@ -35,7 +35,7 @@ export function PhoneFrame({
 }
 
 function StatusBar({ tone = 'light' }: { tone?: 'light' | 'dark' }) {
-  const color = tone === 'light' ? 'text-white' : 'text-ink';
+  const color = tone === 'light' ? 'text-white' : 'text-ink-app';
   return (
     <div className={`flex items-center justify-between px-6 pb-1 pt-3.5 text-[0.66rem] font-semibold ${color}`}>
       <span>9:41</span>
@@ -58,7 +58,7 @@ function TabBar({ active = 'home' }: { active?: 'home' | 'analysis' | 'ai' | 'go
   ] as const;
 
   return (
-    <div className="absolute inset-x-0 bottom-0 z-20 border-t border-divider bg-white/95 px-3 pb-4 pt-2.5 backdrop-blur">
+    <div className="absolute inset-x-0 bottom-0 z-20 border-t border-divider-app bg-white/95 px-3 pb-4 pt-2.5 backdrop-blur">
       <div className="flex items-end justify-between">
         {items.map((item) =>
           item.key === 'ai' ? (
@@ -100,9 +100,9 @@ function TabBar({ active = 'home' }: { active?: 'home' | 'analysis' | 'ai' | 'go
 
 export function HomeScreen() {
   const rows = [
-    { icon: '🛒', name: 'Shwapno Grocery', meta: 'Groceries · Need', amount: '−৳2,450', tone: 'text-ink' },
+    { icon: '🛒', name: 'Shwapno Grocery', meta: 'Groceries · Need', amount: '−৳2,450', tone: 'text-ink-app' },
     { icon: '💼', name: 'Salary — October', meta: 'Income · Verified', amount: '+৳85,000', tone: 'text-green-link' },
-    { icon: '🕌', name: 'Sadaqah', meta: 'Masjid fund', amount: '−৳1,000', tone: 'text-ink' },
+    { icon: '🕌', name: 'Sadaqah', meta: 'Masjid fund', amount: '−৳1,000', tone: 'text-ink-app' },
   ];
 
   return (
@@ -112,7 +112,7 @@ export function HomeScreen() {
         <div className="flex items-center justify-between px-5 pt-3">
           <div>
             <p className="text-[0.62rem] font-medium text-white/60">Assalamu alaikum</p>
-            <p className="text-[0.95rem] font-bold text-white">Abdullah Rahman</p>
+            <p className="text-[0.95rem] font-bold text-white">Jewel Rana</p>
           </div>
           <span className="relative grid h-8 w-8 place-items-center rounded-full bg-white/12">
             <svg viewBox="0 0 24 24" className="h-4 w-4 text-white" fill="currentColor">
@@ -147,11 +147,11 @@ export function HomeScreen() {
         <div className="flex items-center gap-3 rounded-2xl bg-white p-3.5 shadow-card">
           <HealthGauge value={78} size={78} label="Growing" />
           <div className="min-w-0">
-            <p className="text-[0.78rem] font-bold text-ink">Financial health</p>
-            <p className="mt-1 text-[0.62rem] leading-snug text-slate-body">
+            <p className="text-[0.78rem] font-bold text-ink-app">Financial health</p>
+            <p className="mt-1 text-[0.62rem] leading-snug text-body-app">
               Up 6 points. Your needs-to-wants ratio improved this month.
             </p>
-            <span className="mt-2 inline-flex rounded-full bg-green-tint px-2 py-0.5 text-[0.55rem] font-bold text-emerald-brand">
+            <span className="mt-2 inline-flex rounded-full bg-tint-app px-2 py-0.5 text-[0.55rem] font-bold text-emerald-brand">
               +6 vs September
             </span>
           </div>
@@ -168,25 +168,25 @@ export function HomeScreen() {
             </span>
             <span className="rounded-full bg-gold/15 px-2 py-0.5 text-[0.55rem] font-bold text-gold-deep">45 days</span>
           </div>
-          <p className="mt-2 text-[1.15rem] font-extrabold text-ink">৳ 12,066</p>
+          <p className="mt-2 text-[1.15rem] font-extrabold text-ink-app">৳ 12,066</p>
           <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-gold/15">
             <div className="h-full w-[62%] rounded-full bg-gradient-to-r from-gold-light to-gold" />
           </div>
-          <p className="mt-1.5 text-[0.55rem] text-slate-body">Hawl 62% complete · Nisab ৳4,85,000</p>
+          <p className="mt-1.5 text-[0.55rem] text-body-app">Hawl 62% complete · Nisab ৳4,85,000</p>
         </div>
 
         <div className="rounded-2xl bg-white p-3.5 shadow-card">
           <div className="flex items-center justify-between">
-            <p className="text-[0.72rem] font-bold text-ink">Recent activity</p>
+            <p className="text-[0.72rem] font-bold text-ink-app">Recent activity</p>
             <span className="text-[0.58rem] font-semibold text-green-link">See all</span>
           </div>
           <div className="mt-2.5 space-y-2.5">
             {rows.map((row) => (
               <div key={row.name} className="flex items-center gap-2.5">
-                <span className="grid h-7 w-7 shrink-0 place-items-center rounded-lg bg-card text-[0.7rem]">{row.icon}</span>
+                <span className="grid h-7 w-7 shrink-0 place-items-center rounded-lg bg-card-app text-[0.7rem]">{row.icon}</span>
                 <div className="min-w-0 flex-1">
-                  <p className="truncate text-[0.66rem] font-semibold text-ink">{row.name}</p>
-                  <p className="text-[0.55rem] text-slate-body">{row.meta}</p>
+                  <p className="truncate text-[0.66rem] font-semibold text-ink-app">{row.name}</p>
+                  <p className="text-[0.55rem] text-body-app">{row.meta}</p>
                 </div>
                 <p className={`text-[0.66rem] font-bold ${row.tone}`}>{row.amount}</p>
               </div>
@@ -236,17 +236,17 @@ export function ZakatScreen() {
       <div className="relative z-10 -mt-8 space-y-2.5 px-4 pb-24">
         <div className="rounded-2xl bg-white p-3.5 shadow-card">
           <div className="flex items-center justify-between text-[0.62rem] font-semibold">
-            <span className="text-slate-body">Hawl progress</span>
+            <span className="text-body-app">Hawl progress</span>
             <span className="text-gold-deep">45 days remaining</span>
           </div>
-          <div className="relative mt-2.5 h-2 overflow-hidden rounded-full bg-card">
+          <div className="relative mt-2.5 h-2 overflow-hidden rounded-full bg-card-app">
             <div className="h-full w-[62%] rounded-full bg-gradient-to-r from-gold-light via-gold to-gold-deep" />
           </div>
-          <div className="mt-2 flex justify-between text-[0.52rem] text-slate-body">
+          <div className="mt-2 flex justify-between text-[0.52rem] text-body-app">
             <span>Started 12 Muharram</span>
             <span>Due 12 Muharram 1448</span>
           </div>
-          <div className="mt-3 flex items-center gap-2 rounded-xl bg-green-tint px-2.5 py-2">
+          <div className="mt-3 flex items-center gap-2 rounded-xl bg-tint-app px-2.5 py-2">
             <span className="grid h-5 w-5 shrink-0 place-items-center rounded-full bg-emerald-brand text-[0.6rem] text-white">✓</span>
             <p className="text-[0.55rem] font-medium leading-snug text-emerald-brand">
               Above the ৳4,85,000 Nisab since 12 Muharram — Hawl is running.
@@ -255,15 +255,15 @@ export function ZakatScreen() {
         </div>
 
         <div className="rounded-2xl bg-white p-3.5 shadow-card">
-          <p className="text-[0.72rem] font-bold text-ink">Zakatable assets</p>
+          <p className="text-[0.72rem] font-bold text-ink-app">Zakatable assets</p>
           <div className="mt-2.5 space-y-2.5">
             {assets.map((a) => (
               <div key={a.label}>
                 <div className="flex items-center justify-between text-[0.62rem]">
-                  <span className="font-semibold text-ink">{a.label}</span>
-                  <span className="font-bold text-ink">{a.value}</span>
+                  <span className="font-semibold text-ink-app">{a.label}</span>
+                  <span className="font-bold text-ink-app">{a.value}</span>
                 </div>
-                <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-card">
+                <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-card-app">
                   <div className="h-full rounded-full bg-gradient-to-r from-emerald-brand to-green-bright" style={{ width: `${a.pct}%` }} />
                 </div>
               </div>
@@ -277,8 +277,8 @@ export function ZakatScreen() {
             <p className="mt-1 text-[0.85rem] font-extrabold text-white">৳ 18,500</p>
           </div>
           <div className="flex-1 rounded-2xl bg-white p-3 text-center shadow-card">
-            <p className="text-[0.55rem] font-semibold text-slate-body">Zakat paid</p>
-            <p className="mt-1 text-[0.85rem] font-extrabold text-ink">৳ 0 / 12,066</p>
+            <p className="text-[0.55rem] font-semibold text-body-app">Zakat paid</p>
+            <p className="mt-1 text-[0.85rem] font-extrabold text-ink-app">৳ 0 / 12,066</p>
           </div>
         </div>
       </div>
@@ -320,7 +320,7 @@ export function AiScreen() {
         </div>
 
         <div className="max-w-[86%] rounded-2xl rounded-tl-md bg-white px-3.5 py-3 shadow-card">
-          <p className="text-[0.68rem] leading-relaxed text-ink">
+          <p className="text-[0.68rem] leading-relaxed text-ink-app">
             Your spending rose <span className="font-bold">৳7,800</span> vs September. Two things moved:
           </p>
           <div className="mt-2.5 space-y-1.5">
@@ -329,7 +329,7 @@ export function AiScreen() {
               { label: 'Ride sharing', value: '+৳2,100', tag: 'Want', tone: 'text-expense' },
             ].map((r) => (
               <div key={r.label} className="flex items-center justify-between rounded-lg bg-[#F7F8F9] px-2.5 py-1.5">
-                <span className="text-[0.6rem] font-semibold text-ink">{r.label}</span>
+                <span className="text-[0.6rem] font-semibold text-ink-app">{r.label}</span>
                 <span className="flex items-center gap-1.5">
                   <span className="rounded bg-[rgba(240,157,5,0.14)] px-1.5 py-0.5 text-[0.48rem] font-bold text-expense">{r.tag}</span>
                   <span className={`text-[0.6rem] font-bold ${r.tone}`}>{r.value}</span>
@@ -337,7 +337,7 @@ export function AiScreen() {
               </div>
             ))}
           </div>
-          <p className="mt-2.5 text-[0.68rem] leading-relaxed text-ink">
+          <p className="mt-2.5 text-[0.68rem] leading-relaxed text-ink-app">
             Both are wants. Capping dining at ৳6,000 would put you back on track for your Hajj fund.
           </p>
           <div className="mt-3 rounded-xl border-l-2 border-gold bg-[rgba(215,162,37,0.07)] px-2.5 py-2">
@@ -364,9 +364,9 @@ export function AiScreen() {
       </div>
 
       <div className="px-4 pb-24 pt-2">
-        <div className="flex items-center gap-2 rounded-full border border-divider bg-white px-3.5 py-2.5 shadow-card">
-          <span className="flex-1 text-[0.66rem] text-slate-body">Ask anything…</span>
-          <svg viewBox="0 0 24 24" className="h-4 w-4 text-slate-body" fill="currentColor"><path d="M12 15a3 3 0 0 0 3-3V6a3 3 0 1 0-6 0v6a3 3 0 0 0 3 3Zm5-3a5 5 0 0 1-10 0H5a7 7 0 0 0 6 6.9V22h2v-3.1A7 7 0 0 0 19 12h-2Z" /></svg>
+        <div className="flex items-center gap-2 rounded-full border border-divider-app bg-white px-3.5 py-2.5 shadow-card">
+          <span className="flex-1 text-[0.66rem] text-body-app">Ask anything…</span>
+          <svg viewBox="0 0 24 24" className="h-4 w-4 text-body-app" fill="currentColor"><path d="M12 15a3 3 0 0 0 3-3V6a3 3 0 1 0-6 0v6a3 3 0 0 0 3 3Zm5-3a5 5 0 0 1-10 0H5a7 7 0 0 0 6 6.9V22h2v-3.1A7 7 0 0 0 19 12h-2Z" /></svg>
           <span className="grid h-7 w-7 place-items-center rounded-full bg-lavender">
             <svg viewBox="0 0 24 24" className="h-3.5 w-3.5 text-white" fill="currentColor"><path d="M3 20.5 21 12 3 3.5 3 10l12 2-12 2v6.5Z" /></svg>
           </span>
@@ -404,28 +404,28 @@ export function InboxScreen() {
           <div key={d.bank} className="rounded-2xl bg-white p-3.5 shadow-card">
             <div className="flex items-start justify-between gap-2">
               <div className="min-w-0">
-                <p className="flex items-center gap-1.5 text-[0.62rem] font-bold text-ink">
+                <p className="flex items-center gap-1.5 text-[0.62rem] font-bold text-ink-app">
                   <span className="grid h-4 w-4 place-items-center rounded bg-emerald-brand/10 text-[0.5rem] text-emerald-brand">✉</span>
                   {d.bank}
                 </p>
-                <p className="mt-1 truncate text-[0.55rem] text-slate-body">{d.text}</p>
+                <p className="mt-1 truncate text-[0.55rem] text-body-app">{d.text}</p>
               </div>
-              <span className="shrink-0 text-[0.5rem] text-slate-body">{d.time}</span>
+              <span className="shrink-0 text-[0.5rem] text-body-app">{d.time}</span>
             </div>
             <div className="mt-2.5 flex items-center justify-between rounded-xl bg-[#F7F8F9] px-2.5 py-2">
               <span className="flex items-center gap-1.5">
-                <span className="rounded bg-green-tint px-1.5 py-0.5 text-[0.48rem] font-bold text-emerald-brand">{d.cat}</span>
-                <span className="text-[0.62rem] font-extrabold text-ink">{d.amount}</span>
+                <span className="rounded bg-tint-app px-1.5 py-0.5 text-[0.48rem] font-bold text-emerald-brand">{d.cat}</span>
+                <span className="text-[0.62rem] font-extrabold text-ink-app">{d.amount}</span>
               </span>
               <span className="flex gap-1.5">
-                <span className="grid h-5 w-5 place-items-center rounded-full bg-card text-[0.55rem] text-slate-body">✕</span>
+                <span className="grid h-5 w-5 place-items-center rounded-full bg-card-app text-[0.55rem] text-body-app">✕</span>
                 <span className="grid h-5 w-5 place-items-center rounded-full bg-emerald-brand text-[0.55rem] text-white">✓</span>
               </span>
             </div>
           </div>
         ))}
 
-        <div className="rounded-2xl border border-dashed border-emerald-brand/25 bg-green-tint/50 p-3 text-center">
+        <div className="rounded-2xl border border-dashed border-emerald-brand/25 bg-tint-app/50 p-3 text-center">
           <p className="text-[0.58rem] font-semibold text-emerald-brand">
             Nothing is saved until you approve it.
           </p>
