@@ -89,16 +89,43 @@ export function Footer() {
           </div>
         </div>
 
-        <div className="mt-16 flex flex-col gap-4 border-t border-white/10 pt-8 sm:flex-row sm:items-center sm:justify-between">
-          <p className="text-sm text-white/45">
-            © {new Date().getFullYear()} {site.name}. All rights reserved.
-          </p>
-          <p className="text-sm text-white/45">
-            Questions?{' '}
-            <a href={`mailto:${site.email}`} className="font-semibold text-gold-light hover:text-white">
-              {site.email}
-            </a>
-          </p>
+        {/* One row, three parts. The credit used to sit on its own line below
+            the legal row, which left the middle of that row empty and the
+            credit orphaned under it — with two hairline stubs either side that
+            read as debris rather than ornament. A three-column grid centres it
+            properly regardless of how wide the outer two run. */}
+        <div className="mt-16 border-t border-white/10 pt-8">
+          <div className="flex flex-col items-center gap-4 text-sm text-white/45 sm:grid sm:grid-cols-3 sm:gap-6">
+            <p className="sm:justify-self-start">
+              © {new Date().getFullYear()} {site.name}. All rights reserved.
+            </p>
+
+            <p className="sm:justify-self-center">
+              Developed by{' '}
+              {site.builderUrl ? (
+                <a
+                  href={site.builderUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="font-semibold text-white/75 underline decoration-white/20 underline-offset-4 transition-colors hover:text-gold-light hover:decoration-gold-light/50"
+                >
+                  {site.builder}
+                </a>
+              ) : (
+                <span className="font-semibold text-white/75">{site.builder}</span>
+              )}
+            </p>
+
+            <p className="sm:justify-self-end">
+              Questions?{' '}
+              <a
+                href={`mailto:${site.email}`}
+                className="font-semibold text-gold-light transition-colors hover:text-white"
+              >
+                {site.email}
+              </a>
+            </p>
+          </div>
         </div>
       </div>
     </footer>

@@ -14,6 +14,14 @@ import { navLinks } from '@/lib/site';
  * visible as colour and movement, which is what tells you the bar is a layer
  * over the page rather than part of it.
  */
+/** The edge that is being dragged away from hangs on this much longer. */
+const LEAD_MS = 260;
+const TRAIL_MS = 620;
+/** Leaves promptly. */
+const LEAD_EASE = 'cubic-bezier(0.16, 1, 0.3, 1)';
+/** Holds, then gives way all at once — the "fails to stay" part. */
+const TRAIL_EASE = 'cubic-bezier(0.85, 0.02, 0.30, 1)';
+
 /**
  * The brand's eight-point star, reduced to a mark. Same construction as the
  * <GeometricPattern> ornament — two squares, one turned 45° — so the menu is
@@ -38,7 +46,11 @@ export function Nav() {
   // like /privacy has no nav entry, so the lens stays hidden until hover.
   const railRef = useRef<HTMLDivElement>(null);
   const [hovered, setHovered] = useState<string | null>(null);
-  const [lens, setLens] = useState<{ left: number; width: number } | null>(null);
+  // Two edges rather than left+width: they are transitioned separately so the
+  // lens can stretch. See `measure` for why that matters.
+  const [lens, setLens] = useState<
+    { left: number; right: number; leftDur: number; rightDur: number } | null
+  >(null);
   // Suppresses the slide on the very first placement, so the lens does not
   // fly in from the left edge on load.
   const [settled, setSettled] = useState(false);
@@ -46,13 +58,57 @@ export function Nav() {
   const activeHref = navLinks.some((l) => l.href === pathname) ? pathname : null;
   const lensTarget = hovered ?? activeHref;
 
+  // Direction must only be decided when the target actually changes. The
+  // ResizeObserver and the font-ready callback also call measure(), and
+  // recomputing direction there compared a position against itself, flipped
+  // the durations mid-flight, and collapsed the lens to zero width.
+  const lastTarget = useRef<string | null>(null);
+  // The item the lens is currently tearing away from, and which way it is
+  // being pulled. Cleared once the trailing edge has let go.
+  const [tearing, setTearing] = useState<{ href: string; dir: number } | null>(null);
+  const tearTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
   const measure = useCallback(() => {
     const rail = railRef.current;
     // With no target the lens keeps its last position and fades out there,
     // rather than unmounting and snapping back on the next hover.
     if (!rail || !lensTarget) return;
     const el = rail.querySelector<HTMLElement>(`[data-nav="${lensTarget}"]`);
-    if (el) setLens({ left: el.offsetLeft, width: el.offsetWidth });
+    if (!el) return;
+
+    const left = el.offsetLeft;
+    const right = rail.clientWidth - (el.offsetLeft + el.offsetWidth);
+    const prevTarget = lastTarget.current;
+    const targetChanged = prevTarget !== lensTarget;
+    lastTarget.current = lensTarget;
+
+    const prevEl = prevTarget
+      ? rail.querySelector<HTMLElement>(`[data-nav="${prevTarget}"]`)
+      : null;
+    const movingRight = prevEl ? left > prevEl.offsetLeft : true;
+
+    if (targetChanged && prevEl) {
+      const dir = movingRight ? 1 : -1;
+      if (tearTimer.current) clearTimeout(tearTimer.current);
+      setTearing({ href: prevTarget as string, dir });
+      tearTimer.current = setTimeout(() => setTearing(null), TRAIL_MS);
+    }
+
+    setLens((prev) => {
+      // A re-measure of the same item: reposition, keep the current curves.
+      if (!targetChanged && prev) return { ...prev, left, right };
+
+      // The trailing edge is the one being dragged away from. Giving it a
+      // longer, back-loaded curve makes it hang on to where it was while the
+      // leading edge has already gone — the lens stretches, resists, then
+      // loses its grip and snaps back into shape.
+      return {
+        left,
+        right,
+        leftDur: movingRight ? TRAIL_MS : LEAD_MS,
+        rightDur: movingRight ? LEAD_MS : TRAIL_MS,
+      };
+    });
   }, [lensTarget]);
 
   useEffect(() => {
@@ -66,6 +122,10 @@ export function Nav() {
     document.fonts?.ready.then(measure).catch(() => {});
     return () => ro.disconnect();
   }, [measure]);
+
+  useEffect(() => () => {
+    if (tearTimer.current) clearTimeout(tearTimer.current);
+  }, []);
 
   // Let the first placement land before enabling the travel transition.
   useEffect(() => {
@@ -122,12 +182,20 @@ export function Nav() {
               }`}
               style={{
                 left: lens.left,
-                width: lens.width,
+                right: lens.right,
                 opacity: lensTarget ? 1 : 0,
-                transition: settled ? undefined : 'none',
+                transition: settled
+                  ? `left ${lens.leftDur}ms ${
+                      lens.leftDur === LEAD_MS ? LEAD_EASE : TRAIL_EASE
+                    }, right ${lens.rightDur}ms ${
+                      lens.rightDur === LEAD_MS ? LEAD_EASE : TRAIL_EASE
+                    }, opacity 420ms ease`
+                  : 'none',
               }}
             />
           ) : null}
+
+
 
           {navLinks.map((link) => {
             const active = pathname === link.href;
@@ -140,7 +208,10 @@ export function Nav() {
                 onMouseEnter={() => setHovered(link.href)}
                 onFocus={() => setHovered(link.href)}
                 onBlur={() => setHovered(null)}
+                style={tearing?.href === link.href ? ({ '--tear-x': tearing.dir } as React.CSSProperties) : undefined}
                 className={`relative z-10 rounded-full px-5 py-2 text-[0.95rem] font-semibold transition-colors duration-300 ${
+                  tearing?.href === link.href ? 'nav-tearing ' : ''
+                }${
                   solid
                     ? active
                       ? 'text-green-bright'

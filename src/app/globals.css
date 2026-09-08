@@ -103,6 +103,29 @@
 
 /* The world's colour bodies drift slowly, so the backdrop a pane refracts is
    never quite the same twice. */
+@keyframes nav-tear {
+  0% {
+    filter: blur(0px);
+    opacity: 1;
+    transform: translateX(0) scaleX(1);
+  }
+  20% {
+    filter: blur(2.6px);
+    opacity: 0.6;
+    transform: translateX(calc(var(--tear-x, 1) * 3.5px)) scaleX(1.06);
+  }
+  52% {
+    filter: blur(1.1px);
+    opacity: 0.84;
+    transform: translateX(calc(var(--tear-x, 1) * -1.5px)) scaleX(0.988);
+  }
+  100% {
+    filter: blur(0px);
+    opacity: 1;
+    transform: translateX(0) scaleX(1);
+  }
+}
+
 @keyframes pill-sweep {
   0%, 64% { transform: translate3d(-130%, 0, 0); }
   100%    { transform: translate3d(130%, 0, 0); }
@@ -774,6 +797,14 @@ body {
     animation: pill-sweep 7.5s cubic-bezier(0.45, 0, 0.2, 1) infinite;
   }
 
+  /* The item the lens is tearing away from. While the trailing edge is still
+     clinging to it, the label goes soft and gets dragged a little in the
+     direction of travel, then reassembles — the surface breaking as the
+     liquid lets go, rather than the lens simply sliding off a static word. */
+  .nav-tearing {
+    animation: nav-tear 620ms cubic-bezier(0.4, 0, 0.3, 1);
+  }
+
   /* --------------------------------------------------------- Nav lens */
 
   /* The desktop menu's indicator. Not a coloured pill behind the labels but
@@ -798,10 +829,8 @@ body {
       inset 0 1px 0 0 rgb(255 255 255 / 0.50),
       inset 0 -1px 0 0 rgb(255 255 255 / 0.12),
       0 6px 18px -8px rgb(2 18 10 / 0.55);
-    transition:
-      left 0.46s cubic-bezier(0.34, 1.4, 0.44, 1),
-      width 0.46s cubic-bezier(0.34, 1.4, 0.44, 1),
-      opacity 0.3s ease;
+    /* The travel transition is set inline from Nav.tsx: each edge gets its
+       own duration and curve so the lens stretches as it moves. */
   }
 
   .nav-lens-light {

@@ -15,6 +15,9 @@ export const site = {
   /** Placeholders — swap for the real listings the day you publish. */
   playStoreUrl: '#',
   appStoreUrl: '#',
+  /** Studio credit in the footer. Set `builderUrl` to link it. */
+  builder: 'Octopi Digital',
+  builderUrl: 'https://octopi-digital.com',
 } as const;
 
 export type NavLink = { href: string; label: string };
