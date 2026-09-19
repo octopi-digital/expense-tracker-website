@@ -23,7 +23,10 @@ export const site = {
 export type NavLink = { href: string; label: string };
 
 export const navLinks: NavLink[] = [
+  { href: '/why', label: 'Why' },
+  { href: '/benefits', label: 'Benefits' },
   { href: '/features', label: 'Features' },
+  { href: '/guide', label: 'Guide' },
   { href: '/zakat', label: 'Zakat' },
   { href: '/pricing', label: 'Pricing' },
   { href: '/support', label: 'Support' },

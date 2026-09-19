@@ -8,7 +8,10 @@ const columns: { title: string; links: { href: string; label: string }[] }[] = [
   {
     title: 'Product',
     links: [
+      { href: '/why', label: 'Why Deenomics' },
+      { href: '/benefits', label: 'Benefits' },
       { href: '/features', label: 'Features' },
+      { href: '/guide', label: 'Daily life guide' },
       { href: '/zakat', label: 'Zakat & Sadaqah' },
       { href: '/pricing', label: 'Pricing' },
       { href: '/download', label: 'Download' },

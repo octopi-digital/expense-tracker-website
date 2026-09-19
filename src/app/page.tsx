@@ -373,6 +373,17 @@ export default function HomePage() {
             ))}
           </div>
 
+          <Reveal delay={100}>
+            <div className="mt-12 flex justify-center">
+              <Button href="/guide" variant="outline" size="lg">
+                Read the daily life guide
+                <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M5 12h13m-5-6 6 6-6 6" />
+                </svg>
+              </Button>
+            </div>
+          </Reveal>
+
           <Reveal delay={120}>
             <Ornament className="mt-16" />
             <figure className="mx-auto mt-10 max-w-2xl text-center">

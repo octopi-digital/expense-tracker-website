@@ -209,7 +209,7 @@ export function Nav() {
                 onFocus={() => setHovered(link.href)}
                 onBlur={() => setHovered(null)}
                 style={tearing?.href === link.href ? ({ '--tear-x': tearing.dir } as React.CSSProperties) : undefined}
-                className={`relative z-10 rounded-full px-5 py-2 text-[0.95rem] font-semibold transition-colors duration-300 ${
+                className={`relative z-10 rounded-full px-4 py-2 text-[0.95rem] font-semibold transition-colors duration-300 xl:px-5 ${
                   tearing?.href === link.href ? 'nav-tearing ' : ''
                 }${
                   solid
