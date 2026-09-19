@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from 'next';
-import { Plus_Jakarta_Sans, Amiri } from 'next/font/google';
+import { Plus_Jakarta_Sans, Amiri, Noto_Serif_Bengali } from 'next/font/google';
 import './globals.css';
 import { Nav } from '@/components/Nav';
 import { GeometricPattern } from '@/components/Pattern';
@@ -18,6 +18,16 @@ const amiri = Amiri({
   weight: ['400', '700'],
   display: 'swap',
   variable: '--font-amiri',
+});
+
+// Jakarta carries no Bengali glyphs, so without this the Bangla renderings
+// fall back to whatever the device happens to have — which on many machines
+// is nothing consistent. Serif to sit alongside Amiri rather than fight it.
+const bengali = Noto_Serif_Bengali({
+  subsets: ['bengali'],
+  weight: ['400', '600'],
+  display: 'swap',
+  variable: '--font-bengali',
 });
 
 export const metadata: Metadata = {
@@ -59,7 +69,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${jakarta.variable} ${amiri.variable}`}>
+    <html lang="en" className={`${jakarta.variable} ${amiri.variable} ${bengali.variable}`}>
       <body>
         {/* The fixed backdrop every section is layered over. It carries the
             colour and the ornament; the sections themselves are translucent. */}

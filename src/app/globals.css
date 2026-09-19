@@ -62,6 +62,7 @@
 
   --font-sans: var(--font-jakarta), ui-sans-serif, system-ui, sans-serif;
   --font-arabic: var(--font-amiri), serif;
+  --font-bangla: var(--font-bengali), 'Noto Serif Bengali', serif;
 
   --shadow-glow: 0 0 80px -20px rgb(25 204 80 / 0.45);
   --shadow-card: 0 1px 2px rgb(15 23 42 / 0.04), 0 12px 32px -12px rgb(15 23 42 / 0.12);
